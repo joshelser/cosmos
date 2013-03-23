@@ -32,7 +32,7 @@ public interface Sorting {
    * @param id
    * @param columnsToIndex
    */
-  public void index(SortableResult id, Iterable<Index> columnsToIndex);
+  public void index(SortableResult id, Iterable<Column> columns);
   
   /**
    * Fetch all columns present for a given {@link SortableResult}
@@ -49,7 +49,7 @@ public interface Sorting {
   public Iterable<QueryResult> fetch(SortableResult id);
   
   /**
-   * Fetch results from the given {@link SortableResult}, paging through results 
+   * Fetch all results from the given {@link SortableResult}, paging through results 
    * @param id
    * @param limits
    * @return
@@ -57,7 +57,25 @@ public interface Sorting {
   public PagedQueryResult fetch(SortableResult id, Paging limits);
   
   /**
-   * Fetch results for the given column in the provided {@link Order}
+   * Fetch results with value for the given {@link Column}
+   * @param id
+   * @param column
+   * @param order
+   * @return
+   */
+  public Iterable<QueryResult> fetch(SortableResult id, Column column);
+  
+  /**
+   * Fetch results with values for the given {@link Column}, paging through results
+   * @param id
+   * @param column
+   * @param order
+   * @return
+   */
+  public Iterable<QueryResult> fetch(SortableResult id, Column column, Paging limits);
+  
+  /**
+   * Fetch results for the given column in the provided {@link Ordering}
    * @param id
    * @param column
    * @param order
@@ -66,13 +84,49 @@ public interface Sorting {
   public Iterable<QueryResult> fetch(SortableResult id, Ordering ordering);
   
   /**
+   * Fetch results for the given column in the provided {@link Ordering}, paging through results
+   * @param id
+   * @param column
+   * @param order
+   * @return
+   */
+  public Iterable<QueryResult> fetch(SortableResult id, Ordering ordering, Paging limits);
+  
+  /**
    * Return counts for unique values in the given column
    * @param id
    * @param column
    * @param order
    * @return
    */
-  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, String column, Order order);
+  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, Column column);
+  
+  /**
+   * Return counts for unique values in the given column, paging through results
+   * @param id
+   * @param column
+   * @param order
+   * @return
+   */
+  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, Column column, Paging limits);
+  
+  /**
+   * Return counts for unique values in the given column
+   * @param id
+   * @param column
+   * @param order
+   * @return
+   */
+  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, Ordering order);
+  
+  /**
+   * Return counts for unique values in the given column, paging through results
+   * @param id
+   * @param column
+   * @param order
+   * @return
+   */
+  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, Ordering order, Paging limits);
   
   /**
    * Clean up references to the data referenced by this SortableResult

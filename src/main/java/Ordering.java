@@ -3,13 +3,13 @@ import com.google.common.base.Preconditions;
 
 public class Ordering {
   private final Order order;
-  private final String column;
+  private final Column column;
   
-  public Ordering(String column) {
+  public Ordering(Column column) {
     this(column, Order.ASCENDING);
   }
   
-  public Ordering(String column, Order order) {
+  public Ordering(Column column, Order order) {
     Preconditions.checkNotNull(column);
     Preconditions.checkNotNull(order);
     
@@ -21,15 +21,15 @@ public class Ordering {
     return this.order;
   }
   
-  public String column() {
+  public Column column() {
     return this.column;
   }
   
-  public static Ordering create(String column) {
+  public static Ordering create(Column column) {
     return new Ordering(column);
   }
   
-  public static Ordering create(String column, Order order) {
+  public static Ordering create(Column column, Order order) {
     return new Ordering(column, order);
   }
 }
