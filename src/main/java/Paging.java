@@ -19,14 +19,14 @@ public class Paging {
   /**
    * @return the pageSize
    */
-  public Integer getPageSize() {
+  public Integer pageSize() {
     return pageSize;
   }
 
   /**
    * @return the maxResults
    */
-  public Long getMaxResults() {
+  public Long maxResults() {
     return maxResults;
   }
   
