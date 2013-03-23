@@ -1,4 +1,4 @@
-package sorts.results;
+package sorts;
 import org.apache.accumulo.core.client.Connector;
 
 

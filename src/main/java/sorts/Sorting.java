@@ -7,7 +7,6 @@ import sorts.options.Ordering;
 import sorts.options.Paging;
 import sorts.results.PagedQueryResult;
 import sorts.results.QueryResult;
-import sorts.results.SortableResult;
 import sorts.results.Value;
 
 public interface Sorting {
