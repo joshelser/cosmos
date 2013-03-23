@@ -24,4 +24,12 @@ public class Ordering {
   public String column() {
     return this.column;
   }
+  
+  public static Ordering create(String column) {
+    return new Ordering(column);
+  }
+  
+  public static Ordering create(String column, Order order) {
+    return new Ordering(column, order);
+  }
 }

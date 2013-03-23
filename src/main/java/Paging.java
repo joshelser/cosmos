@@ -29,5 +29,8 @@ public class Paging {
   public Long maxResults() {
     return maxResults;
   }
-  
+ 
+  public static Paging create(Integer pageSize, Long maxResults) {
+    return new Paging(pageSize, maxResults);
+  }
 }
