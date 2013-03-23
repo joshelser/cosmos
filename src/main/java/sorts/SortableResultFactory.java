@@ -1,8 +1,6 @@
 package sorts;
+
 import org.apache.accumulo.core.client.Connector;
-
-
-
 
 public class SortableResultFactory {
   

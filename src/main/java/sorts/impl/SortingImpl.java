@@ -3,10 +3,10 @@ import java.util.Map.Entry;
 
 import sorts.SortableResult;
 import sorts.Sorting;
-import sorts.options.Column;
 import sorts.options.Index;
 import sorts.options.Ordering;
 import sorts.options.Paging;
+import sorts.results.Column;
 import sorts.results.PagedQueryResult;
 import sorts.results.QueryResult;
 import sorts.results.Value;

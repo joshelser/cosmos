@@ -1,4 +1,6 @@
 package sorts.options;
+import sorts.results.Column;
+
 import com.google.common.base.Preconditions;
 
 

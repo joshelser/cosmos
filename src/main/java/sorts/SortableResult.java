@@ -1,11 +1,11 @@
 package sorts;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.UUID.randomUUID;
 
 import org.apache.accumulo.core.client.Connector;
 
 import sorts.options.Defaults;
-
 
 public class SortableResult {
   
@@ -27,6 +27,22 @@ public class SortableResult {
     this.metadataTable = metadataTable;
     
     this.UUID = randomUUID().toString();
+  }
+  
+  public Connector connector() {
+    return this.connector;
+  }
+  
+  public String dataTable() {
+    return this.dataTable;
+  }
+  
+  public String metadataTable() {
+    return this.metadataTable;
+  }
+  
+  public String uuid() {
+    return this.UUID;
   }
   
 }
