@@ -1,5 +1,6 @@
-import com.google.common.base.Preconditions;
+package sorts.options;
 
+import com.google.common.base.Preconditions;
 
 public class Index {
   

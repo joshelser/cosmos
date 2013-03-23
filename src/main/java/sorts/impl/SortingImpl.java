@@ -1,27 +1,23 @@
+package sorts.impl;
 import java.util.Map.Entry;
 
-import org.apache.accumulo.core.client.Connector;
+import sorts.Sorting;
+import sorts.options.Column;
+import sorts.options.Index;
+import sorts.options.Ordering;
+import sorts.options.Paging;
+import sorts.results.PagedQueryResult;
+import sorts.results.QueryResult;
+import sorts.results.SortableResult;
+import sorts.results.Value;
 
-import com.google.common.base.Preconditions;
 
 
 public class SortingImpl implements Sorting {
   
-  private final Connector connector;
-  
-  public SortingImpl(Connector connector) {
-    Preconditions.checkNotNull(connector);
-    
-    this.connector = connector;
-  }
-  
-  public SortableResult register() {
-    return null;
-  }
-  
   public void addResults(SortableResult id, Iterable<QueryResult> queryResults) {}
   
-  public void addResultsWithIndex(SortableResult id, Iterable<QueryResult> queryResults, Iterable<Index> columnsToIndex) {}
+  public void addResults(SortableResult id, Iterable<QueryResult> queryResults, Iterable<Index> columnsToIndex) {}
   
   public void index(SortableResult id, Iterable<Column> columns) {}
   

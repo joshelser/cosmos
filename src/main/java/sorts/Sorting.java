@@ -1,12 +1,16 @@
+package sorts;
 import java.util.Map.Entry;
 
+import sorts.options.Column;
+import sorts.options.Index;
+import sorts.options.Ordering;
+import sorts.options.Paging;
+import sorts.results.PagedQueryResult;
+import sorts.results.QueryResult;
+import sorts.results.SortableResult;
+import sorts.results.Value;
+
 public interface Sorting {
-  /**
-   * Create an object which must be passed to all operations
-   * to store, fetch and delete results from Accumulo. 
-   * @return
-   */
-  public SortableResult register();
 
   /**
    * Add results to the given SortableResult
@@ -23,7 +27,7 @@ public interface Sorting {
    * @param queryResults
    * @param columnsToIndex
    */
-  public void addResultsWithIndex(SortableResult id, Iterable<QueryResult> queryResults, 
+  public void addResults(SortableResult id, Iterable<QueryResult> queryResults, 
       Iterable<Index> columnsToIndex);
   
   /**
