@@ -24,4 +24,25 @@ public class Value {
   public static Value create(ByteBuffer value, ColumnVisibility visibility) {
     return new Value(value, visibility);
   }
+  
+  @Override
+  public int hashCode() {
+    return this.value.hashCode() ^ this.visibility.hashCode();
+  }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof Value) {
+      Value other = (Value) o;
+      return this.value.equals(other.value) &&
+          this.visibility.equals(other.visibility);
+    }
+    
+    return false;
+  }
+  
+  @Override
+  public String toString() {
+    return visibility + ": " + value;
+  }
 }

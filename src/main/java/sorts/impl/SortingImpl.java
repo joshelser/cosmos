@@ -15,9 +15,9 @@ import sorts.results.Value;
 
 public class SortingImpl implements Sorting {
   
-  public void addResults(SortableResult id, Iterable<QueryResult> queryResults) {}
+  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults) {}
   
-  public void addResults(SortableResult id, Iterable<QueryResult> queryResults, Iterable<Index> columnsToIndex) {}
+  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, Iterable<Index> columnsToIndex) {}
   
   public void index(SortableResult id, Iterable<Column> columns) {}
   
@@ -25,7 +25,7 @@ public class SortingImpl implements Sorting {
     return null;
   }
   
-  public Iterable<QueryResult> fetch(SortableResult id) {
+  public Iterable<QueryResult<?>> fetch(SortableResult id) {
     return null;
   }
   
@@ -33,19 +33,19 @@ public class SortingImpl implements Sorting {
     return null;
   }
   
-  public Iterable<QueryResult> fetch(SortableResult id, Column column) {
+  public Iterable<QueryResult<?>> fetch(SortableResult id, Column column) {
     return null;
   }
   
-  public Iterable<QueryResult> fetch(SortableResult id, Column column, Paging limits) {
+  public Iterable<QueryResult<?>> fetch(SortableResult id, Column column, Paging limits) {
     return null;
   }
   
-  public Iterable<QueryResult> fetch(SortableResult id, Ordering ordering) {
+  public Iterable<QueryResult<?>> fetch(SortableResult id, Ordering ordering) {
     return null;
   }
   
-  public Iterable<QueryResult> fetch(SortableResult id, Ordering ordering, Paging limits) {
+  public Iterable<QueryResult<?>> fetch(SortableResult id, Ordering ordering, Paging limits) {
     return null;
   }
   

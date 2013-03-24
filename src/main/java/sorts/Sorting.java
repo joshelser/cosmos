@@ -16,7 +16,7 @@ public interface Sorting {
    * @param id
    * @param queryResults
    */
-  public void addResults(SortableResult id, Iterable<QueryResult> queryResults);
+  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults);
   
   /**
    * Add results to the given SortableResult, creating indexes for the provided columns
@@ -26,7 +26,7 @@ public interface Sorting {
    * @param queryResults
    * @param columnsToIndex
    */
-  public void addResults(SortableResult id, Iterable<QueryResult> queryResults, 
+  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, 
       Iterable<Index> columnsToIndex);
   
   /**
@@ -49,7 +49,7 @@ public interface Sorting {
    * @param id
    * @return
    */
-  public Iterable<QueryResult> fetch(SortableResult id);
+  public Iterable<QueryResult<?>> fetch(SortableResult id);
   
   /**
    * Fetch all results from the given {@link SortableResult}, paging through results 
@@ -66,7 +66,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<QueryResult> fetch(SortableResult id, Column column);
+  public Iterable<QueryResult<?>> fetch(SortableResult id, Column column);
   
   /**
    * Fetch results with values for the given {@link Column}, paging through results
@@ -75,7 +75,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<QueryResult> fetch(SortableResult id, Column column, Paging limits);
+  public Iterable<QueryResult<?>> fetch(SortableResult id, Column column, Paging limits);
   
   /**
    * Fetch results for the given column in the provided {@link Ordering}
@@ -84,7 +84,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<QueryResult> fetch(SortableResult id, Ordering ordering);
+  public Iterable<QueryResult<?>> fetch(SortableResult id, Ordering ordering);
   
   /**
    * Fetch results for the given column in the provided {@link Ordering}, paging through results
@@ -93,7 +93,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<QueryResult> fetch(SortableResult id, Ordering ordering, Paging limits);
+  public Iterable<QueryResult<?>> fetch(SortableResult id, Ordering ordering, Paging limits);
   
   /**
    * Return counts for unique values in the given column
