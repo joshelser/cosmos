@@ -30,7 +30,7 @@ public class SortingMetadata {
     UNKNOWN
   }
   
-  public State getState(SortableResult id) throws TableNotFoundException {
+  public static State getState(SortableResult id) throws TableNotFoundException {
     checkNotNull(id);
     
     Connector con = id.connector();
@@ -51,7 +51,7 @@ public class SortingMetadata {
     return State.UNKNOWN;
   }
   
-  public void setState(SortableResult id, State state) throws TableNotFoundException, MutationsRejectedException {
+  public static void setState(SortableResult id, State state) throws TableNotFoundException, MutationsRejectedException {
     checkNotNull(id);
     checkNotNull(state);
 

@@ -45,4 +45,12 @@ public class SortableResult {
     return this.UUID;
   }
   
+  public static SortableResult create(Connector connector) {
+    return new SortableResult(connector);
+  }
+  
+  public static SortableResult create(Connector connector, String dataTable, String metadataTable) {
+    return new SortableResult(connector, dataTable, metadataTable);
+  }
+  
 }
