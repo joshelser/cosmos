@@ -32,7 +32,7 @@ public class MapQueryResultTest {
     document.put("TEXT", "foo");
     document.put("TEXT", "bar");
     
-    MapQueryResult mqr = new MapQueryResult(document, ByteBuffer.wrap("1".getBytes()), 
+    MapQueryResult mqr = new MapQueryResult(document, ByteBuffer.wrap("1".getBytes()), new ColumnVisibility("test"),
         new Function<Entry<String,String>,Entry<Column,Value>>() {
 
           public Entry<Column,Value> apply(Entry<String,String> input) {

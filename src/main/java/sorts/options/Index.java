@@ -27,12 +27,30 @@ public class Index {
     return new Index(column, order);
   }
 
-  public String getKey() {
+  public String column() {
     return this.column;
   }
 
-  public Order getValue() {
+  public Order order() {
     return this.order;
+  }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof Index) {
+      Index other = (Index) o;
+      
+      if (this.column.equals(other.column) && this.order.equals(other.order)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  @Override
+  public int hashCode() {
+    return this.column.hashCode() ^ this.order.hashCode();
   }
   
 }

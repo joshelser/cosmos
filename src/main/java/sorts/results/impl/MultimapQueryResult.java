@@ -5,6 +5,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.nio.ByteBuffer;
 import java.util.Map.Entry;
 
+import org.apache.accumulo.core.security.ColumnVisibility;
+
 import sorts.results.Column;
 import sorts.results.QueryResult;
 import sorts.results.Value;
@@ -17,14 +19,17 @@ public class MultimapQueryResult implements QueryResult<MultimapQueryResult> {
   
   protected final ByteBuffer docId;
   protected final Multimap<Column,Value> document;
+  protected final ColumnVisibility docVisibility;
   
-  public <T1,T2> MultimapQueryResult(Multimap<T1,T2> untypedDoc, ByteBuffer docId,
+  public <T1,T2> MultimapQueryResult(Multimap<T1,T2> untypedDoc, ByteBuffer docId, ColumnVisibility docVisibility,
       Function<Entry<T1,T2>,Entry<Column,Value>> function) {
     checkNotNull(untypedDoc);
     checkNotNull(docId);
+    checkNotNull(docVisibility);
     checkNotNull(function);
     
     this.docId = docId;
+    this.docVisibility = docVisibility;
     this.document = HashMultimap.create();
     
     for (Entry<T1,T2> untypedEntry : untypedDoc.entries()) {
@@ -33,12 +38,14 @@ public class MultimapQueryResult implements QueryResult<MultimapQueryResult> {
     }
   }
   
-  public MultimapQueryResult(Multimap<Column,Value> document, ByteBuffer docId) {
+  public MultimapQueryResult(Multimap<Column,Value> document, ByteBuffer docId, ColumnVisibility docVisibility) {
     checkNotNull(document);
     checkNotNull(docId);
+    checkNotNull(docVisibility);
     
     this.document = document;
     this.docId = docId;
+    this.docVisibility = docVisibility;
   }
   
   public ByteBuffer docId() {
@@ -51,6 +58,10 @@ public class MultimapQueryResult implements QueryResult<MultimapQueryResult> {
   
   public MultimapQueryResult typedDocument() {
     return this;
+  }
+  
+  public ColumnVisibility documentVisibility() {
+    return this.docVisibility;
   }
   
   public Iterable<Entry<Column,Value>> columnValues() {

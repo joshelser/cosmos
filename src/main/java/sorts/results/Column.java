@@ -2,6 +2,8 @@ package sorts.results;
 
 import java.nio.ByteBuffer;
 
+import com.google.common.base.Preconditions;
+
 public class Column {
   private final ByteBuffer column;
   
@@ -14,7 +16,14 @@ public class Column {
   }
   
   public static Column create(ByteBuffer column) {
+    Preconditions.checkNotNull(column);
+    
     return new Column(column);
+  }
+  
+  public static Column create(String column) {
+    Preconditions.checkNotNull(column);
+    return create(ByteBuffer.wrap(column.getBytes()));
   }
   
   @Override
