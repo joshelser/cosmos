@@ -3,7 +3,6 @@ package sorts.impl;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.accumulo.core.client.BatchWriter;
 import org.apache.accumulo.core.client.BatchWriterConfig;
@@ -25,6 +24,8 @@ import sorts.results.PagedQueryResult;
 import sorts.results.QueryResult;
 import sorts.results.Value;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 public class SortingImpl implements Sorting {
@@ -72,11 +73,13 @@ public class SortingImpl implements Sorting {
     }
   }
   
-  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, Iterable<Index> columnsToIndex) throws TableNotFoundException,
+  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, Iterable<Entry<Column,Index>> columnsToIndex) throws TableNotFoundException,
       MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     checkNotNull(queryResults);
     checkNotNull(columnsToIndex);
+    
+    addResults(id, queryResults);
     
     State s = SortingMetadata.getState(id);
     
@@ -88,24 +91,29 @@ public class SortingImpl implements Sorting {
     try {
       bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
     
-      final Set<Index> columns = Sets.newHashSet(columnsToIndex);
+      final Multimap<Column,Index> columns = HashMultimap.create();
       
-      for (QueryResult<?> result : queryResults) {
+      for (Entry<Column,Index> column : columnsToIndex) {
+    	  columns.put(column.getKey(), column.getValue());
+      }
+      
+      for (QueryResult<?> result : queryResults) {    	  
         for (Entry<Column,Value> entry : result.columnValues()) {
+          final Column c = entry.getKey();
+          final Value v = entry.getValue();
           
-          // rework this hunk-o-junk
-          
-          Mutation m = getDocumentPrefix(id, result);
-          
-          final byte[] bytes = new byte[result.document().position()];
-          result.document().get(bytes);
-          
-          final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
-          m.put(index.column(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), 
-              new org.apache.accumulo.core.data.Value(bytes));
+          if (columns.containsKey(c)) {
+        	for (Index index : columns.get(c)) {
+              Mutation m = getDocumentPrefix(id, result, v.value());
+                
+              final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
+              m.put(index.column(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), 
+                new org.apache.accumulo.core.data.Value(result.document().getBytes()));
+              
+              bw.addMutation(m);
+        	}
+          }
         }
-        
-        bw.addMutation(m);
       }
     } finally {
       if (null != bw) {
@@ -170,7 +178,7 @@ public class SortingImpl implements Sorting {
     Mutation m = getDocumentPrefix(id, queryResult, queryResult.docId());
     
     m.put(DOCID_FIELD_NAME, FORWARD + NULL_BYTE_STR + queryResult.docId(), queryResult.documentVisibility(),
-        new org.apache.accumulo.core.data.Value(queryResult.typedDocument().toString().getBytes()));
+        new org.apache.accumulo.core.data.Value(queryResult.document().getBytes()));
     
     return m;
   }

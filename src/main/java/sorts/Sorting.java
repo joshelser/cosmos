@@ -33,7 +33,7 @@ public interface Sorting {
    * @param queryResults
    * @param columnsToIndex
    */
-  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, Iterable<Index> columnsToIndex) throws TableNotFoundException,
+  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, Iterable<Entry<Column,Index>> columnsToIndex) throws TableNotFoundException,
       MutationsRejectedException, UnexpectedStateException;
   
   /**
