@@ -1,14 +1,13 @@
 package sorts.results;
 
-import java.nio.ByteBuffer;
 import java.util.Map.Entry;
 
 import org.apache.accumulo.core.security.ColumnVisibility;
 
 public interface QueryResult<T> {
-  public ByteBuffer docId();
+  public String docId();
   
-  public ByteBuffer document();
+  public String document();
   
   public T typedDocument();
   

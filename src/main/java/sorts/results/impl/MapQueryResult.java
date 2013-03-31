@@ -2,7 +2,6 @@ package sorts.results.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -17,11 +16,11 @@ import com.google.common.collect.Maps;
 
 public class MapQueryResult implements QueryResult<MapQueryResult> {
   
-  protected final ByteBuffer docId;
+  protected final String docId;
   protected final Map<Column,Value> document;
   protected final ColumnVisibility docVisibility;
   
-  public <T1,T2> MapQueryResult(Map<T1,T2> untypedDoc, ByteBuffer docId, ColumnVisibility docVisibility, Function<Entry<T1,T2>,Entry<Column,Value>> function) {
+  public <T1,T2> MapQueryResult(Map<T1,T2> untypedDoc, String docId, ColumnVisibility docVisibility, Function<Entry<T1,T2>,Entry<Column,Value>> function) {
     checkNotNull(untypedDoc);
     checkNotNull(docId);
     checkNotNull(docVisibility);
@@ -37,7 +36,7 @@ public class MapQueryResult implements QueryResult<MapQueryResult> {
     }
   }
   
-  public MapQueryResult(Map<Column,Value> document, ByteBuffer docId, ColumnVisibility docVisibility) {
+  public MapQueryResult(Map<Column,Value> document, String docId, ColumnVisibility docVisibility) {
     checkNotNull(document);
     checkNotNull(docId);
     checkNotNull(docVisibility);
@@ -47,12 +46,12 @@ public class MapQueryResult implements QueryResult<MapQueryResult> {
     this.docVisibility = docVisibility;
   }
   
-  public ByteBuffer docId() {
+  public String docId() {
     return this.docId;
   }
   
-  public ByteBuffer document() {
-    return ByteBuffer.wrap(this.document.toString().getBytes());
+  public String document() {
+    return this.document.toString();
   }
   
   public MapQueryResult typedDocument() {

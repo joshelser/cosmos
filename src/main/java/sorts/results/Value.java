@@ -1,23 +1,21 @@
 package sorts.results;
 
-import java.nio.ByteBuffer;
-
 import org.apache.accumulo.core.security.ColumnVisibility;
 
 import com.google.common.base.Preconditions;
 
 public class Value {
-  private final ByteBuffer value;
+  private final String value;
   private final ColumnVisibility visibility;
   
-  public Value(ByteBuffer value, ColumnVisibility visibility) {
+  public Value(String value, ColumnVisibility visibility) {
     Preconditions.checkNotNull(value);
     Preconditions.checkNotNull(visibility);
     this.value = value;
     this.visibility = visibility;
   }
   
-  public ByteBuffer value() {
+  public String value() {
     return this.value;
   }
   
@@ -25,16 +23,10 @@ public class Value {
     return this.visibility;
   }
   
-  public static Value create(ByteBuffer value, ColumnVisibility visibility) {
-    Preconditions.checkNotNull(value);
-    Preconditions.checkNotNull(visibility);
-    return new Value(value, visibility);
-  }
-  
   public static Value create(String value, ColumnVisibility visibility) {
     Preconditions.checkNotNull(value);
     Preconditions.checkNotNull(visibility);
-    return create(ByteBuffer.wrap(value.getBytes()), visibility);
+    return new Value(value, visibility);
   }
   
   @Override

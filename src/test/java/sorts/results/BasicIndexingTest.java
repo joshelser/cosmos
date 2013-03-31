@@ -1,6 +1,5 @@
 package sorts.results;
 
-import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,7 +47,7 @@ public class BasicIndexingTest {
     data.put(Column.create("TEXT"), Value.create("foo", new ColumnVisibility("test")));
     data.put(Column.create("TEXT"), Value.create("bar", new ColumnVisibility("test")));
     
-    MapQueryResult mqr = new MapQueryResult(data, ByteBuffer.wrap(new byte[] {'1'}), new ColumnVisibility("test"));
+    MapQueryResult mqr = new MapQueryResult(data, "1", new ColumnVisibility("test"));
     
     SortableResult id = SortableResult.create(c);
     

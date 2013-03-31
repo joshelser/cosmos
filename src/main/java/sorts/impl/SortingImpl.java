@@ -167,13 +167,9 @@ public class SortingImpl implements Sorting {
   }
   
   protected Mutation addDocument(SortableResult id, QueryResult<?> queryResult) {
-    final byte[] docId = new byte[queryResult.docId().position()];
-    queryResult.docId().get(docId);
-    final String docIdStr = new String(docId);
-
-    Mutation m = getDocumentPrefix(id, queryResult, docIdStr);
+    Mutation m = getDocumentPrefix(id, queryResult, queryResult.docId());
     
-    m.put(DOCID_FIELD_NAME, FORWARD + NULL_BYTE_STR + docIdStr, queryResult.documentVisibility(),
+    m.put(DOCID_FIELD_NAME, FORWARD + NULL_BYTE_STR + queryResult.docId(), queryResult.documentVisibility(),
         new org.apache.accumulo.core.data.Value(queryResult.typedDocument().toString().getBytes()));
     
     return m;

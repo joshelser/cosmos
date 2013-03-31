@@ -1,29 +1,22 @@
 package sorts.results;
 
-import java.nio.ByteBuffer;
-
 import com.google.common.base.Preconditions;
 
 public class Column {
-  private final ByteBuffer column;
+  private final String column;
   
-  public Column(ByteBuffer column) {
+  public Column(String column) {
     this.column = column;
   }
 
-  public ByteBuffer column() {
+  public String column() {
     return this.column;
-  }
-  
-  public static Column create(ByteBuffer column) {
-    Preconditions.checkNotNull(column);
-    
-    return new Column(column);
   }
   
   public static Column create(String column) {
     Preconditions.checkNotNull(column);
-    return create(ByteBuffer.wrap(column.getBytes()));
+    
+    return new Column(column);
   }
   
   @Override
