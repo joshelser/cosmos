@@ -2,15 +2,11 @@ package sorts.results;
 
 import java.util.Collections;
 import java.util.Map.Entry;
-import java.util.Properties;
 
-import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.Scanner;
-import org.apache.accumulo.core.client.mock.MockInstance;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.core.security.ColumnVisibility;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -27,20 +23,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 @RunWith(JUnit4.class)
-public class BasicIndexingTest {
-  
-  private Connector c;
-  
-  @Before
-  public void setup() throws Exception {
-    MockInstance mi = new MockInstance();
-    Properties p = new Properties();
-    p.setProperty("password", "");
-    c = mi.getConnector("root", p);
-    c.securityOperations().changeUserAuthorizations("root", new Authorizations("test"));
-    c.tableOperations().create(Defaults.DATA_TABLE);
-    c.tableOperations().create(Defaults.METADATA_TABLE);
-  }
+public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void test() throws Exception {
@@ -51,7 +34,7 @@ public class BasicIndexingTest {
     
     MultimapQueryResult mqr = new MultimapQueryResult(data, "1", new ColumnVisibility("test"));
     
-    SortableResult id = SortableResult.create(c);
+    SortableResult id = SortableResult.create(c, new Authorizations("test"));
     
     Sorting s = new SortingImpl();
     

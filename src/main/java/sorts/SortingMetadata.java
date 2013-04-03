@@ -70,6 +70,24 @@ public class SortingMetadata {
     }
   }
   
+  public static void remove(SortableResult id) throws TableNotFoundException, MutationsRejectedException {
+    checkNotNull(id);
+
+    BatchWriter bw = null;
+    try {
+      bw = id.connector().createBatchWriter(id.metadataTable(), new BatchWriterConfig());
+      Mutation m = new Mutation(id.uuid());
+      m.putDelete(STATE_COLFAM, EMPTY_TEXT);
+      
+      bw.addMutation(m);
+      bw.flush();
+    } finally {
+      if (null != bw) {
+        bw.close();
+      }
+    }
+  }
+  
   public static State deserializeState(Value v) {
     return State.valueOf(v.toString());
   }

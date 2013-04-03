@@ -135,7 +135,7 @@ public class SortingImpl implements Sorting {
     }
   }
   
-  public void finalizeResults(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
+  public void finalize(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
     State s = SortingMetadata.getState(id);
@@ -197,7 +197,27 @@ public class SortingImpl implements Sorting {
     return null;
   }
   
-  public void delete(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {}
+  public void delete(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
+    checkNotNull(id);
+    
+    State s = SortingMetadata.getState(id);
+    
+    if (!State.LOADED.equals(s)) {
+      throw unexpectedState(id, State.LOADED, s);
+    }
+    
+    final State desiredState = State.DELETING;
+
+    log.debug("Changing state for {} from {} to {}", new Object[] {id, s, desiredState});
+    
+    SortingMetadata.setState(id, desiredState);
+    
+    // TODO implement deletion of the Keys
+    
+    log.debug("Removing state for {}", id);
+    
+    SortingMetadata.remove(id);
+  }
   
   protected Mutation getDocumentPrefix(SortableResult id, QueryResult<?> queryResult, String suffix) {
     return new Mutation(id.uuid() + NULL_BYTE_STR + suffix);

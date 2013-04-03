@@ -43,7 +43,7 @@ public interface Sorting {
    * @throws MutationsRejectedException
    * @throws UnexpectedStateException
    */
-  public void finalizeResults(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException;
+  public void finalize(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException;
   
   /**
    * Create indexes for the provided columns for all records that currently exist in the SortableResult
