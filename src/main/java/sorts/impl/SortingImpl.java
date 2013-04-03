@@ -2,13 +2,17 @@ package sorts.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Arrays;
 import java.util.Map.Entry;
 
 import org.apache.accumulo.core.client.BatchWriter;
 import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.MutationsRejectedException;
+import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.data.Mutation;
+import org.apache.accumulo.core.data.Range;
+import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +31,7 @@ import sorts.results.QueryResult;
 import sorts.results.Value;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
 public class SortingImpl implements Sorting {
@@ -34,6 +39,7 @@ public class SortingImpl implements Sorting {
   
   public static final String NULL_BYTE_STR = "\0";
   public static final String DOCID_FIELD_NAME = "SORTS_DOCID";
+  public static final Text DOCID_FIELD_NAME_TEXT = new Text(DOCID_FIELD_NAME);
   public static final String FORWARD = "f";
   public static final String REVERSE = "r";
   
@@ -106,6 +112,9 @@ public class SortingImpl implements Sorting {
       
       final Multimap<Column,Index> columns = HashMultimap.create();
       
+      // Add the default field
+      columns.put(Column.create(DOCID_FIELD_NAME), Index.define(DOCID_FIELD_NAME));
+      
       for (Entry<Column,Index> column : columnsToIndex) {
         columns.put(column.getKey(), column.getValue());
       }
@@ -158,7 +167,19 @@ public class SortingImpl implements Sorting {
   }
   
   public Iterable<QueryResult<?>> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
-    return null;
+    checkNotNull(id);
+    
+    State s = SortingMetadata.getState(id);
+    
+    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+    }
+    
+    Scanner scanner = id.connector().createScanner(id.dataTable(), id.auths());
+    scanner.setRange(Range.prefix(id.uuid()));
+    scanner.fetchColumnFamily(DOCID_FIELD_NAME_TEXT);
+    
+    return Iterables.transform(scanner, new KVToMultimap());
   }
   
   public PagedQueryResult fetch(SortableResult id, Paging limits) throws TableNotFoundException, UnexpectedStateException {
@@ -232,8 +253,12 @@ public class SortingImpl implements Sorting {
     return m;
   }
   
+  protected UnexpectedStateException unexpectedState(SortableResult id, State[] expected, State actual) {
+    return new UnexpectedStateException("Invalid state " + id + " for " + id + ". Expected one of " + Arrays.asList(expected) + " but was " + actual);
+  }
+  
   protected UnexpectedStateException unexpectedState(SortableResult id, State expected, State actual) {
-    return new UnexpectedStateException("Invalid state " + id + " for " + id + ". Expected " + actual + " but was " + actual);
+    return new UnexpectedStateException("Invalid state " + id + " for " + id + ". Expected " + expected + " but was " + actual);
   }
   
 }

@@ -2,6 +2,7 @@ package sorts.results;
 
 import java.util.Collections;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.data.Key;
@@ -40,8 +41,13 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr), Collections.singleton(
-    		Maps.immutableEntry(Column.create("TEXT"), Index.define("TEXT"))));
+    Set<Entry<Column,Index>> columnsToIndex = Collections.singleton(Maps.immutableEntry(Column.create("TEXT"), Index.define("TEXT")));
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr), columnsToIndex);
+    
+    mqr = new MultimapQueryResult(mqr, "2");
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr), columnsToIndex);
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     for (Entry<Key,org.apache.accumulo.core.data.Value> entry : scanner) {
@@ -50,6 +56,14 @@ public class BasicIndexingTest extends AbstractSortableTest {
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     for (Entry<Key,org.apache.accumulo.core.data.Value> entry : scanner) {
       System.out.println(entry);
+    }
+    
+    s.finalize(id);
+    
+    Iterable<QueryResult<?>> results = s.fetch(id);
+    
+    for (QueryResult<?> result : results) {
+      System.out.println(result.docId() + " " + result.document());
     }
   }
   

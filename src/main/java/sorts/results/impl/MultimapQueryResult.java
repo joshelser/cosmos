@@ -47,6 +47,15 @@ public class MultimapQueryResult implements QueryResult<MultimapQueryResult> {
     this.docVisibility = docVisibility;
   }
   
+  public MultimapQueryResult(MultimapQueryResult other, String newDocId) {
+    checkNotNull(other);
+    checkNotNull(newDocId);
+    
+    this.docId = newDocId;
+    this.document = HashMultimap.create(other.document);
+    this.docVisibility = other.docVisibility;
+  }
+  
   public String docId() {
     return this.docId;
   }
