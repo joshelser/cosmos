@@ -37,6 +37,15 @@ public interface Sorting {
       MutationsRejectedException, UnexpectedStateException;
   
   /**
+   * Closes the state of the given SortableResult. No additional results can be written after the set has been finalized. 
+   * @param id
+   * @throws TableNotFoundException
+   * @throws MutationsRejectedException
+   * @throws UnexpectedStateException
+   */
+  public void finalizeResults(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException;
+  
+  /**
    * Create indexes for the provided columns for all records that currently exist in the SortableResult
    * 
    * @param id
