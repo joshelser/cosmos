@@ -11,7 +11,8 @@ import sorts.options.Paging;
 import sorts.results.Column;
 import sorts.results.PagedQueryResult;
 import sorts.results.QueryResult;
-import sorts.results.Value;
+import sorts.results.SValue;
+import sorts.results.impl.MultimapQueryResult;
 
 public interface Sorting {
   
@@ -67,7 +68,7 @@ public interface Sorting {
    * @param id
    * @return
    */
-  public Iterable<QueryResult<?>> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException;
+  public Iterable<MultimapQueryResult> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Fetch all results from the given {@link SortableResult}, paging through results
@@ -86,7 +87,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<QueryResult<?>> fetch(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException;
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Fetch results with values for the given {@link Column}, paging through results
@@ -96,7 +97,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<QueryResult<?>> fetch(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException;
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Fetch results for the given column in the provided {@link Ordering}
@@ -106,7 +107,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<QueryResult<?>> fetch(SortableResult id, Ordering ordering) throws TableNotFoundException, UnexpectedStateException;
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Ordering ordering) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Fetch results for the given column in the provided {@link Ordering}, paging through results
@@ -116,7 +117,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<QueryResult<?>> fetch(SortableResult id, Ordering ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException;
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Ordering ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Return counts for unique values in the given column
@@ -126,7 +127,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException;
+  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Return counts for unique values in the given column, paging through results
@@ -136,7 +137,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException;
+  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Return counts for unique values in the given column
@@ -146,7 +147,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, Ordering order) throws TableNotFoundException, UnexpectedStateException;
+  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Ordering order) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Return counts for unique values in the given column, paging through results
@@ -156,7 +157,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, Ordering order, Paging limits) throws TableNotFoundException, UnexpectedStateException;
+  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Ordering order, Paging limits) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Clean up references to the data referenced by this SortableResult

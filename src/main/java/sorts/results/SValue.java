@@ -4,11 +4,11 @@ import org.apache.accumulo.core.security.ColumnVisibility;
 
 import com.google.common.base.Preconditions;
 
-public class Value {
+public class SValue {
   private final String value;
   private final ColumnVisibility visibility;
   
-  public Value(String value, ColumnVisibility visibility) {
+  public SValue(String value, ColumnVisibility visibility) {
     Preconditions.checkNotNull(value);
     Preconditions.checkNotNull(visibility);
     this.value = value;
@@ -23,10 +23,10 @@ public class Value {
     return this.visibility;
   }
   
-  public static Value create(String value, ColumnVisibility visibility) {
+  public static SValue create(String value, ColumnVisibility visibility) {
     Preconditions.checkNotNull(value);
     Preconditions.checkNotNull(visibility);
-    return new Value(value, visibility);
+    return new SValue(value, visibility);
   }
   
   @Override
@@ -36,8 +36,8 @@ public class Value {
   
   @Override
   public boolean equals(Object o) {
-    if (o instanceof Value) {
-      Value other = (Value) o;
+    if (o instanceof SValue) {
+      SValue other = (SValue) o;
       return this.value.equals(other.value) &&
           this.visibility.equals(other.visibility);
     }

@@ -1,13 +1,14 @@
 package sorts.results;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.security.Authorizations;
-import org.apache.accumulo.core.security.ColumnVisibility;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -26,16 +27,23 @@ import com.google.common.collect.Multimap;
 @RunWith(JUnit4.class)
 public class BasicIndexingTest extends AbstractSortableTest {
   
+  protected List<Multimap<Column,SValue>> data;
+  
+  @BeforeClass
+  public void createTestData() {
+    
+  }
+  
   @Test
   public void test() throws Exception {
-    Multimap<Column,Value> data = HashMultimap.create();
+    Multimap<Column,SValue> data = HashMultimap.create();
     
-    data.put(Column.create("TEXT"), Value.create("foo", new ColumnVisibility("test")));
-    data.put(Column.create("TEXT"), Value.create("bar", new ColumnVisibility("test")));
+    data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
+    data.put(Column.create("TEXT"), SValue.create("bar", VIZ));
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", new ColumnVisibility("test"));
+    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
     
-    SortableResult id = SortableResult.create(c, new Authorizations("test"));
+    SortableResult id = SortableResult.create(c, AUTHS);
     
     Sorting s = new SortingImpl();
     
@@ -60,9 +68,9 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.finalize(id);
     
-    Iterable<QueryResult<?>> results = s.fetch(id);
+    Iterable<MultimapQueryResult> results = s.fetch(id);
     
-    for (QueryResult<?> result : results) {
+    for (MultimapQueryResult result : results) {
       System.out.println(result.docId() + " " + result.document());
     }
   }

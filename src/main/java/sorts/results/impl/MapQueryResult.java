@@ -9,7 +9,7 @@ import org.apache.accumulo.core.security.ColumnVisibility;
 
 import sorts.results.Column;
 import sorts.results.QueryResult;
-import sorts.results.Value;
+import sorts.results.SValue;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
@@ -17,10 +17,10 @@ import com.google.common.collect.Maps;
 public class MapQueryResult implements QueryResult<MapQueryResult> {
   
   protected final String docId;
-  protected final Map<Column,Value> document;
+  protected final Map<Column,SValue> document;
   protected final ColumnVisibility docVisibility;
   
-  public <T1,T2> MapQueryResult(Map<T1,T2> untypedDoc, String docId, ColumnVisibility docVisibility, Function<Entry<T1,T2>,Entry<Column,Value>> function) {
+  public <T1,T2> MapQueryResult(Map<T1,T2> untypedDoc, String docId, ColumnVisibility docVisibility, Function<Entry<T1,T2>,Entry<Column,SValue>> function) {
     checkNotNull(untypedDoc);
     checkNotNull(docId);
     checkNotNull(docVisibility);
@@ -31,12 +31,12 @@ public class MapQueryResult implements QueryResult<MapQueryResult> {
     this.docVisibility = docVisibility;
     
     for (Entry<T1,T2> untypedEntry : untypedDoc.entrySet()) {
-      Entry<Column,Value> entry = function.apply(untypedEntry);
+      Entry<Column,SValue> entry = function.apply(untypedEntry);
       this.document.put(entry.getKey(), entry.getValue());
     }
   }
   
-  public MapQueryResult(Map<Column,Value> document, String docId, ColumnVisibility docVisibility) {
+  public MapQueryResult(Map<Column,SValue> document, String docId, ColumnVisibility docVisibility) {
     checkNotNull(document);
     checkNotNull(docId);
     checkNotNull(docVisibility);
@@ -62,7 +62,7 @@ public class MapQueryResult implements QueryResult<MapQueryResult> {
     return this.docVisibility;
   }
   
-  public Iterable<Entry<Column,Value>> columnValues() {
+  public Iterable<Entry<Column,SValue>> columnValues() {
     return this.document.entrySet();
   }
   

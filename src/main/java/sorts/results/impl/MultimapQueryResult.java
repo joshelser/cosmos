@@ -8,7 +8,7 @@ import org.apache.accumulo.core.security.ColumnVisibility;
 
 import sorts.results.Column;
 import sorts.results.QueryResult;
-import sorts.results.Value;
+import sorts.results.SValue;
 
 import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
@@ -17,11 +17,11 @@ import com.google.common.collect.Multimap;
 public class MultimapQueryResult implements QueryResult<MultimapQueryResult> {
   
   protected final String docId;
-  protected final Multimap<Column,Value> document;
+  protected final Multimap<Column,SValue> document;
   protected final ColumnVisibility docVisibility;
   
   public <T1,T2> MultimapQueryResult(Multimap<T1,T2> untypedDoc, String docId, ColumnVisibility docVisibility,
-      Function<Entry<T1,T2>,Entry<Column,Value>> function) {
+      Function<Entry<T1,T2>,Entry<Column,SValue>> function) {
     checkNotNull(untypedDoc);
     checkNotNull(docId);
     checkNotNull(docVisibility);
@@ -32,12 +32,12 @@ public class MultimapQueryResult implements QueryResult<MultimapQueryResult> {
     this.document = HashMultimap.create();
     
     for (Entry<T1,T2> untypedEntry : untypedDoc.entries()) {
-      Entry<Column,Value> entry = function.apply(untypedEntry);
+      Entry<Column,SValue> entry = function.apply(untypedEntry);
       this.document.put(entry.getKey(), entry.getValue());
     }
   }
   
-  public MultimapQueryResult(Multimap<Column,Value> document, String docId, ColumnVisibility docVisibility) {
+  public MultimapQueryResult(Multimap<Column,SValue> document, String docId, ColumnVisibility docVisibility) {
     checkNotNull(document);
     checkNotNull(docId);
     checkNotNull(docVisibility);
@@ -72,7 +72,7 @@ public class MultimapQueryResult implements QueryResult<MultimapQueryResult> {
     return this.docVisibility;
   }
   
-  public Iterable<Entry<Column,Value>> columnValues() {
+  public Iterable<Entry<Column,SValue>> columnValues() {
     return this.document.entries();
   }
   

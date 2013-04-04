@@ -8,7 +8,6 @@ import org.apache.accumulo.core.data.Value;
 import org.apache.hadoop.io.Text;
 
 import sorts.results.Column;
-import sorts.results.QueryResult;
 import sorts.results.impl.MultimapQueryResult;
 
 import com.google.common.base.Function;
@@ -18,12 +17,12 @@ import com.google.common.collect.Multimap;
 /**
  * 
  */
-public class KVToMultimap implements Function<Entry<Key,Value>,QueryResult<?>> {
+public class KVToMultimap implements Function<Entry<Key,Value>,MultimapQueryResult> {
 
   public MultimapQueryResult apply(Entry<Key,Value> input) {
-    Multimap<Column,sorts.results.Value> dontCare = HashMultimap.create();
+    Multimap<Column,sorts.results.SValue> dontCare = HashMultimap.create();
     
-    dontCare.put(Column.create("ATALL"),sorts.results.Value.create(input.getValue().toString(), input.getKey().getColumnVisibilityParsed()));
+    dontCare.put(Column.create("ATALL"),sorts.results.SValue.create(input.getValue().toString(), input.getKey().getColumnVisibilityParsed()));
     
     Text cq = input.getKey().getColumnQualifier();
     

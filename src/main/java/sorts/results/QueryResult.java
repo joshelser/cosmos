@@ -13,5 +13,5 @@ public interface QueryResult<T> {
   
   public ColumnVisibility documentVisibility();
   
-  public Iterable<Entry<Column,Value>> columnValues();
+  public Iterable<Entry<Column,SValue>> columnValues();
 }

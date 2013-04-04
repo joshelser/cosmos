@@ -21,27 +21,27 @@ public class MapQueryResultTest {
   
   @Test
   public void basicCreation() {
-    Set<Entry<Column,Value>> expected = Sets.newHashSet();
+    Set<Entry<Column,SValue>> expected = Sets.newHashSet();
     expected.add(Maps.immutableEntry(Column.create("TEXT"),
-        Value.create("foo", new ColumnVisibility("test"))));
+        SValue.create("foo", new ColumnVisibility("test"))));
     expected.add(Maps.immutableEntry(Column.create("TEXT"),
-        Value.create("bar", new ColumnVisibility("test"))));
+        SValue.create("bar", new ColumnVisibility("test"))));
     
     Map<String,String> document = Maps.newHashMap();
     document.put("TEXT", "foo");
     document.put("TEXT", "bar");
     
     MapQueryResult mqr = new MapQueryResult(document, "1", new ColumnVisibility("test"),
-        new Function<Entry<String,String>,Entry<Column,Value>>() {
+        new Function<Entry<String,String>,Entry<Column,SValue>>() {
 
-          public Entry<Column,Value> apply(Entry<String,String> input) {
+          public Entry<Column,SValue> apply(Entry<String,String> input) {
             final ColumnVisibility cv = new ColumnVisibility("test");
             return Maps.immutableEntry(Column.create(input.getKey()),
-                Value.create(input.getValue(), cv));
+                SValue.create(input.getValue(), cv));
           }
     });
     
-    for (Entry<Column,Value> column : mqr.columnValues()) {
+    for (Entry<Column,SValue> column : mqr.columnValues()) {
       Assert.assertTrue(expected.contains(column));
     }
   }

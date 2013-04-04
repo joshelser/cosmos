@@ -12,6 +12,7 @@ import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
+import org.apache.accumulo.core.data.Value;
 import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,8 @@ import sorts.options.Paging;
 import sorts.results.Column;
 import sorts.results.PagedQueryResult;
 import sorts.results.QueryResult;
-import sorts.results.Value;
+import sorts.results.SValue;
+import sorts.results.impl.MultimapQueryResult;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
@@ -120,17 +122,16 @@ public class SortingImpl implements Sorting {
       }
       
       for (QueryResult<?> result : queryResults) {
-        for (Entry<Column,Value> entry : result.columnValues()) {
+        for (Entry<Column,SValue> entry : result.columnValues()) {
           final Column c = entry.getKey();
-          final Value v = entry.getValue();
+          final SValue v = entry.getValue();
           
           if (columns.containsKey(c)) {
             for (Index index : columns.get(c)) {
               Mutation m = getDocumentPrefix(id, result, v.value());
               
               final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
-              m.put(index.column(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), new org.apache.accumulo.core.data.Value(result
-                  .document().getBytes()));
+              m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), new Value(result.document().getBytes()));
               
               bw.addMutation(m);
             }
@@ -166,7 +167,7 @@ public class SortingImpl implements Sorting {
     return null;
   }
   
-  public Iterable<QueryResult<?>> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
+  public Iterable<MultimapQueryResult> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     
     State s = SortingMetadata.getState(id);
@@ -186,35 +187,35 @@ public class SortingImpl implements Sorting {
     return null;
   }
   
-  public Iterable<QueryResult<?>> fetch(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException {
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
   
-  public Iterable<QueryResult<?>> fetch(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
   
-  public Iterable<QueryResult<?>> fetch(SortableResult id, Ordering ordering) throws TableNotFoundException, UnexpectedStateException {
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Ordering ordering) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
   
-  public Iterable<QueryResult<?>> fetch(SortableResult id, Ordering ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Ordering ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
   
-  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException {
+  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
   
-  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
   
-  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, Ordering order) throws TableNotFoundException, UnexpectedStateException {
+  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Ordering order) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
   
-  public Iterable<Entry<Value,Long>> groupResults(SortableResult id, Ordering order, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Ordering order, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
   
@@ -247,8 +248,7 @@ public class SortingImpl implements Sorting {
   protected Mutation addDocument(SortableResult id, QueryResult<?> queryResult) {
     Mutation m = getDocumentPrefix(id, queryResult, queryResult.docId());
     
-    m.put(DOCID_FIELD_NAME, FORWARD + NULL_BYTE_STR + queryResult.docId(), queryResult.documentVisibility(), new org.apache.accumulo.core.data.Value(
-        queryResult.document().getBytes()));
+    m.put(DOCID_FIELD_NAME, FORWARD + NULL_BYTE_STR + queryResult.docId(), queryResult.documentVisibility(), new Value(queryResult.document().getBytes()));
     
     return m;
   }
