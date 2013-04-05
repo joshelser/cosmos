@@ -2,6 +2,7 @@ package sorts.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map.Entry;
 
@@ -12,7 +13,6 @@ import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
-import org.apache.accumulo.core.data.Value;
 import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +66,7 @@ public class SortingImpl implements Sorting {
   }
   
   public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults) throws TableNotFoundException, MutationsRejectedException,
-      UnexpectedStateException {
+      UnexpectedStateException, IOException {
     checkNotNull(id);
     checkNotNull(queryResults);
     
@@ -93,7 +93,7 @@ public class SortingImpl implements Sorting {
   }
   
   public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, Iterable<Entry<Column,Index>> columnsToIndex) throws TableNotFoundException,
-      MutationsRejectedException, UnexpectedStateException {
+      MutationsRejectedException, UnexpectedStateException, IOException {
     checkNotNull(id);
     checkNotNull(queryResults);
     checkNotNull(columnsToIndex);
@@ -131,7 +131,7 @@ public class SortingImpl implements Sorting {
               Mutation m = getDocumentPrefix(id, result, v.value());
               
               final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
-              m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), new Value(result.document().getBytes()));
+              m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
               
               bw.addMutation(m);
             }
@@ -245,10 +245,10 @@ public class SortingImpl implements Sorting {
     return new Mutation(id.uuid() + NULL_BYTE_STR + suffix);
   }
   
-  protected Mutation addDocument(SortableResult id, QueryResult<?> queryResult) {
+  protected Mutation addDocument(SortableResult id, QueryResult<?> queryResult) throws IOException {
     Mutation m = getDocumentPrefix(id, queryResult, queryResult.docId());
     
-    m.put(DOCID_FIELD_NAME, FORWARD + NULL_BYTE_STR + queryResult.docId(), queryResult.documentVisibility(), new Value(queryResult.document().getBytes()));
+    m.put(DOCID_FIELD_NAME, FORWARD + NULL_BYTE_STR + queryResult.docId(), queryResult.documentVisibility(), queryResult.toValue());
     
     return m;
   }

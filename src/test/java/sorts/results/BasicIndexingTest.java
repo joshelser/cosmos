@@ -7,8 +7,8 @@ import java.util.Set;
 
 import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.data.Key;
+import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.Authorizations;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -28,11 +28,6 @@ import com.google.common.collect.Multimap;
 public class BasicIndexingTest extends AbstractSortableTest {
   
   protected List<Multimap<Column,SValue>> data;
-  
-  @BeforeClass
-  public void createTestData() {
-    
-  }
   
   @Test
   public void test() throws Exception {
@@ -58,11 +53,11 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.addResults(id, Collections.<QueryResult<?>> singleton(mqr), columnsToIndex);
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
-    for (Entry<Key,org.apache.accumulo.core.data.Value> entry : scanner) {
+    for (Entry<Key,Value> entry : scanner) {
       System.out.println(entry);
     }
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
-    for (Entry<Key,org.apache.accumulo.core.data.Value> entry : scanner) {
+    for (Entry<Key,Value> entry : scanner) {
       System.out.println(entry);
     }
     

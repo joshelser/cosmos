@@ -1,5 +1,6 @@
 package sorts;
 
+import java.io.IOException;
 import java.util.Map.Entry;
 
 import org.apache.accumulo.core.client.MutationsRejectedException;
@@ -25,7 +26,7 @@ public interface Sorting {
    * @param queryResults
    */
   public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults) throws TableNotFoundException, MutationsRejectedException,
-      UnexpectedStateException;
+      UnexpectedStateException, IOException;
   
   /**
    * Add results to the given SortableResult, creating indexes for the provided columns at insertion time.
@@ -35,7 +36,7 @@ public interface Sorting {
    * @param columnsToIndex
    */
   public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, Iterable<Entry<Column,Index>> columnsToIndex) throws TableNotFoundException,
-      MutationsRejectedException, UnexpectedStateException;
+      MutationsRejectedException, UnexpectedStateException, IOException;
   
   /**
    * Closes the state of the given SortableResult. No additional results can be written after the set has been finalized. 

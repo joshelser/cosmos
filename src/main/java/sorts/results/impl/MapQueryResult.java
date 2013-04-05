@@ -2,10 +2,17 @@ package sorts.results.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.ColumnVisibility;
+import org.apache.hadoop.io.DataOutputBuffer;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableUtils;
 
 import sorts.results.Column;
 import sorts.results.QueryResult;
@@ -16,9 +23,11 @@ import com.google.common.collect.Maps;
 
 public class MapQueryResult implements QueryResult<MapQueryResult> {
   
-  protected final String docId;
-  protected final Map<Column,SValue> document;
-  protected final ColumnVisibility docVisibility;
+  protected String docId;
+  protected Map<Column,SValue> document;
+  protected ColumnVisibility docVisibility;
+  
+  protected MapQueryResult() { }
   
   public <T1,T2> MapQueryResult(Map<T1,T2> untypedDoc, String docId, ColumnVisibility docVisibility, Function<Entry<T1,T2>,Entry<Column,SValue>> function) {
     checkNotNull(untypedDoc);
@@ -64,6 +73,57 @@ public class MapQueryResult implements QueryResult<MapQueryResult> {
   
   public Iterable<Entry<Column,SValue>> columnValues() {
     return this.document.entrySet();
+  }
+  
+  public static MapQueryResult recreate(DataInput in) throws IOException {
+    MapQueryResult result = new MapQueryResult();
+    result.readFields(in);
+    return result;
+  }
+  
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    this.docId = Text.readString(in);
+    
+    final int cvLength = WritableUtils.readVInt(in);
+    final byte[] cvBytes = new byte[cvLength];
+    in.readFully(cvBytes);
+    
+    this.docVisibility = new ColumnVisibility(cvBytes);
+    
+    final int entryCount = WritableUtils.readVInt(in);
+    this.document = Maps.newHashMapWithExpectedSize(entryCount);
+    
+    for (int i = 0; i < entryCount; i++) {
+      
+      this.document.put(Column.recreate(in), SValue.recreate(in));
+    }
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    Text.writeString(out, this.docId);
+
+    byte[] cvBytes = this.docVisibility.flatten();
+    WritableUtils.writeVInt(out, cvBytes.length);
+    out.write(cvBytes);
+    
+    WritableUtils.writeVInt(out, this.document.size());
+    for (Entry<Column,SValue> entry : this.document.entrySet()) {
+      entry.getKey().write(out);
+      entry.getValue().write(out);
+    }
+  }
+  
+  @Override
+  public Value toValue() throws IOException {
+    DataOutputBuffer buf = new DataOutputBuffer();
+    this.write(buf);
+    buf.close();
+    byte[] bytes = new byte[buf.getLength()];
+    System.arraycopy(buf.getData(), 0, bytes, 0, buf.getLength());
+    
+    return new Value(bytes);
   }
   
 }
