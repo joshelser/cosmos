@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.ColumnVisibility;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableUtils;
@@ -134,6 +135,26 @@ public class MultimapQueryResult implements QueryResult<MultimapQueryResult> {
     System.arraycopy(buf.getData(), 0, bytes, 0, buf.getLength());
     
     return new Value(bytes);
+  }
+  
+  @Override
+  public int hashCode() {
+    HashCodeBuilder hcb = new HashCodeBuilder(17,31);
+    hcb.append(this.docId);
+    hcb.append(this.docVisibility.hashCode());
+    hcb.append(this.document.hashCode());
+    return hcb.toHashCode();
+  }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof MultimapQueryResult) {
+      MultimapQueryResult other = (MultimapQueryResult) o;
+      return this.docId.equals(other.docId) && this.docVisibility.equals(other.docVisibility) &&
+          this.document.equals(other.document);
+    }
+    
+    return false;
   }
   
 }
