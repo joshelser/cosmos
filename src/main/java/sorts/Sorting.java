@@ -35,7 +35,7 @@ public interface Sorting {
    * @param queryResults
    * @param columnsToIndex
    */
-  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, Iterable<Entry<Column,Index>> columnsToIndex) throws TableNotFoundException,
+  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, Iterable<Index> columnsToIndex) throws TableNotFoundException,
       MutationsRejectedException, UnexpectedStateException, IOException;
   
   /**
@@ -53,7 +53,7 @@ public interface Sorting {
    * @param id
    * @param columnsToIndex
    */
-  public void index(SortableResult id, Iterable<Column> columns) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException;
+  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException;
   
   /**
    * Fetch all columns present for a given {@link SortableResult}

@@ -4,8 +4,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map.Entry;
 
+import org.apache.accumulo.core.client.BatchDeleter;
 import org.apache.accumulo.core.client.BatchWriter;
 import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.MutationsRejectedException;
@@ -92,7 +94,7 @@ public class SortingImpl implements Sorting {
     }
   }
   
-  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, Iterable<Entry<Column,Index>> columnsToIndex) throws TableNotFoundException,
+  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, Iterable<Index> columnsToIndex) throws TableNotFoundException,
       MutationsRejectedException, UnexpectedStateException, IOException {
     checkNotNull(id);
     checkNotNull(queryResults);
@@ -117,8 +119,8 @@ public class SortingImpl implements Sorting {
       // Add the default field
       columns.put(Column.create(DOCID_FIELD_NAME), Index.define(DOCID_FIELD_NAME));
       
-      for (Entry<Column,Index> column : columnsToIndex) {
-        columns.put(column.getKey(), column.getValue());
+      for (Index index : columnsToIndex) {
+        columns.put(index.column(), index);
       }
       
       for (QueryResult<?> result : queryResults) {
@@ -161,7 +163,7 @@ public class SortingImpl implements Sorting {
     SortingMetadata.setState(id, desiredState);
   }
   
-  public void index(SortableResult id, Iterable<Column> columns) throws TableNotFoundException, UnexpectedStateException {}
+  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws TableNotFoundException, UnexpectedStateException {}
   
   public Iterable<Column> columns(SortableResult id) {
     return null;
@@ -234,7 +236,18 @@ public class SortingImpl implements Sorting {
     
     SortingMetadata.setState(id, desiredState);
     
-    // TODO implement deletion of the Keys
+    // Delete of the Keys
+    BatchDeleter bd = null;
+    try {
+      bd = id.connector().createBatchDeleter(id.dataTable(), id.auths(), 4, new BatchWriterConfig());
+      bd.setRanges(Collections.singleton(Range.prefix(id.uuid())));
+      
+      bd.delete();
+    } finally {
+      if (null != bd) {
+        bd.close();      
+      }
+    }
     
     log.debug("Removing state for {}", id);
     
