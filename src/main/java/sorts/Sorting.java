@@ -53,7 +53,7 @@ public interface Sorting {
    * @param id
    * @param columnsToIndex
    */
-  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException;
+  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException, IOException;
   
   /**
    * Fetch all columns present for a given {@link SortableResult}

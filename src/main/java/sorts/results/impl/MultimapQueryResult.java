@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map.Entry;
 
 import org.apache.accumulo.core.data.Value;
@@ -84,6 +85,22 @@ public class MultimapQueryResult implements QueryResult<MultimapQueryResult> {
   
   public Iterable<Entry<Column,SValue>> columnValues() {
     return this.document.entries();
+  }
+  
+  public int columnSize() {
+    return this.document.keySet().size();
+  }
+  
+  public boolean containsKey(Column key) {
+    return this.document.containsKey(key);
+  }
+  
+  public boolean containEntry(Column column, SValue svalue) {
+    return this.document.containsEntry(column, svalue);
+  }
+  
+  public Collection<SValue> get(Column column) {
+    return this.document.get(column);
   }
   
   public static MultimapQueryResult recreate(DataInput in) throws IOException {

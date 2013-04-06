@@ -54,11 +54,11 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     for (Entry<Key,Value> entry : scanner) {
-      System.out.println(entry);
+      //System.out.println(entry);
     }
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     for (Entry<Key,Value> entry : scanner) {
-      System.out.println(entry);
+      //System.out.println(entry);
     }
     
     s.finalize(id);
@@ -66,7 +66,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Iterable<MultimapQueryResult> results = s.fetch(id);
     
     for (MultimapQueryResult result : results) {
-      System.out.println(result.docId() + " " + result.document());
+      //System.out.println(result.docId() + " " + result.document());
     }
   }
   
@@ -117,6 +117,57 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Assert.assertEquals(0, metadataCount);
     Assert.assertEquals(0, dataCount);
+  }
+  
+  @Test
+  public void postIndex() throws Exception {
+    Multimap<Column,SValue> data = HashMultimap.create();
+    
+    data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
+    data.put(Column.create("TEXT"), SValue.create("bar", VIZ));
+    
+    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    
+    SortableResult id = SortableResult.create(c, AUTHS);
+    
+    Sorting s = new SortingImpl();
+    
+    s.register(id);
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    
+    int metadataCount = 0, dataCount = 0;
+    Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
+    for (Entry<Key,Value> entry : scanner) {
+      //System.out.println(entry);
+      dataCount++;
+    }
+    scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
+    for (Entry<Key,Value> entry : scanner) {
+      //System.out.println(entry);
+      metadataCount++;
+    }
+    
+    Assert.assertEquals(1, metadataCount);
+    Assert.assertEquals(1, dataCount);
+    
+    s.index(id, Collections.singleton(Index.define("TEXT")));
+    
+    metadataCount = 0;
+    dataCount = 0;
+    scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
+    for (Entry<Key,Value> entry : scanner) {
+      //System.out.println(entry);
+      dataCount++;
+    }
+    scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
+    for (Entry<Key,Value> entry : scanner) {
+      //System.out.println(entry);
+      metadataCount++;
+    }
+    
+    Assert.assertEquals(1, metadataCount);
+    Assert.assertEquals(3, dataCount);
   }
   
 }

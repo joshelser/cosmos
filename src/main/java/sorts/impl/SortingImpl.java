@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
 
@@ -114,16 +115,11 @@ public class SortingImpl implements Sorting {
     try {
       bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
       
-      final Multimap<Column,Index> columns = HashMultimap.create();
-      
-      // Add the default field
-      columns.put(Column.create(DOCID_FIELD_NAME), Index.define(DOCID_FIELD_NAME));
-      
-      for (Index index : columnsToIndex) {
-        columns.put(index.column(), index);
-      }
-      
+      final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
+
       for (QueryResult<?> result : queryResults) {
+        bw.addMutation(addDocument(id, result));
+        
         for (Entry<Column,SValue> entry : result.columnValues()) {
           final Column c = entry.getKey();
           final SValue v = entry.getValue();
@@ -163,7 +159,65 @@ public class SortingImpl implements Sorting {
     SortingMetadata.setState(id, desiredState);
   }
   
-  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws TableNotFoundException, UnexpectedStateException {}
+  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws TableNotFoundException, UnexpectedStateException, MutationsRejectedException, IOException {
+    checkNotNull(id);
+    checkNotNull(columnsToIndex);
+    
+    State s = SortingMetadata.getState(id);
+    
+    if (!State.LOADING.equals(s)) {
+      throw unexpectedState(id, State.LOADING, s);
+    }
+    
+    final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
+    final int numCols = columns.keySet().size();
+    
+    Iterable<MultimapQueryResult> results = fetch(id);
+    
+    BatchWriter bw = null;
+    try {
+      bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
+    
+      for (MultimapQueryResult result : results) {
+        if (result.columnSize() > numCols) {
+          for (Entry<Column,Index> entry : columns.entries()) {
+            if (result.containsKey(entry.getKey())) {
+              Collection<SValue> values = result.get(entry.getKey());
+              for (SValue value :  values) {
+                Mutation m = getDocumentPrefix(id, result, value.value());
+                
+                final String direction = Order.ASCENDING.equals(entry.getValue().order()) ? FORWARD : REVERSE;
+                m.put(entry.getValue().column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
+                
+                bw.addMutation(m);
+              }
+            }
+          }
+        } else {
+          for (Entry<Column,SValue> entry : result.columnValues()) {
+            if (columns.containsKey(entry.getKey())) {
+              final Collection<Index> indexes = columns.get(entry.getKey());
+              for (Index index : indexes) {
+                final Collection<SValue> svalues = result.get(index.column());
+                for (SValue value : svalues) {
+                  Mutation m = getDocumentPrefix(id, result, value.value());
+                  
+                  final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
+                  m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
+                  
+                  bw.addMutation(m);
+                }
+              }
+            }
+          }
+        } 
+      }
+    } finally {
+      if (null != bw) {
+        bw.close();
+      }
+    }
+  }
   
   public Iterable<Column> columns(SortableResult id) {
     return null;
@@ -273,5 +327,14 @@ public class SortingImpl implements Sorting {
   protected UnexpectedStateException unexpectedState(SortableResult id, State expected, State actual) {
     return new UnexpectedStateException("Invalid state " + id + " for " + id + ". Expected " + expected + " but was " + actual);
   }
-  
+ 
+  protected HashMultimap<Column,Index> mapForIndexedColumns(Iterable<Index> columnsToIndex) {
+    final HashMultimap<Column,Index> columns = HashMultimap.create();
+    
+    for (Index index : columnsToIndex) {
+      columns.put(index.column(), index);
+    }
+    
+    return columns;
+  }
 }
