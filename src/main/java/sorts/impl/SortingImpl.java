@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.accumulo.core.client.BatchDeleter;
 import org.apache.accumulo.core.client.BatchWriter;
@@ -73,34 +74,6 @@ public class SortingImpl implements Sorting {
     checkNotNull(id);
     checkNotNull(queryResults);
     
-    State s = SortingMetadata.getState(id);
-    
-    if (!State.LOADING.equals(s)) {
-      UnexpectedStateException e = unexpectedState(id, State.LOADING, s);
-      log.error(e.getMessage());
-      throw e;
-    }
-    
-    BatchWriter bw = null;
-    try {
-      bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
-      
-      for (QueryResult<?> result : queryResults) {
-        bw.addMutation(addDocument(id, result));
-      }
-    } finally {
-      if (null != bw) {
-        bw.close();
-      }
-    }
-  }
-  
-  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults, Iterable<Index> columnsToIndex) throws TableNotFoundException,
-      MutationsRejectedException, UnexpectedStateException, IOException {
-    checkNotNull(id);
-    checkNotNull(queryResults);
-    checkNotNull(columnsToIndex);
-    
     addResults(id, queryResults);
     
     State s = SortingMetadata.getState(id);
@@ -110,6 +83,8 @@ public class SortingImpl implements Sorting {
       log.error(e.getMessage());
       throw e;
     }
+    
+    Set<Index> columnsToIndex = id.columnsToIndex();
     
     BatchWriter bw = null;
     try {
@@ -172,6 +147,8 @@ public class SortingImpl implements Sorting {
     final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
     final int numCols = columns.keySet().size();
     
+    // TODO add the values of columns to the sortableresult
+    
     Iterable<MultimapQueryResult> results = fetch(id);
     
     BatchWriter bw = null;
@@ -220,6 +197,7 @@ public class SortingImpl implements Sorting {
   }
   
   public Iterable<Column> columns(SortableResult id) {
+    checkNotNull(id);
     return null;
   }
   

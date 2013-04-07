@@ -38,19 +38,19 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
     
-    SortableResult id = SortableResult.create(c, AUTHS);
+    Set<Index> columnsToIndex = Collections.singleton(Index.define("TEXT"));
+    
+    SortableResult id = SortableResult.create(c, AUTHS, columnsToIndex);
     
     Sorting s = new SortingImpl();
     
     s.register(id);
     
-    Set<Index> columnsToIndex = Collections.singleton(Index.define("TEXT"));
-    
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr), columnsToIndex);
+    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
     
     mqr = new MultimapQueryResult(mqr, "2");
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr), columnsToIndex);
+    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     for (Entry<Key,Value> entry : scanner) {
@@ -79,13 +79,13 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
     
-    SortableResult id = SortableResult.create(c, AUTHS);
+    SortableResult id = SortableResult.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
     
     Sorting s = new SortingImpl();
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr), Collections.singleton(Index.define("TEXT")));
+    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
     
     int metadataCount = 0, dataCount = 0;
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
@@ -128,7 +128,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
     
-    SortableResult id = SortableResult.create(c, AUTHS);
+    SortableResult id = SortableResult.create(c, AUTHS, Collections.<Index> emptySet());
     
     Sorting s = new SortingImpl();
     
