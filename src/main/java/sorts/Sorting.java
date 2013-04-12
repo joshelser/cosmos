@@ -72,14 +72,14 @@ public interface Sorting {
   public PagedQueryResult fetch(SortableResult id, Paging limits) throws TableNotFoundException, UnexpectedStateException;
   
   /**
-   * Fetch results with value for the given {@link Column}
+   * Fetch results with the given {@link value} in the given {@link Column}
    * 
    * @param id
    * @param column
    * @param order
    * @return
    */
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException;
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, String value) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Fetch results with values for the given {@link Column}, paging through results
@@ -89,10 +89,10 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException;
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, String value, Paging limits) throws TableNotFoundException, UnexpectedStateException;
   
   /**
-   * Fetch results for the given column in the provided {@link Ordering}
+   * Fetch results in the provided {@link Ordering}
    * 
    * @param id
    * @param column
@@ -102,7 +102,7 @@ public interface Sorting {
   public Iterable<MultimapQueryResult> fetch(SortableResult id, Ordering ordering) throws TableNotFoundException, UnexpectedStateException;
   
   /**
-   * Fetch results for the given column in the provided {@link Ordering}, paging through results
+   * Fetch results in the provided {@link Ordering}, paging through results
    * 
    * @param id
    * @param column
@@ -130,26 +130,6 @@ public interface Sorting {
    * @return
    */
   public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException;
-  
-  /**
-   * Return counts for unique values in the given column
-   * 
-   * @param id
-   * @param column
-   * @param order
-   * @return
-   */
-  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Ordering order) throws TableNotFoundException, UnexpectedStateException;
-  
-  /**
-   * Return counts for unique values in the given column, paging through results
-   * 
-   * @param id
-   * @param column
-   * @param order
-   * @return
-   */
-  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Ordering order, Paging limits) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Clean up references to the data referenced by this SortableResult

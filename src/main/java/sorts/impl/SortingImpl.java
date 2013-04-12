@@ -8,12 +8,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.accumulo.core.client.BatchDeleter;
+import org.apache.accumulo.core.client.BatchScanner;
 import org.apache.accumulo.core.client.BatchWriter;
 import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.MutationsRejectedException;
-import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
@@ -51,6 +52,7 @@ public class SortingImpl implements Sorting {
   
   private final BatchWriterConfig DEFAULT_BW_CONFIG = new BatchWriterConfig();
   
+  @Override
   public void register(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
@@ -69,12 +71,11 @@ public class SortingImpl implements Sorting {
     SortingMetadata.setState(id, targetState);
   }
   
+  @Override
   public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults) throws TableNotFoundException, MutationsRejectedException,
       UnexpectedStateException, IOException {
     checkNotNull(id);
     checkNotNull(queryResults);
-    
-    addResults(id, queryResults);
     
     State s = SortingMetadata.getState(id);
     
@@ -117,7 +118,8 @@ public class SortingImpl implements Sorting {
       }
     }
   }
-  
+
+  @Override
   public void finalize(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
@@ -133,15 +135,16 @@ public class SortingImpl implements Sorting {
     
     SortingMetadata.setState(id, desiredState);
   }
-  
+
+  @Override
   public void index(SortableResult id, Iterable<Index> columnsToIndex) throws TableNotFoundException, UnexpectedStateException, MutationsRejectedException, IOException {
     checkNotNull(id);
     checkNotNull(columnsToIndex);
     
     State s = SortingMetadata.getState(id);
     
-    if (!State.LOADING.equals(s)) {
-      throw unexpectedState(id, State.LOADING, s);
+    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
     }
     
     final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
@@ -155,8 +158,13 @@ public class SortingImpl implements Sorting {
     try {
       bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
     
+      // Iterate over the results we have
       for (MultimapQueryResult result : results) {
+        
+        // If the cardinality of columns is greater in this result than the number of columns
+        // we want to index
         if (result.columnSize() > numCols) {
+          // It's more efficient to go over each column to index
           for (Entry<Column,Index> entry : columns.entries()) {
             if (result.containsKey(entry.getKey())) {
               Collection<SValue> values = result.get(entry.getKey());
@@ -171,6 +179,7 @@ public class SortingImpl implements Sorting {
             }
           }
         } else {
+          // Otherwise it's more efficient to iterate over the columns of the result
           for (Entry<Column,SValue> entry : result.columnValues()) {
             if (columns.containsKey(entry.getKey())) {
               final Collection<Index> indexes = columns.get(entry.getKey());
@@ -195,12 +204,14 @@ public class SortingImpl implements Sorting {
       }
     }
   }
-  
+
+  @Override
   public Iterable<Column> columns(SortableResult id) {
     checkNotNull(id);
     return null;
   }
-  
+
+  @Override
   public Iterable<MultimapQueryResult> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     
@@ -210,56 +221,62 @@ public class SortingImpl implements Sorting {
       throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
     }
     
-    Scanner scanner = id.connector().createScanner(id.dataTable(), id.auths());
-    scanner.setRange(Range.prefix(id.uuid()));
-    scanner.fetchColumnFamily(DOCID_FIELD_NAME_TEXT);
+    BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+    bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
+    bs.fetchColumnFamily(DOCID_FIELD_NAME_TEXT);
+    bs.setTimeout(5, TimeUnit.MINUTES);
     
-    return Iterables.transform(scanner, new KVToMultimap());
+    return Iterables.transform(bs, new KVToMultimap());
   }
-  
+
+  @Override
   public PagedQueryResult fetch(SortableResult id, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+    checkNotNull(id);
+    checkNotNull(limits);
+    
+    Iterable<MultimapQueryResult> results = fetch(id);
+    
+    return new PagedQueryResult(results, limits);
+  }
+
+  @Override
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, String value) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
-  
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException {
+
+  @Override
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, String value, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
-  
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException {
-    return null;
-  }
-  
+
+  @Override
   public Iterable<MultimapQueryResult> fetch(SortableResult id, Ordering ordering) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
-  
+
+  @Override
   public Iterable<MultimapQueryResult> fetch(SortableResult id, Ordering ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
-  
+
+  @Override
   public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
-  
+
+  @Override
   public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
-  
-  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Ordering order) throws TableNotFoundException, UnexpectedStateException {
-    return null;
-  }
-  
-  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Ordering order, Paging limits) throws TableNotFoundException, UnexpectedStateException {
-    return null;
-  }
-  
+
+  @Override
   public void delete(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
     State s = SortingMetadata.getState(id);
     
-    if (!State.LOADED.equals(s)) {
-      throw unexpectedState(id, State.LOADED, s);
+    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
     }
     
     final State desiredState = State.DELETING;
