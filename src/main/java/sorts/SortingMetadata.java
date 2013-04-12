@@ -22,6 +22,33 @@ public class SortingMetadata {
   public static final Text EMPTY_TEXT = new Text("");
   public static final Text STATE_COLFAM = new Text("state");
   
+  /**
+   * A {@link State} determines the lifecycle phases of a {@link SortableResult}
+   * in Accumulo.
+   * 
+   * <p>
+   * {@code LOADING} means that new records are actively being loaded and queries 
+   * can start; however, only the columns specified as being indexed when the {@link SortableResult}
+   * was defined can be guaranteed to exist. Meaning, calls to {@link Sorting#index(SortableResult, Iterable)}
+   * will not block queries from running while the index is being updated. Obviously, queries in this
+   * state are not guaranteed to be the column result set for a {@link SortableResult}
+   * 
+   * <p>
+   *  {@code LOADED} means that the {@link Sorting} client writing results has completed. 
+   * 
+   * <p>
+   * {@code ERROR} means that there an error in the loading of the data for the given
+   * {@link SortableResult} and processing has ceased.
+   * 
+   * <p>
+   * {@code DELETING} means that a client has called {@link Sorting#delete(SortableResult)}
+   * and the results are in the process of being deleted.
+   * 
+   * <p>
+   * {@code UNKNOWN} means that the software is unaware of the given {@link SortableResult}
+   *  
+   * 
+   */
   public enum State {
     LOADING,
     LOADED,
