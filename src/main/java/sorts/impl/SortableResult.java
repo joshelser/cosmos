@@ -1,8 +1,9 @@
-package sorts;
+package sorts.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.UUID.randomUUID;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.apache.accumulo.core.client.Connector;
@@ -11,6 +12,8 @@ import org.apache.accumulo.core.security.Authorizations;
 import sorts.options.Defaults;
 import sorts.options.Index;
 import sorts.util.IdentitySet;
+
+import com.google.common.collect.Sets;
 
 public class SortableResult {
   
@@ -33,7 +36,7 @@ public class SortableResult {
     
     this.connector = connector;
     this.auths = auths;
-    this.columnsToIndex = columnsToIndex;
+    this.columnsToIndex = Sets.newHashSet(columnsToIndex);
     this.dataTable = dataTable;
     this.metadataTable = metadataTable;
     
@@ -64,7 +67,7 @@ public class SortableResult {
     return this.UUID;
   }
   
-  protected void addColumnsToIndex(Set<Index> columns) {
+  protected void addColumnsToIndex(Collection<Index> columns) {
     checkNotNull(columns);
     
     if (!(this.columnsToIndex instanceof IdentitySet)) {
