@@ -22,7 +22,6 @@ import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sorts.SortableResult;
 import sorts.Sorting;
 import sorts.SortingMetadata;
 import sorts.SortingMetadata.State;
@@ -150,7 +149,8 @@ public class SortingImpl implements Sorting {
     final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
     final int numCols = columns.keySet().size();
     
-    // TODO add the values of columns to the sortableresult
+    // Add the values of columns to the sortableresult as we want future results to be indexed the same way
+    id.addColumnsToIndex(columns.values());
     
     Iterable<MultimapQueryResult> results = fetch(id);
     

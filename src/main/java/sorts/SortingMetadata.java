@@ -18,6 +18,8 @@ import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
 import org.apache.hadoop.io.Text;
 
+import sorts.impl.SortableResult;
+
 public class SortingMetadata {
   public static final Text EMPTY_TEXT = new Text("");
   public static final Text STATE_COLFAM = new Text("state");
@@ -62,7 +64,7 @@ public class SortingMetadata {
     
     Connector con = id.connector();
     
-    Scanner s = con.createScanner(id.metadataTable, Constants.NO_AUTHS);
+    Scanner s = con.createScanner(id.metadataTable(), Constants.NO_AUTHS);
     
     s.setRange(new Range(id.uuid()));
     

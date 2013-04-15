@@ -8,10 +8,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import sorts.SortableResult;
 import sorts.Sorting;
 import sorts.SortingMetadata;
 import sorts.SortingMetadata.State;
+import sorts.impl.SortableResult;
 import sorts.impl.SortingImpl;
 import sorts.options.Index;
 

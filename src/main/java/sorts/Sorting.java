@@ -7,6 +7,7 @@ import java.util.Set;
 import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.TableNotFoundException;
 
+import sorts.impl.SortableResult;
 import sorts.options.Index;
 import sorts.options.Ordering;
 import sorts.options.Paging;

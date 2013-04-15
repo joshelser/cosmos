@@ -11,8 +11,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import sorts.SortableResult;
 import sorts.Sorting;
+import sorts.impl.SortableResult;
 import sorts.impl.SortingImpl;
 import sorts.options.Defaults;
 import sorts.options.Index;
