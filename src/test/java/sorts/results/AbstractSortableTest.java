@@ -1,9 +1,8 @@
 package sorts.results;
 
-import java.util.Properties;
-
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.mock.MockInstance;
+import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.junit.Before;
@@ -22,9 +21,8 @@ public class AbstractSortableTest {
   @Before
   public void setup() throws Exception {
     MockInstance mi = new MockInstance();
-    Properties p = new Properties();
-    p.setProperty("password", "");
-    c = mi.getConnector("root", p);
+    PasswordToken pw = new PasswordToken("");
+    c = mi.getConnector("root", pw);
     c.securityOperations().changeUserAuthorizations("root", new Authorizations("test"));
     c.tableOperations().create(Defaults.DATA_TABLE);
     c.tableOperations().create(Defaults.METADATA_TABLE);
