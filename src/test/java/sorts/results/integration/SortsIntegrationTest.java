@@ -5,6 +5,9 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.mediawiki.xml.export_0.MediaWikiType;
+
+import sorts.results.impl.MultimapQueryResult;
 
 import com.google.common.collect.Lists;
 
@@ -16,10 +19,12 @@ public class SortsIntegrationTest extends SortsIntegrationSetup {
 
   @Test
   public void test() throws Exception {
+    // Cache all of the wikis -- multithreaded
     loadAllWikis();
     
     long start = System.currentTimeMillis();
     
+    // These should all be cached
     Assert.assertNotNull(getWiki1());
     Assert.assertNotNull(getWiki2());
     Assert.assertNotNull(getWiki3());
@@ -33,6 +38,7 @@ public class SortsIntegrationTest extends SortsIntegrationSetup {
   
   @Test
   public void testWiki1() throws Exception {
+    // Get the same wiki 3 times
     List<Thread> threads = Lists.newArrayList();
     
     for (int i = 0; i < 3; i++) {
@@ -60,7 +66,15 @@ public class SortsIntegrationTest extends SortsIntegrationSetup {
 
     long end = System.currentTimeMillis();
     
-    Assert.assertTrue((end - start) < 10000);
+    // We should only have to wait on one to parse the xml
+    Assert.assertTrue((end - start) < 8000);
+  }
+  
+  @Test
+  public void wiki1Test() throws Exception {
+    MediaWikiType wiki1 = getWiki1();
+    List<MultimapQueryResult> results = wikiToMultimap(wiki1);
+    
   }
   
 }

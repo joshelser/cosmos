@@ -8,14 +8,24 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.accumulo.core.security.ColumnVisibility;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.experimental.categories.Category;
 import org.mediawiki.xml.export_0.MediaWikiType;
+import org.mediawiki.xml.export_0.PageType;
 
+import sorts.results.Column;
+import sorts.results.SValue;
+import sorts.results.impl.MultimapQueryResult;
+
+import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
 
 /**
@@ -23,6 +33,8 @@ import com.google.common.collect.Lists;
  */
 @Category(IntegrationTests.class)
 public class SortsIntegrationSetup {
+  public static final String PAGE_ID = "PAGE_ID", PAGE_TITLE = "PAGE_TITLE", PAGE_RESTRICTIONS = "PAGE_RESTRICTIONS";
+      
   public static final String ARTICLE_BASE = "/enwiki-20111201-metadata-articles-", ARTICLE_SUFFIX = ".xml.gz";
   
   private static final Cache<String,MediaWikiType> wikiCache = CacheBuilder.newBuilder().concurrencyLevel(5).build();
@@ -193,6 +205,32 @@ public class SortsIntegrationSetup {
     JAXBElement<MediaWikiType> jaxb = (JAXBElement<MediaWikiType>) o;
     
     return jaxb.getValue();
+  }
+  
+  public static List<MultimapQueryResult> wikiToMultimap(MediaWikiType wiki) {
+    Preconditions.checkNotNull(wiki);
+    
+    List<PageType> pages = wiki.getPage();
+    List<MultimapQueryResult> mmap = Lists.newArrayList();
+    final String lang = wiki.getLang();
+    final ColumnVisibility viz = new ColumnVisibility(lang); 
+    long id = 0l;
+    
+    for (PageType page : pages) {
+      Multimap<Column,SValue> data = HashMultimap.create();
+      
+      data.put(Column.create(PAGE_ID), SValue.create(page.getId().toString(), viz));
+      data.put(Column.create(PAGE_TITLE), SValue.create(page.getTitle(), viz));
+      
+      if (!StringUtils.isBlank(page.getRestrictions())) {
+        data.put(Column.create(PAGE_RESTRICTIONS), SValue.create(page.getRestrictions(), viz));
+      }
+      
+      mmap.add(new MultimapQueryResult(data, lang + id, viz));
+    }
+    
+    
+    return mmap;
   }
   
 }
