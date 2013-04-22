@@ -155,6 +155,15 @@ public class MultimapQueryResult implements QueryResult<MultimapQueryResult> {
   }
   
   @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(256);
+    
+    sb.append(this.docId).append(" ").append(this.docVisibility).append(" - ").append(this.document);
+    
+    return sb.toString();
+  }
+  
+  @Override
   public int hashCode() {
     HashCodeBuilder hcb = new HashCodeBuilder(17,31);
     hcb.append(this.docId);

@@ -8,6 +8,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <version.accumulo>1.5.0-SNAPSHOT</version.accumulo>
   </properties>
 
   <build>
@@ -91,7 +92,32 @@
       <dependency>
         <groupId>org.apache.accumulo</groupId>
         <artifactId>accumulo-core</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>${version.accumulo}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.accumulo</groupId>
+        <artifactId>accumulo-test</artifactId>
+        <version>${version.accumulo}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.accumulo</groupId>
+        <artifactId>accumulo-start</artifactId>
+        <version>${version.accumulo}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.accumulo</groupId>
+        <artifactId>accumulo-server</artifactId>
+        <version>${version.accumulo}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.accumulo</groupId>
+        <artifactId>accumulo-fate</artifactId>
+        <version>${version.accumulo}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.accumulo</groupId>
+        <artifactId>accumulo-trace</artifactId>
+        <version>${version.accumulo}</version>
       </dependency>
       <dependency>
       	<groupId>org.apache.zookeeper</groupId>
@@ -151,6 +177,30 @@
     <dependency>
       <groupId>org.apache.accumulo</groupId>
       <artifactId>accumulo-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.accumulo</groupId>
+      <artifactId>accumulo-test</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.accumulo</groupId>
+      <artifactId>accumulo-start</artifactId>
+      <scope>test</scope>  
+    </dependency>
+    <dependency>
+      <groupId>org.apache.accumulo</groupId>
+      <artifactId>accumulo-server</artifactId>
+      <scope>test</scope>  
+    </dependency>
+    <dependency>
+      <groupId>org.apache.accumulo</groupId>
+      <artifactId>accumulo-fate</artifactId>
+      <scope>test</scope>  
+    </dependency>
+    <dependency>
+      <groupId>org.apache.accumulo</groupId>
+      <artifactId>accumulo-trace</artifactId>
+      <scope>test</scope>  
     </dependency>
     <dependency>
       <groupId>org.apache.zookeeper</groupId>

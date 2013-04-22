@@ -34,6 +34,8 @@ public class SortableResult {
     checkNotNull(dataTable);
     checkNotNull(metadataTable);
     
+    // TODO Check for the table's existence.
+    
     this.connector = connector;
     this.auths = auths;
     this.columnsToIndex = Sets.newHashSet(columnsToIndex);

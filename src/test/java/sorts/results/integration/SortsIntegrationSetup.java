@@ -15,8 +15,10 @@ import org.junit.BeforeClass;
 import org.junit.experimental.categories.Category;
 import org.mediawiki.xml.export_0.MediaWikiType;
 import org.mediawiki.xml.export_0.PageType;
+import org.mediawiki.xml.export_0.RevisionType;
 
 import sorts.results.Column;
+import sorts.results.QueryResult;
 import sorts.results.SValue;
 import sorts.results.impl.MultimapQueryResult;
 
@@ -27,14 +29,15 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
-
 /**
  * 
  */
 @Category(IntegrationTests.class)
 public class SortsIntegrationSetup {
-  public static final String PAGE_ID = "PAGE_ID", PAGE_TITLE = "PAGE_TITLE", PAGE_RESTRICTIONS = "PAGE_RESTRICTIONS";
-      
+  public static final String PAGE_ID = "PAGE_ID", PAGE_TITLE = "PAGE_TITLE", PAGE_RESTRICTIONS = "PAGE_RESTRICTIONS",
+      CONTRIBUTOR_USERNAME = "CONTRIBUTOR_USERNAME", CONTRIBUTOR_ID = "CONTRIBUTOR_ID", CONTRIBUTOR_IP = "CONTRIBUTOR_IP", REVISION_ID = "REVISION_ID",
+      REVISION_TIMESTAMP = "REVISION_TIMESTAMP", REVISION_COMMENT = "REVISION_COMMENT";
+  
   public static final String ARTICLE_BASE = "/enwiki-20111201-metadata-articles-", ARTICLE_SUFFIX = ".xml.gz";
   
   private static final Cache<String,MediaWikiType> wikiCache = CacheBuilder.newBuilder().concurrencyLevel(5).build();
@@ -207,13 +210,13 @@ public class SortsIntegrationSetup {
     return jaxb.getValue();
   }
   
-  public static List<MultimapQueryResult> wikiToMultimap(MediaWikiType wiki) {
+  public static List<QueryResult<?>> wikiToMultimap(MediaWikiType wiki) {
     Preconditions.checkNotNull(wiki);
     
     List<PageType> pages = wiki.getPage();
-    List<MultimapQueryResult> mmap = Lists.newArrayList();
+    List<QueryResult<?>> mmap = Lists.newArrayList();
     final String lang = wiki.getLang();
-    final ColumnVisibility viz = new ColumnVisibility(lang); 
+    final ColumnVisibility viz = new ColumnVisibility(lang);
     long id = 0l;
     
     for (PageType page : pages) {
@@ -226,9 +229,32 @@ public class SortsIntegrationSetup {
         data.put(Column.create(PAGE_RESTRICTIONS), SValue.create(page.getRestrictions(), viz));
       }
       
+      List<Object> revisions = page.getRevisionOrUploadOrLogitem();
+      for (Object o : revisions) {
+        if (o instanceof RevisionType) {
+          RevisionType rev = (RevisionType) o;
+          
+          if (null != rev.getContributor()) {
+            // If we have an IP, not a logged in user
+            if (null != rev.getContributor().getIp()) {
+              data.put(Column.create(CONTRIBUTOR_IP), SValue.create(rev.getContributor().getIp(), viz));
+            } else {
+              // Assume username with ID
+              data.put(Column.create(CONTRIBUTOR_USERNAME), SValue.create(rev.getContributor().getUsername(), viz));
+              data.put(Column.create(CONTRIBUTOR_ID), SValue.create(rev.getContributor().getId().toString(), viz));
+            }
+          }
+          data.put(Column.create(REVISION_ID), SValue.create(rev.getId().toString(), viz));
+          data.put(Column.create(REVISION_TIMESTAMP), SValue.create(rev.getTimestamp().toString(), viz));
+          
+          if (null != rev.getComment() && !StringUtils.isBlank(rev.getComment().getValue())) {
+            data.put(Column.create(REVISION_COMMENT), SValue.create(rev.getComment().getValue(), viz));
+          }
+        }
+      }
+      
       mmap.add(new MultimapQueryResult(data, lang + id, viz));
     }
-    
     
     return mmap;
   }
