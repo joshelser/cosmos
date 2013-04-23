@@ -8,14 +8,15 @@ import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.security.Authorizations;
+import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.accumulo.test.MiniAccumuloCluster;
 import org.apache.accumulo.test.MiniAccumuloConfig;
+import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.rules.TemporaryFolder;
 import org.mediawiki.xml.export_0.MediaWikiType;
 
 import sorts.Sorting;
@@ -23,7 +24,6 @@ import sorts.impl.SortableResult;
 import sorts.impl.SortingImpl;
 import sorts.options.Defaults;
 import sorts.options.Index;
-import sorts.options.Ordering;
 import sorts.results.Column;
 import sorts.results.QueryResult;
 import sorts.results.SValue;
@@ -38,10 +38,11 @@ import com.google.common.collect.Sets;
 @Category(IntegrationTests.class)
 public class SortsIntegrationTest extends SortsIntegrationSetup {
   protected static MiniAccumuloCluster mac;
+  protected static File macDir;
   
   @BeforeClass
   public static void createAccumuloCluster() throws Exception {
-    File macDir = File.createTempFile("miniaccumulocluster", null);
+    macDir = File.createTempFile("miniaccumulocluster", null);
     Assert.assertTrue(macDir.delete());
     Assert.assertTrue(macDir.mkdir());
     macDir.deleteOnExit();
@@ -62,6 +63,7 @@ public class SortsIntegrationTest extends SortsIntegrationSetup {
   @AfterClass
   public static void stopAccumuloCluster() throws Exception {
     mac.stop();
+    FileUtils.deleteDirectory(macDir);
   }
   
   @Test
@@ -134,17 +136,27 @@ public class SortsIntegrationTest extends SortsIntegrationSetup {
     s.register(id);
     s.addResults(id, results);
     
-    Column pageId = Column.create(PAGE_ID);
+    Column pageIdCol = Column.create(PAGE_ID);
     
     Iterable<MultimapQueryResult> newResults = s.fetch(id);
-    //Iterable<MultimapQueryResult> newResults = s.fetch(id, Ordering.create(pageId));
     
     Assert.assertNotNull(newResults);
     
     long count = 0;
+    String prevPageId = "";
     for (MultimapQueryResult res : newResults) {
-      Collection<SValue> pageIds = res.get(pageId);
-      System.out.println(pageIds + ":" + res);
+      Collection<SValue> pageIds = res.get(pageIdCol);
+      String currPageId = null;
+      for (SValue pageId : pageIds) {
+        if (null == currPageId) {
+          currPageId = pageId.value();
+        }
+
+        // If we have multiple pageIds for this record, choose the least one greater than the prev
+        if (prevPageId.compareTo(pageId.value()) < 0 && pageId.value().compareTo(currPageId) < 0) {
+          currPageId = pageId.value();
+        }
+      }
       count++;
     }
     

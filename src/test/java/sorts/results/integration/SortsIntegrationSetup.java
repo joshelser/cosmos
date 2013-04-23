@@ -254,6 +254,7 @@ public class SortsIntegrationSetup {
       }
       
       mmap.add(new MultimapQueryResult(data, lang + id, viz));
+      id++;
     }
     
     return mmap;
