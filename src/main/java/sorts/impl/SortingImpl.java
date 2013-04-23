@@ -111,6 +111,15 @@ public class SortingImpl implements Sorting {
           }
         }
       }
+    } catch (MutationsRejectedException e) {
+      log.error("Caught exception adding results for {}", id, e);
+      throw e;
+    } catch (TableNotFoundException e) {
+      log.error("Caught exception adding results for {}", id, e);
+      throw e;
+    } catch (RuntimeException e) {
+      log.error("Caught exception adding results for {}", id, e);
+      throw e;
     } finally {
       if (null != bw) {
         bw.close();
