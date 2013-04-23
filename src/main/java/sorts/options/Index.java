@@ -59,4 +59,9 @@ public class Index {
     return this.column.hashCode() ^ this.order.hashCode();
   }
   
+  @Override
+  public String toString() {
+    return this.column + ", " + this.order;
+  }
+  
 }
