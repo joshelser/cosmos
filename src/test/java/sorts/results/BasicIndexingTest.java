@@ -64,6 +64,11 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Iterable<MultimapQueryResult> results = s.fetch(id);
     
     Assert.assertEquals(2, Iterables.size(results));
+    
+    results = s.fetch(id, Index.define("TEXT"));
+    
+    // This should really be two...
+    Assert.assertEquals(4, Iterables.size(results));
   }
   
   @Test
@@ -169,7 +174,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
   }
   
   @Test
-  public void postIndexSpareData() throws Exception {
+  public void postIndexSparseData() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
     data.put(Column.create("TEXT"), SValue.create("foo", VIZ));

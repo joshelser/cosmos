@@ -26,9 +26,9 @@ import sorts.Sorting;
 import sorts.SortingMetadata;
 import sorts.SortingMetadata.State;
 import sorts.UnexpectedStateException;
+import sorts.UnindexedColumnException;
 import sorts.options.Index;
 import sorts.options.Order;
-import sorts.options.Ordering;
 import sorts.options.Paging;
 import sorts.results.Column;
 import sorts.results.PagedQueryResult;
@@ -259,22 +259,44 @@ public class SortingImpl implements Sorting {
   }
 
   @Override
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Ordering ordering) throws TableNotFoundException, UnexpectedStateException {
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
+    checkNotNull(id);
+    
+    State s = SortingMetadata.getState(id);
+    
+    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+    }
+    
+    Index.define(ordering.column());
+    
+    if (!id.columnsToIndex().contains(ordering)) {
+      log.error("{} is not indexed by {}", ordering, id);
+      throw new UnindexedColumnException();
+    }
+    
+    BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+    bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
+    bs.fetchColumnFamily(new Text(ordering.column().column()));
+    bs.setTimeout(5, TimeUnit.MINUTES);
+    
+    // TODO For multiple values in the same Index#column() for the same result
+    // we really want to dedupe these and only return the first?
+    return Iterables.transform(bs, new KVToMultimap());
+  }
+
+  @Override
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
     return null;
   }
 
   @Override
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Ordering ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
     return null;
   }
 
   @Override
-  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException {
-    return null;
-  }
-
-  @Override
-  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
     return null;
   }
 
