@@ -101,7 +101,22 @@ public interface Sorting {
    * @return
    */
   public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
-  
+
+  /**
+   * Fetch results in the provided {@link Ordering}. If {@link duplicateUidsAllowed} is true,
+   * records with multiple values for the {@link Column} specified by the {@link ordering} will
+   * only be returned once.
+   * 
+   * @param id
+   * @param ordering
+   * @param duplicateUidsAllowed
+   * @return
+   * @throws TableNotFoundException
+   * @throws UnexpectedStateException
+   * @throws UnindexedColumnException
+   */
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+
   /**
    * Fetch results in the provided {@link Ordering}, paging through results
    * 

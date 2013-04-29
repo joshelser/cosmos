@@ -260,6 +260,11 @@ public class SortingImpl implements Sorting {
 
   @Override
   public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
+    return fetch(id, ordering, true);
+  }
+  
+  @Override
+  public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
     checkNotNull(id);
     
     State s = SortingMetadata.getState(id);
@@ -280,9 +285,12 @@ public class SortingImpl implements Sorting {
     bs.fetchColumnFamily(new Text(ordering.column().column()));
     bs.setTimeout(5, TimeUnit.MINUTES);
     
-    // TODO For multiple values in the same Index#column() for the same result
-    // we really want to dedupe these and only return the first?
-    return Iterables.transform(bs, new KVToMultimap());
+    // If the client has told us they don't want duplicate records, lets not give them duplicate records
+    if (duplicateUidsAllowed){
+      return Iterables.transform(bs, new KVToMultimap());
+    } else {
+      return Iterables.transform(Iterables.filter(bs, new DedupingPredicate()), new KVToMultimap());
+    }
   }
 
   @Override
