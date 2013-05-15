@@ -98,12 +98,17 @@ public class GroupByRowSuffixIteratorTest {
       
       bs.addScanIterator(cfg);
       
+      long count = 0;
       for (Entry<Key,Value> entry : bs) {
         VLongWritable writable = GroupByRowSuffixIterator.getWritable(entry.getValue());
         
         Assert.assertTrue("Results did not contain: " + entry.getKey(), results.containsKey(entry.getKey()));
         Assert.assertEquals(results.get(entry.getKey()).longValue(), writable.get());
+
+        count++;
       }
+
+      Assert.assertEquals(results.size(), count);
     } finally {
       if (null != bs) {
         bs.close();
