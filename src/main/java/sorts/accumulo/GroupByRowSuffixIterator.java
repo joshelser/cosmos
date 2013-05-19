@@ -123,6 +123,8 @@ public class GroupByRowSuffixIterator implements SortedKeyValueIterator<Key,Valu
     
     // While we're still within the desired search space (this row) 
     while (searchSpace.contains(currentKey)) {
+      // TODO Provide abstract method for combining column visibilities
+      // for records being counted
       keyCount++;
       getSource().next();
      

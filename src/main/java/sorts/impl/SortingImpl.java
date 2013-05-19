@@ -14,6 +14,7 @@ import org.apache.accumulo.core.client.BatchDeleter;
 import org.apache.accumulo.core.client.BatchScanner;
 import org.apache.accumulo.core.client.BatchWriter;
 import org.apache.accumulo.core.client.BatchWriterConfig;
+import org.apache.accumulo.core.client.IteratorSetting;
 import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.data.Mutation;
@@ -27,6 +28,7 @@ import sorts.SortingMetadata;
 import sorts.SortingMetadata.State;
 import sorts.UnexpectedStateException;
 import sorts.UnindexedColumnException;
+import sorts.accumulo.GroupByRowSuffixIterator;
 import sorts.options.Index;
 import sorts.options.Order;
 import sorts.options.Paging;
@@ -302,7 +304,27 @@ public class SortingImpl implements Sorting {
 
   @Override
   public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
-    return null;
+    checkNotNull(id);
+    
+    State s = SortingMetadata.getState(id);
+    
+    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+    }
+    
+    checkNotNull(column);
+    
+    Text colf = new Text(column.column());
+    
+    BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+    bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
+    bs.fetchColumnFamily(colf);
+    bs.setTimeout(5, TimeUnit.MINUTES);
+    
+    IteratorSetting cfg = new IteratorSetting(50, GroupByRowSuffixIterator.class);
+    bs.addScanIterator(cfg);
+    
+    return Iterables.transform(bs, new GroupByFunction());
   }
 
   @Override
@@ -351,6 +373,8 @@ public class SortingImpl implements Sorting {
   protected Mutation addDocument(SortableResult id, QueryResult<?> queryResult) throws IOException {
     Mutation m = getDocumentPrefix(id, queryResult, queryResult.docId());
     
+    // TODO be more space efficient here and store a reference to the document once in Accumulo
+    // merits: don't bloat the default locality group's index, less size overall
     m.put(DOCID_FIELD_NAME, FORWARD + NULL_BYTE_STR + queryResult.docId(), queryResult.documentVisibility(), queryResult.toValue());
     
     return m;
