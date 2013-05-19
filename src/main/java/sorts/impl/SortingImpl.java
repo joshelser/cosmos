@@ -145,6 +145,8 @@ public class SortingImpl implements Sorting {
   }
 
   @Override
+  //TODO I should be the one that's providing locking here to make sure that no records are inserted
+  // while the columnsToIndex map is updated
   public void index(SortableResult id, Iterable<Index> columnsToIndex) throws TableNotFoundException, UnexpectedStateException, MutationsRejectedException, IOException {
     checkNotNull(id);
     checkNotNull(columnsToIndex);
