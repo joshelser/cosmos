@@ -132,7 +132,7 @@ public class MultimapQueryResult implements QueryResult<MultimapQueryResult> {
   public void write(DataOutput out) throws IOException {
     Text.writeString(out, this.docId);
     
-    byte[] cvBytes = this.docVisibility.flatten();
+    byte[] cvBytes = this.docVisibility.getExpression();
     WritableUtils.writeVInt(out, cvBytes.length);
     out.write(cvBytes);
     

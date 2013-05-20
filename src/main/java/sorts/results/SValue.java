@@ -68,7 +68,7 @@ public class SValue implements Writable {
   public void write(DataOutput out) throws IOException {
     Text.writeString(out, this.value);
     
-    byte[] cvBytes = this.visibility.flatten();
+    byte[] cvBytes = this.visibility.getExpression();
     WritableUtils.writeVInt(out, cvBytes.length);
     out.write(cvBytes);
     
