@@ -9,8 +9,12 @@ import java.util.Set;
  */
 public class IdentitySet<T> implements Set<T> {
   
+  @SuppressWarnings("rawtypes")
+  private static final IdentitySet instance = new IdentitySet();
+  
+  @SuppressWarnings("unchecked")
   public static <T> IdentitySet<T> create() {
-    return new IdentitySet<T>();
+    return instance;
   }
   
   public IdentitySet() { }
@@ -40,6 +44,7 @@ public class IdentitySet<T> implements Set<T> {
     throw new UnsupportedOperationException();
   }
 
+  @SuppressWarnings("hiding")
   @Override
   public <T> T[] toArray(T[] a) {
     throw new UnsupportedOperationException();
