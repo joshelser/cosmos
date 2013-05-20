@@ -38,7 +38,14 @@ public class SortableResult {
     
     this.connector = connector;
     this.auths = auths;
-    this.columnsToIndex = Sets.newHashSet(columnsToIndex);
+    
+    // Make sure we don't try to make a real Set out of the IdentitySet
+    if (columnsToIndex instanceof IdentitySet) {
+      this.columnsToIndex = columnsToIndex; 
+    } else {
+      this.columnsToIndex = Sets.newHashSet(columnsToIndex);
+    }
+    
     this.dataTable = dataTable;
     this.metadataTable = metadataTable;
     

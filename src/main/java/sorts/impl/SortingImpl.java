@@ -92,6 +92,7 @@ public class SortingImpl implements Sorting {
     try {
       bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
       
+      // TODO This is broken with the identity set
       final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
 
       for (QueryResult<?> result : queryResults) {
