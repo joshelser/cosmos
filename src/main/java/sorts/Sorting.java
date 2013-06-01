@@ -70,7 +70,7 @@ public interface Sorting {
    * @param limits
    * @return
    */
-  public PagedQueryResult fetch(SortableResult id, Paging limits) throws TableNotFoundException, UnexpectedStateException;
+  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Paging limits) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Fetch results with the given {@link value} in the given {@link Column}
@@ -90,7 +90,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, String value, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Column column, String value, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Fetch results in the provided {@link Ordering}
@@ -125,7 +125,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Return counts for unique values in the given column
@@ -145,7 +145,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public PagedQueryResult<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Clean up references to the data referenced by this SortableResult

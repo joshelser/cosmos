@@ -4,15 +4,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import sorts.options.Paging;
-import sorts.results.impl.MultimapQueryResult;
 
 import com.google.common.collect.Iterables;
 
-public class PagedQueryResult implements Iterator<List<MultimapQueryResult>>{
+public class PagedQueryResult<T> implements Iterator<List<T>>{
 
-  protected final Iterator<List<MultimapQueryResult>> pagedLimitedResults;
+  protected final Iterator<List<T>> pagedLimitedResults;
   
-  public PagedQueryResult(Iterable<MultimapQueryResult> results, Paging paging) {
+  public PagedQueryResult(Iterable<T> results, Paging paging) {
     pagedLimitedResults = Iterables.partition(Iterables.limit(results, paging.maxResults().intValue()), paging.pageSize()).iterator();
   }
 
@@ -22,7 +21,7 @@ public class PagedQueryResult implements Iterator<List<MultimapQueryResult>>{
   }
 
   @Override
-  public List<MultimapQueryResult> next() {
+  public List<T> next() {
     return pagedLimitedResults.next();
   }
 

@@ -2,10 +2,14 @@ package sorts;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.accumulo.core.Constants;
+import org.apache.accumulo.core.client.BatchDeleter;
+import org.apache.accumulo.core.client.BatchScanner;
 import org.apache.accumulo.core.client.BatchWriter;
 import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.Connector;
@@ -19,10 +23,15 @@ import org.apache.accumulo.core.data.Value;
 import org.apache.hadoop.io.Text;
 
 import sorts.impl.SortableResult;
+import sorts.results.Column;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 
 public class SortingMetadata {
   public static final Text EMPTY_TEXT = new Text("");
   public static final Text STATE_COLFAM = new Text("state");
+  public static final Text COLUMN_COLFAM = new Text("column");
   
   /**
    * A {@link State} determines the lifecycle phases of a {@link SortableResult}
@@ -101,23 +110,52 @@ public class SortingMetadata {
   
   public static void remove(SortableResult id) throws TableNotFoundException, MutationsRejectedException {
     checkNotNull(id);
-
-    BatchWriter bw = null;
+    
+    BatchDeleter bd = null;
     try {
-      bw = id.connector().createBatchWriter(id.metadataTable(), new BatchWriterConfig());
-      Mutation m = new Mutation(id.uuid());
-      m.putDelete(STATE_COLFAM, EMPTY_TEXT);
-      
-      bw.addMutation(m);
-      bw.flush();
+      bd = id.connector().createBatchDeleter(id.metadataTable(), id.auths(), 10, new BatchWriterConfig());
+      bd.setRanges(Collections.singleton(Range.exact(id.uuid())));
+      bd.delete();
     } finally {
-      if (null != bw) {
-        bw.close();
+      if (null != bd) {
+        bd.close();
       }
     }
   }
   
   public static State deserializeState(Value v) {
     return State.valueOf(v.toString());
+  }
+  
+  /**
+   * Return the {@link Column}s that exist for the given {@link SortableResult}
+   * @param id
+   * @return
+   * @throws TableNotFoundException
+   */
+  public static Iterable<Column> columns(SortableResult id) throws TableNotFoundException {
+    checkNotNull(id);
+    
+    BatchScanner bs = null;
+    try {
+      bs = id.connector().createBatchScanner(id.metadataTable(), id.auths(), 10);
+      bs.setRanges(Collections.singleton(Range.exact(id.uuid())));
+      bs.fetchColumnFamily(COLUMN_COLFAM);
+      bs.setTimeout(5, TimeUnit.MINUTES);
+      
+      return Iterables.transform(bs, new Function<Entry<Key,Value>,Column> () {
+        private final Text holder = new Text();
+        @Override
+        public Column apply(Entry<Key,Value> input) {
+          input.getKey().getColumnQualifier(holder);
+          return Column.create(holder.toString());
+        }
+        
+      });
+    } finally {
+      if (null != bs) {
+        bs.close();
+      }
+    }
   }
 }

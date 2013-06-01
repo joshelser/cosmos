@@ -19,6 +19,7 @@ import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
+import org.apache.accumulo.core.data.Value;
 import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,7 @@ import sorts.results.impl.MultimapQueryResult;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 public class SortingImpl implements Sorting {
   private static final Logger log = LoggerFactory.getLogger(SortingImpl.class);
@@ -50,6 +52,7 @@ public class SortingImpl implements Sorting {
   public static final Text DOCID_FIELD_NAME_TEXT = new Text(DOCID_FIELD_NAME);
   public static final String FORWARD = "f";
   public static final String REVERSE = "r";
+  public static final Value EMPTY_VALUE = new Value(new byte[0]);
   
   private final BatchWriterConfig DEFAULT_BW_CONFIG = new BatchWriterConfig();
   
@@ -88,19 +91,25 @@ public class SortingImpl implements Sorting {
     
     Set<Index> columnsToIndex = id.columnsToIndex();
     
-    BatchWriter bw = null;
+    BatchWriter bw = null, metadataBw = null;
     try {
       bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
+      metadataBw = id.connector().createBatchWriter(id.metadataTable(), DEFAULT_BW_CONFIG);
       
       // TODO This is broken with the identity set
       final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
-
+      final Text holder = new Text();
+      
       for (QueryResult<?> result : queryResults) {
         bw.addMutation(addDocument(id, result));
+        Mutation columnMutation = new Mutation(id.uuid());
         
         for (Entry<Column,SValue> entry : result.columnValues()) {
           final Column c = entry.getKey();
           final SValue v = entry.getValue();
+          holder.set(c.column());
+          
+          columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, EMPTY_VALUE);
           
           if (columns.containsKey(c)) {
             for (Index index : columns.get(c)) {
@@ -113,6 +122,8 @@ public class SortingImpl implements Sorting {
             }
           }
         }
+        
+        metadataBw.addMutation(columnMutation);
       }
     } catch (MutationsRejectedException e) {
       log.error("Caught exception adding results for {}", id, e);
@@ -126,6 +137,9 @@ public class SortingImpl implements Sorting {
     } finally {
       if (null != bw) {
         bw.close();
+      }
+      if (null != metadataBw) {
+        metadataBw.close();
       }
     }
   }
@@ -220,9 +234,16 @@ public class SortingImpl implements Sorting {
   }
 
   @Override
-  public Iterable<Column> columns(SortableResult id) {
+  public Iterable<Column> columns(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
-    return null;
+    
+    State s = SortingMetadata.getState(id);
+    
+    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+    }
+    
+    return SortingMetadata.columns(id);
   }
 
   @Override
@@ -244,13 +265,13 @@ public class SortingImpl implements Sorting {
   }
 
   @Override
-  public PagedQueryResult fetch(SortableResult id, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     checkNotNull(limits);
     
     Iterable<MultimapQueryResult> results = fetch(id);
     
-    return new PagedQueryResult(results, limits);
+    return new PagedQueryResult<MultimapQueryResult>(results, limits);
   }
 
   @Override
@@ -259,7 +280,7 @@ public class SortingImpl implements Sorting {
   }
 
   @Override
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, String value, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Column column, String value, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     return null;
   }
 
@@ -271,6 +292,7 @@ public class SortingImpl implements Sorting {
   @Override
   public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
     checkNotNull(id);
+    checkNotNull(ordering);
     
     State s = SortingMetadata.getState(id);
     
@@ -299,8 +321,13 @@ public class SortingImpl implements Sorting {
   }
 
   @Override
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
-    return null;
+  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
+    checkNotNull(id);
+    checkNotNull(limits);
+    
+    Iterable<MultimapQueryResult> results = fetch(id, ordering);
+    
+    return new PagedQueryResult<MultimapQueryResult>(results, limits);
   }
 
   @Override
@@ -329,8 +356,12 @@ public class SortingImpl implements Sorting {
   }
 
   @Override
-  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
-    return null;
+  public PagedQueryResult<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
+    checkNotNull(limits);
+    
+    Iterable<Entry<SValue,Long>> results = groupResults(id, column);
+    
+    return new PagedQueryResult<Entry<SValue,Long>>(results, limits);
   }
 
   @Override

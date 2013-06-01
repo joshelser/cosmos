@@ -2,9 +2,14 @@ package sorts.results;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.accumulo.core.client.BatchScanner;
 import org.apache.accumulo.core.client.Scanner;
+import org.apache.accumulo.core.data.Key;
+import org.apache.accumulo.core.data.Range;
+import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.Authorizations;
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import sorts.Sorting;
+import sorts.SortingMetadata;
 import sorts.impl.SortableResult;
 import sorts.impl.SortingImpl;
 import sorts.options.Defaults;
@@ -57,7 +63,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(6, Iterables.size(scanner));
 
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(1, Iterables.size(scanner));
+    Assert.assertEquals(2, Iterables.size(scanner));
     
     s.finalize(id);
     
@@ -92,7 +98,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(3, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(1, Iterables.size(scanner));
+    Assert.assertEquals(2, Iterables.size(scanner));
     
     s.finalize(id);
     
@@ -126,7 +132,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(1, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(1, Iterables.size(scanner));
+    Assert.assertEquals(2, Iterables.size(scanner));
     
     s.index(id, Collections.singleton(Index.define("TEXT")));
 
@@ -134,11 +140,11 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(3, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(1, Iterables.size(scanner));
+    Assert.assertEquals(2, Iterables.size(scanner));
   }
   
   @Test
-  public void addResultsWithIndexOverSpareData() throws Exception {
+  public void addResultsWithIndexOverSparseData() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
     data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
@@ -164,7 +170,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(6, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(1, Iterables.size(scanner));
+    Assert.assertEquals(2, Iterables.size(scanner));
     
     s.finalize(id);
     
@@ -195,7 +201,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(1, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(1, Iterables.size(scanner));
+    Assert.assertEquals(2, Iterables.size(scanner));
     
     s.index(id, Sets.newHashSet(Index.define("TEXT"), Index.define("DOESNTEXIST")));
     
@@ -203,7 +209,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(4, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(1, Iterables.size(scanner));
+    Assert.assertEquals(2, Iterables.size(scanner));
   }
   
   @Test
@@ -260,6 +266,57 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Assert.assertEquals(10, numRecords);
     Assert.assertEquals(4, pageCount);
+  }
+  
+  @Test
+  public void columns() throws Exception {
+    SortableResult id = SortableResult.create(c, AUTHS, Sets.newHashSet(Index.define("NAME"), Index.define("AGE"),
+        Index.define("HEIGHT"), Index.define("WEIGHT")));
+    
+    Multimap<Column,SValue> data = HashMultimap.create();
+    
+    data.put(Column.create("NAME"), SValue.create("George", VIZ));
+    data.put(Column.create("AGE"), SValue.create("25", VIZ));
+    data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
+    
+    Sorting s = new SortingImpl();
+    
+    s.register(id);
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "1", VIZ)));
+    
+    Set<Column> actual = Sets.newHashSet(s.columns(id));
+    Set<Column> expected = Sets.newHashSet(data.keySet());
+    
+    Assert.assertEquals(expected, actual);
+    
+    data.removeAll(Column.create("HEIGHT"));
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "2", VIZ)));
+    
+    Assert.assertEquals(expected, Sets.newHashSet(s.columns(id)));
+    
+    data.removeAll(Column.create("AGE"));
+    data.put(Column.create("WEIGHT"), SValue.create("100", VIZ));
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "3", VIZ)));
+    
+    expected.add(Column.create("WEIGHT"));
+    
+    Assert.assertEquals(expected, Sets.newHashSet(s.columns(id)));
+    
+    s.delete(id);
+    
+    BatchScanner bs = c.createBatchScanner(id.metadataTable(), id.auths(), 1);
+    bs.setRanges(Collections.singleton(Range.exact(id.uuid())));
+    bs.fetchColumnFamily(SortingMetadata.COLUMN_COLFAM);
+    
+    long count = 0;
+    for (Entry<Key,Value> e : bs) {
+      count++;
+    }
+    
+    Assert.assertEquals(0, count);
   }
   
 }
