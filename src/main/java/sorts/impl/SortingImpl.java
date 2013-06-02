@@ -286,6 +286,8 @@ public class SortingImpl implements Sorting {
     }
     
     BatchScanner bs = null;
+    
+    // TODO I don't think this try/catch does what I want it to do
     try {
       bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
       bs.setRanges(Collections.singleton(Range.exact(id.uuid() + NULL_BYTE_STR + value)));
