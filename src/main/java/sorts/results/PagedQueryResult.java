@@ -11,8 +11,12 @@ public class PagedQueryResult<T> implements Iterator<List<T>>{
 
   protected final Iterator<List<T>> pagedLimitedResults;
   
-  public PagedQueryResult(Iterable<T> results, Paging paging) {
-    pagedLimitedResults = Iterables.partition(Iterables.limit(results, paging.maxResults().intValue()), paging.pageSize()).iterator();
+  public static <T> PagedQueryResult<T> create(Iterable<T> results, Paging limits) {
+    return new PagedQueryResult<T>(results, limits);
+  }
+  
+  public PagedQueryResult(Iterable<T> results, Paging limits) {
+    pagedLimitedResults = Iterables.partition(Iterables.limit(results, limits.maxResults().intValue()), limits.pageSize()).iterator();
   }
 
   @Override

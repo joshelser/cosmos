@@ -302,7 +302,11 @@ public class SortingImpl implements Sorting {
 
   @Override
   public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Column column, String value, Paging limits) throws TableNotFoundException, UnexpectedStateException {
-    return null;
+    checkNotNull(limits);
+    
+    Iterable<MultimapQueryResult> results = fetch(id, column, value);
+    
+    return PagedQueryResult.create(results, limits);
   }
 
   @Override
@@ -348,7 +352,7 @@ public class SortingImpl implements Sorting {
     
     Iterable<MultimapQueryResult> results = fetch(id, ordering);
     
-    return new PagedQueryResult<MultimapQueryResult>(results, limits);
+    return PagedQueryResult.create(results, limits);
   }
 
   @Override
@@ -382,7 +386,7 @@ public class SortingImpl implements Sorting {
     
     Iterable<Entry<SValue,Long>> results = groupResults(id, column);
     
-    return new PagedQueryResult<Entry<SValue,Long>>(results, limits);
+    return PagedQueryResult.create(results, limits);
   }
 
   @Override
