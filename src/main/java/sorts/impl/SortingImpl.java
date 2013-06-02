@@ -42,7 +42,6 @@ import sorts.results.impl.MultimapQueryResult;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 
 public class SortingImpl implements Sorting {
   private static final Logger log = LoggerFactory.getLogger(SortingImpl.class);
@@ -276,7 +275,29 @@ public class SortingImpl implements Sorting {
 
   @Override
   public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, String value) throws TableNotFoundException, UnexpectedStateException {
-    return null;
+    checkNotNull(id);
+    checkNotNull(column);
+    checkNotNull(value);
+    
+    State s = SortingMetadata.getState(id);
+    
+    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+    }
+    
+    BatchScanner bs = null;
+    try {
+      bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+      bs.setRanges(Collections.singleton(Range.exact(id.uuid() + NULL_BYTE_STR + value)));
+      bs.fetchColumnFamily(new Text(column.column()));
+      bs.setTimeout(5, TimeUnit.MINUTES);
+    
+      return Iterables.transform(bs, new KVToMultimap());
+    } finally {
+      if (null != bs) {
+        bs.close();
+      }
+    }
   }
 
   @Override

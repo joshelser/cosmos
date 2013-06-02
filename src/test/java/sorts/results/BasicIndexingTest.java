@@ -1,5 +1,6 @@
 package sorts.results;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -61,7 +62,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(6, Iterables.size(scanner));
-
+    
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(2, Iterables.size(scanner));
     
@@ -93,7 +94,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.register(id);
     
     s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
-
+    
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(3, Iterables.size(scanner));
     
@@ -103,7 +104,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.finalize(id);
     
     s.delete(id);
-
+    
     scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(0, Iterables.size(scanner));
     
@@ -127,7 +128,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.register(id);
     
     s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
-
+    
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(1, Iterables.size(scanner));
     
@@ -135,7 +136,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(2, Iterables.size(scanner));
     
     s.index(id, Collections.singleton(Index.define("TEXT")));
-
+    
     scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(3, Iterables.size(scanner));
     
@@ -165,7 +166,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     mqr = new MultimapQueryResult(mqr, "2");
     
     s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
-
+    
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(6, Iterables.size(scanner));
     
@@ -196,7 +197,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.register(id);
     
     s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
-
+    
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(1, Iterables.size(scanner));
     
@@ -270,8 +271,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void columns() throws Exception {
-    SortableResult id = SortableResult.create(c, AUTHS, Sets.newHashSet(Index.define("NAME"), Index.define("AGE"),
-        Index.define("HEIGHT"), Index.define("WEIGHT")));
+    SortableResult id = SortableResult.create(c, AUTHS,
+        Sets.newHashSet(Index.define("NAME"), Index.define("AGE"), Index.define("HEIGHT"), Index.define("WEIGHT")));
     
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -319,4 +320,61 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(0, count);
   }
   
+  @Test
+  public void projectToSingleValueInColumn() throws Exception {
+    Column name = Column.create("NAME"), age = Column.create("AGE"), height = Column.create("HEIGHT"), weight = Column.create("WEIGHT"); 
+    
+    SortableResult id = SortableResult.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age),
+        Index.define(height), Index.define(weight)));
+    
+    Multimap<Column,SValue> data = HashMultimap.create();
+    
+    data.put(name, SValue.create("George", VIZ));
+    data.put(Column.create("AGE"), SValue.create("25", VIZ));
+    data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
+    
+    Sorting s = new SortingImpl();
+    
+    s.register(id);
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "1", VIZ)));
+    
+    data.removeAll(name);
+    data.put(name, SValue.create("Steve", VIZ));
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "2", VIZ)));
+    
+    data.removeAll(name);
+    data.put(name, SValue.create("Frank", VIZ));
+    data.put(Column.create("WEIGHT"), SValue.create("100", VIZ));
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "3", VIZ)));
+    
+    ArrayList<MultimapQueryResult> results = Lists.newArrayList(s.fetch(id, name, "George"));
+    
+    Assert.assertEquals(1, results.size());
+    
+    Assert.assertEquals("1", results.get(0).docId());
+    
+    data.removeAll(height);
+    data.put(height, SValue.create("75", VIZ));
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "4", VIZ)));
+    
+    results = Lists.newArrayList(s.fetch(id, name, "Frank"));
+    
+    Assert.assertEquals(2, results.size());
+    
+    Set<String> docids = Sets.newHashSet("3", "4");
+    
+    for (MultimapQueryResult r : results) {
+      Assert.assertTrue("Did not find " + r.docId() + " to remove from " + docids, docids.remove(r.docId()));
+    }
+    
+    Assert.assertTrue("Expected empty set of docids: " + docids, docids.isEmpty());
+    
+    Iterable<MultimapQueryResult> empty = s.fetch(id, age, "0");
+    
+    Assert.assertEquals(0, Iterables.size(empty));
+  }
 }
