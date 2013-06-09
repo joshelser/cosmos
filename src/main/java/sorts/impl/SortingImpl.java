@@ -269,7 +269,7 @@ public class SortingImpl implements Sorting {
     checkNotNull(id);
     checkNotNull(limits);
     
-    Iterable<MultimapQueryResult> results = fetch(id);
+    CloseableIterable<MultimapQueryResult> results = fetch(id);
     
     return new PagedQueryResult<MultimapQueryResult>(results, limits);
   }
@@ -298,7 +298,7 @@ public class SortingImpl implements Sorting {
       UnexpectedStateException {
     checkNotNull(limits);
     
-    Iterable<MultimapQueryResult> results = fetch(id, column, value);
+    CloseableIterable<MultimapQueryResult> results = fetch(id, column, value);
     
     return PagedQueryResult.create(results, limits);
   }
@@ -346,7 +346,7 @@ public class SortingImpl implements Sorting {
     checkNotNull(id);
     checkNotNull(limits);
     
-    Iterable<MultimapQueryResult> results = fetch(id, ordering);
+    CloseableIterable<MultimapQueryResult> results = fetch(id, ordering);
     
     return PagedQueryResult.create(results, limits);
   }
@@ -382,7 +382,7 @@ public class SortingImpl implements Sorting {
       UnexpectedStateException, UnindexedColumnException {
     checkNotNull(limits);
     
-    Iterable<Entry<SValue,Long>> results = groupResults(id, column);
+    CloseableIterable<Entry<SValue,Long>> results = groupResults(id, column);
     
     return PagedQueryResult.create(results, limits);
   }

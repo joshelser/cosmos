@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import org.apache.accumulo.core.client.BatchScanner;
+import org.apache.accumulo.core.client.ScannerBase;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Value;
 
@@ -18,27 +18,31 @@ import com.google.common.collect.Iterables;
  */
 public class CloseableIterable<T> implements Results<T> {
   
-  private final BatchScanner bs;
-  private final Iterable<T> iterable;
+  protected final ScannerBase scanner;
+  protected final Iterable<T> iterable;
   
-  public CloseableIterable(BatchScanner bs, Iterable<T> iterable) {
-    checkNotNull(bs);
+  public CloseableIterable(ScannerBase scanner, Iterable<T> iterable) {
+    checkNotNull(scanner);
     checkNotNull(iterable);
     
-    this.bs = bs;
+    this.scanner = scanner;
     this.iterable = iterable;
   }
   
-  public static <T> CloseableIterable<T> create(BatchScanner bs, Iterable<T> iterable) {
-    return new CloseableIterable<T>(bs, iterable);
+  public static <T> CloseableIterable<T> create(ScannerBase scanner, Iterable<T> iterable) {
+    return new CloseableIterable<T>(scanner, iterable);
   }
   
-  public static <T> CloseableIterable<T> transform(BatchScanner bs, Function<Entry<Key,Value>,T> func) {
-    return new CloseableIterable<T>(bs, Iterables.transform(bs, func));
+  public static <T> CloseableIterable<T> transform(ScannerBase scanner, Function<Entry<Key,Value>,T> func) {
+    return new CloseableIterable<T>(scanner, Iterables.transform(scanner, func));
   }
   
-  public static <T> CloseableIterable<T> filterAndTransform(BatchScanner bs, Predicate<Entry<Key,Value>> filter, Function<Entry<Key,Value>,T> func) {
-    return new CloseableIterable<T>(bs, Iterables.transform(Iterables.filter(bs, filter), func));
+  public static <T> CloseableIterable<T> filterAndTransform(ScannerBase scanner, Predicate<Entry<Key,Value>> filter, Function<Entry<Key,Value>,T> func) {
+    return new CloseableIterable<T>(scanner, Iterables.transform(Iterables.filter(scanner, filter), func));
+  }
+  
+  protected ScannerBase source() {
+    return scanner;
   }
   
   @Override
@@ -48,7 +52,7 @@ public class CloseableIterable<T> implements Results<T> {
   
   @Override
   public void close() {
-    bs.close();
+    scanner.close();
   }
   
 }
