@@ -68,14 +68,18 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.finalize(id);
     
-    Iterable<MultimapQueryResult> results = s.fetch(id);
+    CloseableIterable<MultimapQueryResult> results = s.fetch(id);
     
     Assert.assertEquals(2, Iterables.size(results));
+    
+    results.close();
     
     results = s.fetch(id, Index.define("TEXT"));
     
     // This should really be two...
     Assert.assertEquals(4, Iterables.size(results));
+    
+    results.close();
   }
   
   @Test
@@ -175,9 +179,11 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.finalize(id);
     
-    Iterable<MultimapQueryResult> results = s.fetch(id);
+    CloseableIterable<MultimapQueryResult> results = s.fetch(id);
     
     Assert.assertEquals(2, Iterables.size(results));
+    
+    results.close();
   }
   
   @Test
@@ -236,13 +242,13 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.finalize(id);
     
-    PagedQueryResult pqr = s.fetch(id, Paging.create(5, 20l));
+    PagedQueryResult<MultimapQueryResult> pqr = s.fetch(id, Paging.create(5, 20l));
     
     int pageCount = 0;
     int numRecords = 0;
-    while (pqr.hasNext()) {
+    for (List<MultimapQueryResult> page : pqr) {
       pageCount++;
-      int nextSize = pqr.next().size();
+      int nextSize = page.size();
       
       Assert.assertTrue(nextSize <= 5);
       
@@ -256,9 +262,9 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     pageCount = 0;
     numRecords = 0;
-    while (pqr.hasNext()) {
+    for (List<MultimapQueryResult> page : pqr) {
       pageCount++;
-      int nextSize = pqr.next().size();
+      int nextSize = page.size();
       
       Assert.assertTrue(nextSize <= 3);
       
@@ -317,6 +323,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
       count++;
     }
     
+    bs.close();
+    
     Assert.assertEquals(0, count);
   }
   
@@ -350,7 +358,9 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "3", VIZ)));
     
-    ArrayList<MultimapQueryResult> results = Lists.newArrayList(s.fetch(id, name, "George"));
+    CloseableIterable<MultimapQueryResult> iter = s.fetch(id, name, "George");
+    ArrayList<MultimapQueryResult> results = Lists.newArrayList(iter);
+    iter.close();
     
     Assert.assertEquals(1, results.size());
     
@@ -361,7 +371,9 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "4", VIZ)));
     
-    results = Lists.newArrayList(s.fetch(id, name, "Frank"));
+    iter = s.fetch(id, name, "Frank");
+    results = Lists.newArrayList(iter);
+    iter.close();
     
     Assert.assertEquals(2, results.size());
     
@@ -373,8 +385,10 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Assert.assertTrue("Expected empty set of docids: " + docids, docids.isEmpty());
     
-    Iterable<MultimapQueryResult> empty = s.fetch(id, age, "0");
+    CloseableIterable<MultimapQueryResult> empty = s.fetch(id, age, "0");
     
     Assert.assertEquals(0, Iterables.size(empty));
+    
+    empty.close();
   }
 }

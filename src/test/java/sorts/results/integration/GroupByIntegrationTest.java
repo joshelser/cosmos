@@ -23,6 +23,7 @@ import sorts.impl.SortableResult;
 import sorts.impl.SortingImpl;
 import sorts.options.Defaults;
 import sorts.options.Index;
+import sorts.results.CloseableIterable;
 import sorts.results.Column;
 import sorts.results.QueryResult;
 import sorts.results.SValue;
@@ -118,7 +119,7 @@ public class GroupByIntegrationTest extends SortsIntegrationSetup {
         SValue.create("Wilhelm", cv), 1l, 
         SValue.create("Marky", cv), 1l);
     
-    Iterable<Entry<SValue,Long>> countedResults = sorts.groupResults(id, Column.create("NAME"));
+    CloseableIterable<Entry<SValue,Long>> countedResults = sorts.groupResults(id, Column.create("NAME"));
     
     int resultCount = 0;
     for (Entry<SValue,Long> entry : countedResults) {
@@ -128,6 +129,7 @@ public class GroupByIntegrationTest extends SortsIntegrationSetup {
       Assert.assertEquals(expects.get(entry.getKey()), entry.getValue());
     }
     
+    countedResults.close();
     Assert.assertEquals(expects.size(), resultCount);
   
     // TEesting AGE
@@ -146,6 +148,8 @@ public class GroupByIntegrationTest extends SortsIntegrationSetup {
       Assert.assertEquals(expects.get(entry.getKey()), entry.getValue());
     }
     
+    countedResults.close();
+    
     Assert.assertEquals(expects.size(), resultCount);
   
     // Testing STATE
@@ -160,6 +164,8 @@ public class GroupByIntegrationTest extends SortsIntegrationSetup {
       Assert.assertTrue(expects.containsKey(entry.getKey()));
       Assert.assertEquals(expects.get(entry.getKey()), entry.getValue());
     }
+
+    countedResults.close();
     
     Assert.assertEquals(expects.size(), resultCount);
   
@@ -177,6 +183,8 @@ public class GroupByIntegrationTest extends SortsIntegrationSetup {
       Assert.assertTrue(expects.containsKey(entry.getKey()));
       Assert.assertEquals(expects.get(entry.getKey()), entry.getValue());
     }
+    
+    countedResults.close();
     
     Assert.assertEquals(expects.size(), resultCount);
   }

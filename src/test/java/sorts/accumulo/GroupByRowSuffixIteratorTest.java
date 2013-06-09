@@ -26,6 +26,9 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+import sorts.results.integration.IntegrationTests;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
@@ -33,6 +36,7 @@ import com.google.common.io.Files;
 /**
  * 
  */
+@Category(IntegrationTests.class)
 public class GroupByRowSuffixIteratorTest {
   
   protected static File tmp = Files.createTempDir();
