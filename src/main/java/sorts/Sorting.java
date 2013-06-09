@@ -9,6 +9,7 @@ import org.apache.accumulo.core.client.TableNotFoundException;
 import sorts.impl.SortableResult;
 import sorts.options.Index;
 import sorts.options.Paging;
+import sorts.results.CloseableIterable;
 import sorts.results.Column;
 import sorts.results.PagedQueryResult;
 import sorts.results.QueryResult;
@@ -61,7 +62,7 @@ public interface Sorting {
    * @param id
    * @return
    */
-  public Iterable<MultimapQueryResult> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException;
+  public CloseableIterable<MultimapQueryResult> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Fetch all results from the given {@link SortableResult}, paging through results
@@ -80,7 +81,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, String value) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public CloseableIterable<MultimapQueryResult> fetch(SortableResult id, Column column, String value) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Fetch results with values for the given {@link Column}, paging through results
@@ -100,7 +101,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public CloseableIterable<MultimapQueryResult> fetch(SortableResult id, Index ordering) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
 
   /**
    * Fetch results in the provided {@link Ordering}. If {@link duplicateUidsAllowed} is true,
@@ -115,7 +116,7 @@ public interface Sorting {
    * @throws UnexpectedStateException
    * @throws UnindexedColumnException
    */
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public CloseableIterable<MultimapQueryResult> fetch(SortableResult id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
 
   /**
    * Fetch results in the provided {@link Ordering}, paging through results
@@ -135,7 +136,7 @@ public interface Sorting {
    * @param order
    * @return
    */
-  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public CloseableIterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Return counts for unique values in the given column, paging through results

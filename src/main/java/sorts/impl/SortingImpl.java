@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.accumulo.core.client.BatchDeleter;
 import org.apache.accumulo.core.client.BatchScanner;
@@ -33,6 +32,7 @@ import sorts.accumulo.GroupByRowSuffixIterator;
 import sorts.options.Index;
 import sorts.options.Order;
 import sorts.options.Paging;
+import sorts.results.CloseableIterable;
 import sorts.results.Column;
 import sorts.results.PagedQueryResult;
 import sorts.results.QueryResult;
@@ -142,7 +142,7 @@ public class SortingImpl implements Sorting {
       }
     }
   }
-
+  
   @Override
   public void finalize(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
@@ -159,11 +159,12 @@ public class SortingImpl implements Sorting {
     
     SortingMetadata.setState(id, desiredState);
   }
-
+  
   @Override
-  //TODO I should be the one that's providing locking here to make sure that no records are inserted
+  // TODO I should be the one that's providing locking here to make sure that no records are inserted
   // while the columnsToIndex map is updated
-  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws TableNotFoundException, UnexpectedStateException, MutationsRejectedException, IOException {
+  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws TableNotFoundException, UnexpectedStateException, MutationsRejectedException,
+      IOException {
     checkNotNull(id);
     checkNotNull(columnsToIndex);
     
@@ -184,7 +185,7 @@ public class SortingImpl implements Sorting {
     BatchWriter bw = null;
     try {
       bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
-    
+      
       // Iterate over the results we have
       for (MultimapQueryResult result : results) {
         
@@ -195,7 +196,7 @@ public class SortingImpl implements Sorting {
           for (Entry<Column,Index> entry : columns.entries()) {
             if (result.containsKey(entry.getKey())) {
               Collection<SValue> values = result.get(entry.getKey());
-              for (SValue value :  values) {
+              for (SValue value : values) {
                 Mutation m = getDocumentPrefix(id, result, value.value());
                 
                 final String direction = Order.ASCENDING.equals(entry.getValue().order()) ? FORWARD : REVERSE;
@@ -223,7 +224,7 @@ public class SortingImpl implements Sorting {
               }
             }
           }
-        } 
+        }
       }
     } finally {
       if (null != bw) {
@@ -231,7 +232,7 @@ public class SortingImpl implements Sorting {
       }
     }
   }
-
+  
   @Override
   public Iterable<Column> columns(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
@@ -244,9 +245,9 @@ public class SortingImpl implements Sorting {
     
     return SortingMetadata.columns(id);
   }
-
+  
   @Override
-  public Iterable<MultimapQueryResult> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
+  public CloseableIterable<MultimapQueryResult> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     
     State s = SortingMetadata.getState(id);
@@ -258,11 +259,11 @@ public class SortingImpl implements Sorting {
     BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
     bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
     bs.fetchColumnFamily(DOCID_FIELD_NAME_TEXT);
-    bs.setTimeout(5, TimeUnit.MINUTES);
     
-    return Iterables.transform(bs, new KVToMultimap());
+    
+    return CloseableIterable.create(bs, Iterables.transform(bs, new KVToMultimap()));
   }
-
+  
   @Override
   public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
@@ -272,9 +273,9 @@ public class SortingImpl implements Sorting {
     
     return new PagedQueryResult<MultimapQueryResult>(results, limits);
   }
-
+  
   @Override
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Column column, String value) throws TableNotFoundException, UnexpectedStateException {
+  public CloseableIterable<MultimapQueryResult> fetch(SortableResult id, Column column, String value) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     checkNotNull(column);
     checkNotNull(value);
@@ -285,39 +286,32 @@ public class SortingImpl implements Sorting {
       throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
     }
     
-    BatchScanner bs = null;
+    BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+    bs.setRanges(Collections.singleton(Range.exact(id.uuid() + NULL_BYTE_STR + value)));
+    bs.fetchColumnFamily(new Text(column.column()));
     
-    // TODO I don't think this try/catch does what I want it to do
-    try {
-      bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
-      bs.setRanges(Collections.singleton(Range.exact(id.uuid() + NULL_BYTE_STR + value)));
-      bs.fetchColumnFamily(new Text(column.column()));
-      bs.setTimeout(5, TimeUnit.MINUTES);
-    
-      return Iterables.transform(bs, new KVToMultimap());
-    } finally {
-      if (null != bs) {
-        bs.close();
-      }
-    }
+    return CloseableIterable.transform(bs, new KVToMultimap());
   }
-
+  
   @Override
-  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Column column, String value, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Column column, String value, Paging limits) throws TableNotFoundException,
+      UnexpectedStateException {
     checkNotNull(limits);
     
     Iterable<MultimapQueryResult> results = fetch(id, column, value);
     
     return PagedQueryResult.create(results, limits);
   }
-
+  
   @Override
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
+  public CloseableIterable<MultimapQueryResult> fetch(SortableResult id, Index ordering) throws TableNotFoundException, UnexpectedStateException,
+      UnindexedColumnException {
     return fetch(id, ordering, true);
   }
   
   @Override
-  public Iterable<MultimapQueryResult> fetch(SortableResult id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
+  public CloseableIterable<MultimapQueryResult> fetch(SortableResult id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException,
+      UnexpectedStateException, UnindexedColumnException {
     checkNotNull(id);
     checkNotNull(ordering);
     
@@ -337,18 +331,18 @@ public class SortingImpl implements Sorting {
     BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
     bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
     bs.fetchColumnFamily(new Text(ordering.column().column()));
-    bs.setTimeout(5, TimeUnit.MINUTES);
     
     // If the client has told us they don't want duplicate records, lets not give them duplicate records
-    if (duplicateUidsAllowed){
-      return Iterables.transform(bs, new KVToMultimap());
+    if (duplicateUidsAllowed) {
+      return CloseableIterable.transform(bs, new KVToMultimap());
     } else {
-      return Iterables.transform(Iterables.filter(bs, new DedupingPredicate()), new KVToMultimap());
+      return CloseableIterable.filterAndTransform(bs, new DedupingPredicate(), new KVToMultimap());
     }
   }
-
+  
   @Override
-  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
+  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException,
+      UnindexedColumnException {
     checkNotNull(id);
     checkNotNull(limits);
     
@@ -356,9 +350,10 @@ public class SortingImpl implements Sorting {
     
     return PagedQueryResult.create(results, limits);
   }
-
+  
   @Override
-  public Iterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
+  public CloseableIterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException,
+      UnindexedColumnException {
     checkNotNull(id);
     
     State s = SortingMetadata.getState(id);
@@ -374,23 +369,24 @@ public class SortingImpl implements Sorting {
     BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
     bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
     bs.fetchColumnFamily(colf);
-    bs.setTimeout(5, TimeUnit.MINUTES);
+    
     
     IteratorSetting cfg = new IteratorSetting(50, GroupByRowSuffixIterator.class);
     bs.addScanIterator(cfg);
     
-    return Iterables.transform(bs, new GroupByFunction());
+    return CloseableIterable.transform(bs, new GroupByFunction());
   }
-
+  
   @Override
-  public PagedQueryResult<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException {
+  public PagedQueryResult<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException,
+      UnexpectedStateException, UnindexedColumnException {
     checkNotNull(limits);
     
     Iterable<Entry<SValue,Long>> results = groupResults(id, column);
     
     return PagedQueryResult.create(results, limits);
   }
-
+  
   @Override
   public void delete(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
@@ -402,7 +398,7 @@ public class SortingImpl implements Sorting {
     }
     
     final State desiredState = State.DELETING;
-
+    
     log.debug("Changing state for {} from {} to {}", new Object[] {id, s, desiredState});
     
     SortingMetadata.setState(id, desiredState);
@@ -416,7 +412,7 @@ public class SortingImpl implements Sorting {
       bd.delete();
     } finally {
       if (null != bd) {
-        bd.close();      
+        bd.close();
       }
     }
     
@@ -446,7 +442,7 @@ public class SortingImpl implements Sorting {
   protected UnexpectedStateException unexpectedState(SortableResult id, State expected, State actual) {
     return new UnexpectedStateException("Invalid state " + id + " for " + id + ". Expected " + expected + " but was " + actual);
   }
- 
+  
   protected HashMultimap<Column,Index> mapForIndexedColumns(Iterable<Index> columnsToIndex) {
     final HashMultimap<Column,Index> columns = HashMultimap.create();
     
