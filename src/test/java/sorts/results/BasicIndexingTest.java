@@ -50,7 +50,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     SortableResult id = SortableResult.create(c, AUTHS, columnsToIndex);
     
-    Sorting s = new SortingImpl();
+    Sorting s = new SortingImpl(zkConnectString());
     
     s.register(id);
     
@@ -93,7 +93,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     SortableResult id = SortableResult.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
     
-    Sorting s = new SortingImpl();
+    Sorting s = new SortingImpl(zkConnectString());
     
     s.register(id);
     
@@ -127,7 +127,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     SortableResult id = SortableResult.create(c, AUTHS, Collections.<Index> emptySet());
     
-    Sorting s = new SortingImpl();
+    Sorting s = new SortingImpl(zkConnectString());
     
     s.register(id);
     
@@ -161,7 +161,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     SortableResult id = SortableResult.create(c, AUTHS, columnsToIndex);
     
-    Sorting s = new SortingImpl();
+    Sorting s = new SortingImpl(zkConnectString());
     
     s.register(id);
     
@@ -198,7 +198,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     SortableResult id = SortableResult.create(c, AUTHS, Collections.<Index> emptySet());
     
-    Sorting s = new SortingImpl();
+    Sorting s = new SortingImpl(zkConnectString());
     
     s.register(id);
     
@@ -234,7 +234,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     SortableResult id = SortableResult.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
     
-    Sorting s = new SortingImpl();
+    Sorting s = new SortingImpl(zkConnectString());
     
     s.register(id);
     
@@ -286,7 +286,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     data.put(Column.create("AGE"), SValue.create("25", VIZ));
     data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
     
-    Sorting s = new SortingImpl();
+    Sorting s = new SortingImpl(zkConnectString());
     
     s.register(id);
     
@@ -341,7 +341,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     data.put(Column.create("AGE"), SValue.create("25", VIZ));
     data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
     
-    Sorting s = new SortingImpl();
+    Sorting s = new SortingImpl(zkConnectString());
     
     s.register(id);
     

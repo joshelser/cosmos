@@ -46,7 +46,7 @@ public interface Sorting {
    * @param id
    * @param columnsToIndex
    */
-  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException, IOException;
+  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws Exception;
   
   /**
    * Fetch all columns present for a given {@link SortableResult}
@@ -154,4 +154,9 @@ public interface Sorting {
    * @param id
    */
   public void delete(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException;
+  
+  /**
+   * Cleans up internal resources, such as the Curator/ZooKeeper connection, and should be called by the client
+   */
+  public void close();
 }

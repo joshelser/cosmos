@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.accumulo.core.client.BatchDeleter;
 import org.apache.accumulo.core.client.BatchScanner;
@@ -19,6 +20,12 @@ import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
+import org.apache.curator.RetryPolicy;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.imps.CuratorFrameworkState;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
+import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +59,38 @@ public class SortingImpl implements Sorting {
   public static final String FORWARD = "f";
   public static final String REVERSE = "r";
   public static final Value EMPTY_VALUE = new Value(new byte[0]);
+  public static final String CURATOR_PREFIX = "/sorts/";
+  
+  public static final long LOCK_SECS = 10;
   
   private final BatchWriterConfig DEFAULT_BW_CONFIG = new BatchWriterConfig();
+  private final CuratorFramework curator;
+  
+  public SortingImpl(String zookeepers) {
+    RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
+    curator = CuratorFrameworkFactory.newClient(zookeepers, retryPolicy);
+    curator.start();
+  }
+  
+  @Override
+  public void close() {
+    synchronized(curator) {
+      CuratorFrameworkState state = curator.getState();
+      
+      // Stop unless we're already stopped
+      if (!CuratorFrameworkState.STOPPED.equals(state)) {
+        curator.close();
+      }
+    }
+  }
+  
+  /**
+   * finalize is not guaranteed to be called, as such, care should be taken to ensure that {@link close} is called.
+   */
+  @Override
+  public void finalize() throws IOException {
+    this.close();
+  }
   
   @Override
   public void register(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
@@ -163,8 +200,7 @@ public class SortingImpl implements Sorting {
   @Override
   // TODO I should be the one that's providing locking here to make sure that no records are inserted
   // while the columnsToIndex map is updated
-  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws TableNotFoundException, UnexpectedStateException, MutationsRejectedException,
-      IOException {
+  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws Exception {
     checkNotNull(id);
     checkNotNull(columnsToIndex);
     
@@ -177,60 +213,79 @@ public class SortingImpl implements Sorting {
     final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
     final int numCols = columns.keySet().size();
     
-    // Add the values of columns to the sortableresult as we want future results to be indexed the same way
-    id.addColumnsToIndex(columns.values());
+    InterProcessMutex lock = new InterProcessMutex(curator, SortingImpl.CURATOR_PREFIX + id.uuid());
     
-    Iterable<MultimapQueryResult> results = fetch(id);
-    
-    BatchWriter bw = null;
-    try {
-      bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
-      
-      // Iterate over the results we have
-      for (MultimapQueryResult result : results) {
+    boolean locked = false;
+    int count = 1;
+    while (!locked && count < 4) {
+      if (locked = lock.acquire(10, TimeUnit.SECONDS)) {
+        // Add the values of columns to the sortableresult as we want future results to be indexed the same way
+        id.addColumnsToIndex(columns.values());
         
-        // If the cardinality of columns is greater in this result than the number of columns
-        // we want to index
-        if (result.columnSize() > numCols) {
-          // It's more efficient to go over each column to index
-          for (Entry<Column,Index> entry : columns.entries()) {
-            if (result.containsKey(entry.getKey())) {
-              Collection<SValue> values = result.get(entry.getKey());
-              for (SValue value : values) {
-                Mutation m = getDocumentPrefix(id, result, value.value());
-                
-                final String direction = Order.ASCENDING.equals(entry.getValue().order()) ? FORWARD : REVERSE;
-                m.put(entry.getValue().column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
-                
-                bw.addMutation(m);
+        CloseableIterable<MultimapQueryResult> results = fetch(id);
+        
+        BatchWriter bw = null;
+        try {
+          bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
+          
+          // Iterate over the results we have
+          for (MultimapQueryResult result : results) {
+            
+            // If the cardinality of columns is greater in this result than the number of columns
+            // we want to index
+            if (result.columnSize() > numCols) {
+              // It's more efficient to go over each column to index
+              for (Entry<Column,Index> entry : columns.entries()) {
+                if (result.containsKey(entry.getKey())) {
+                  Collection<SValue> values = result.get(entry.getKey());
+                  for (SValue value : values) {
+                    Mutation m = getDocumentPrefix(id, result, value.value());
+                    
+                    final String direction = Order.ASCENDING.equals(entry.getValue().order()) ? FORWARD : REVERSE;
+                    m.put(entry.getValue().column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
+                    
+                    bw.addMutation(m);
+                  }
+                }
               }
-            }
-          }
-        } else {
-          // Otherwise it's more efficient to iterate over the columns of the result
-          for (Entry<Column,SValue> entry : result.columnValues()) {
-            if (columns.containsKey(entry.getKey())) {
-              final Collection<Index> indexes = columns.get(entry.getKey());
-              for (Index index : indexes) {
-                final Collection<SValue> svalues = result.get(index.column());
-                for (SValue value : svalues) {
-                  Mutation m = getDocumentPrefix(id, result, value.value());
-                  
-                  final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
-                  m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
-                  
-                  bw.addMutation(m);
+            } else {
+              // Otherwise it's more efficient to iterate over the columns of the result
+              for (Entry<Column,SValue> entry : result.columnValues()) {
+                if (columns.containsKey(entry.getKey())) {
+                  final Collection<Index> indexes = columns.get(entry.getKey());
+                  for (Index index : indexes) {
+                    final Collection<SValue> svalues = result.get(index.column());
+                    for (SValue value : svalues) {
+                      Mutation m = getDocumentPrefix(id, result, value.value());
+                      
+                      final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
+                      m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
+                      
+                      bw.addMutation(m);
+                    }
+                  }
                 }
               }
             }
           }
+        } finally {
+          if (null != bw) {
+            bw.close();
+          }
+          if (null != results) {
+            results.close();
+          }
         }
-      }
-    } finally {
-      if (null != bw) {
-        bw.close();
+        
+        return;
+      } else {
+        count++;
+        log.warn("Could not acquire lock after {} seconds. Attempting acquire #{}", LOCK_SECS, count);
+        
       }
     }
+    
+    throw new IllegalStateException("Could not acquire lock during index() after " + count + " attempts");
   }
   
   @Override
