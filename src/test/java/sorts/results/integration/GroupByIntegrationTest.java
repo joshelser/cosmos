@@ -9,8 +9,9 @@ import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.core.security.ColumnVisibility;
-import org.apache.accumulo.server.mini.MiniAccumuloCluster;
-import org.apache.accumulo.server.mini.MiniAccumuloConfig;
+import org.apache.accumulo.minicluster.MiniAccumuloCluster;
+import org.apache.accumulo.minicluster.MiniAccumuloConfig;
+import org.apache.curator.test.TestingServer;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,6 +50,8 @@ public class GroupByIntegrationTest extends SortsIntegrationSetup {
   protected ZooKeeperInstance inst;
   protected Connector con;
   
+  protected static TestingServer zk;
+  
   @BeforeClass
   public static void setupMAC() throws Exception {
     File tmp = Files.createTempDir();
@@ -58,10 +61,12 @@ public class GroupByIntegrationTest extends SortsIntegrationSetup {
     mac.start();
 
     
-    ZooKeeperInstance zk = new ZooKeeperInstance(mac.getInstanceName(), mac.getZooKeepers());
-    Connector con = zk.getConnector("root", new PasswordToken("foo"));
+    ZooKeeperInstance zkInst = new ZooKeeperInstance(mac.getInstanceName(), mac.getZooKeepers());
+    Connector con = zkInst.getConnector("root", new PasswordToken("foo"));
     con.tableOperations().create(Defaults.DATA_TABLE);
     con.tableOperations().create(Defaults.METADATA_TABLE);
+
+    zk = new TestingServer();
   }
   
   @AfterClass
@@ -71,7 +76,7 @@ public class GroupByIntegrationTest extends SortsIntegrationSetup {
   
   @Before
   public void setupSorts() throws Exception {
-    sorts = new SortingImpl();
+    sorts = new SortingImpl(zk.getConnectString());
     inst = new ZooKeeperInstance(mac.getInstanceName(), mac.getZooKeepers());
     con = inst.getConnector("root", new PasswordToken("foo"));
   }

@@ -8,9 +8,10 @@ import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.security.Authorizations;
-import org.apache.accumulo.server.mini.MiniAccumuloCluster;
-import org.apache.accumulo.server.mini.MiniAccumuloConfig;
+import org.apache.accumulo.minicluster.MiniAccumuloCluster;
+import org.apache.accumulo.minicluster.MiniAccumuloConfig;
 import org.apache.commons.io.FileUtils;
+import org.apache.curator.test.TestingServer;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -38,6 +39,7 @@ import com.google.common.collect.Sets;
 public class SortsIntegrationTest extends SortsIntegrationSetup {
   protected static MiniAccumuloCluster mac;
   protected static File macDir;
+  protected static TestingServer zk;
   
   @BeforeClass
   public static void createAccumuloCluster() throws Exception {
@@ -52,11 +54,13 @@ public class SortsIntegrationTest extends SortsIntegrationSetup {
     mac = new MiniAccumuloCluster(config);
     mac.start();
     
-    ZooKeeperInstance zk = new ZooKeeperInstance(mac.getInstanceName(), mac.getZooKeepers());
-    Connector c = zk.getConnector("root", new PasswordToken(""));
+    ZooKeeperInstance zkInst = new ZooKeeperInstance(mac.getInstanceName(), mac.getZooKeepers());
+    Connector c = zkInst.getConnector("root", new PasswordToken(""));
     
     // Add in auths for "en"
     c.securityOperations().changeUserAuthorizations("root", new Authorizations("en"));
+    
+    zk = new TestingServer();
   }
   
   @AfterClass
@@ -114,7 +118,7 @@ public class SortsIntegrationTest extends SortsIntegrationSetup {
     long end = System.currentTimeMillis();
     
     // We should only have to wait on one to parse the xml
-    Assert.assertTrue((end - start) < 8000);
+    Assert.assertTrue("Took more than 8s: "+ (end - start) / 1000, (end - start) < 8000);
   }
   
   @Test
@@ -130,7 +134,7 @@ public class SortsIntegrationTest extends SortsIntegrationSetup {
     SortableResult id = SortableResult.create(con, new Authorizations("en"),
         Sets.newHashSet(Index.define(PAGE_ID)));
     
-    Sorting s = new SortingImpl();
+    Sorting s = new SortingImpl(SortsIntegrationTest.zk.getConnectString());
     
     s.register(id);
     s.addResults(id, results);

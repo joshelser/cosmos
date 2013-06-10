@@ -27,7 +27,7 @@ public class SortableResultStateTest extends AbstractSortableTest {
     
     Assert.assertEquals(State.UNKNOWN, SortingMetadata.getState(id));
         
-    Sorting s = new SortingImpl();
+    Sorting s = new SortingImpl(zk.getConnectString());
     s.register(id);
     
     Assert.assertEquals(State.LOADING, SortingMetadata.getState(id));
