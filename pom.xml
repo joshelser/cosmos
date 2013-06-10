@@ -274,4 +274,17 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <reporting>
+  	<plugins>
+  		<plugin>
+  			<groupId>org.codehaus.mojo</groupId>
+  			<artifactId>maven-cobertura-plugin</artifactId>
+  			<version>2.5.2</version>
+  			<configuration>
+  				<format>html</format>
+  				<format>xml</format>
+  			</configuration>
+  		</plugin>
+  	</plugins>
+  </reporting>
 </project>
