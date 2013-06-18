@@ -25,6 +25,8 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
+import org.apache.curator.framework.state.ConnectionState;
+import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
@@ -70,6 +72,19 @@ public class SortingImpl implements Sorting {
     RetryPolicy retryPolicy = new ExponentialBackoffRetry(2000, 3);
     curator = CuratorFrameworkFactory.newClient(zookeepers, retryPolicy);
     curator.start();
+    
+    //TODO http://curator.incubator.apache.org/curator-recipes/shared-reentrant-lock.html 
+    // "Error handling: ... strongly recommended that you add a ConnectionStateListener and 
+    // watch for SUSPENDED and LOST state changes"
+    
+//    curator.getConnectionStateListenable().addListener(new ConnectionStateListener() {
+//
+//      @Override
+//      public void stateChanged(CuratorFramework client, ConnectionState newState) {
+//        
+//      }
+//      
+//    });
   }
   
   @Override
