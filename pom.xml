@@ -125,14 +125,14 @@
         <version>${version.accumulo}</version>
       </dependency>
       <dependency>
-      	<groupId>org.apache.zookeeper</groupId>
-      	<artifactId>zookeeper</artifactId>
-      	<version>3.4.5</version>
+        <groupId>org.apache.zookeeper</groupId>
+        <artifactId>zookeeper</artifactId>
+        <version>3.4.5</version>
       </dependency>
       <dependency>
-      	<groupId>org.apache.hadoop</groupId>
-      	<artifactId>hadoop-core</artifactId>
-      	<version>1.1.2</version>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-core</artifactId>
+        <version>1.1.2</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
@@ -275,16 +275,16 @@
     </dependency>
   </dependencies>
   <reporting>
-  	<plugins>
-  		<plugin>
-  			<groupId>org.codehaus.mojo</groupId>
-  			<artifactId>maven-cobertura-plugin</artifactId>
-  			<version>2.5.2</version>
-  			<configuration>
-  				<format>html</format>
-  				<format>xml</format>
-  			</configuration>
-  		</plugin>
-  	</plugins>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>maven-cobertura-plugin</artifactId>
+        <version>2.5.2</version>
+        <configuration>
+          <format>html</format>
+          <format>xml</format>
+        </configuration>
+      </plugin>
+    </plugins>
   </reporting>
 </project>
