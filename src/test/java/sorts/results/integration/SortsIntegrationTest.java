@@ -24,6 +24,7 @@ import sorts.impl.SortableResult;
 import sorts.impl.SortingImpl;
 import sorts.options.Defaults;
 import sorts.options.Index;
+import sorts.results.CloseableIterable;
 import sorts.results.Column;
 import sorts.results.QueryResult;
 import sorts.results.SValue;
@@ -141,7 +142,7 @@ public class SortsIntegrationTest extends SortsIntegrationSetup {
     
     Column pageIdCol = Column.create(PAGE_ID);
     
-    Iterable<MultimapQueryResult> newResults = s.fetch(id);
+    CloseableIterable<MultimapQueryResult> newResults = s.fetch(id);
     
     Assert.assertNotNull(newResults);
     
@@ -164,6 +165,9 @@ public class SortsIntegrationTest extends SortsIntegrationSetup {
     }
     
     Assert.assertEquals(wiki1.getPage().size(), count);
+    
+    newResults.close();
+    s.close();
   }
   
 }

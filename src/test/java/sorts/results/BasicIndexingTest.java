@@ -80,6 +80,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(4, Iterables.size(results));
     
     results.close();
+    s.close();
   }
   
   @Test
@@ -114,6 +115,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(0, Iterables.size(scanner));
+    
+    s.close();
   }
   
   @Test
@@ -146,6 +149,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(2, Iterables.size(scanner));
+    
+    s.close();
   }
   
   @Test
@@ -184,6 +189,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(2, Iterables.size(results));
     
     results.close();
+    s.close();
   }
   
   @Test
@@ -217,6 +223,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(2, Iterables.size(scanner));
+    
+    s.close();
   }
   
   @Test
@@ -273,6 +281,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Assert.assertEquals(10, numRecords);
     Assert.assertEquals(4, pageCount);
+    
+    s.close();
   }
   
   @Test
@@ -326,6 +336,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     bs.close();
     
     Assert.assertEquals(0, count);
+    
+    s.close();
   }
   
   @Test
@@ -390,5 +402,6 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(0, Iterables.size(empty));
     
     empty.close();
+    s.close();
   }
 }

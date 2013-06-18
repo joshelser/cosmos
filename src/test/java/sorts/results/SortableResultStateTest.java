@@ -40,6 +40,8 @@ public class SortableResultStateTest extends AbstractSortableTest {
     s.delete(id);
     
     Assert.assertEquals(State.UNKNOWN, SortingMetadata.getState(id));
+    
+    s.close();
   }
   
 }

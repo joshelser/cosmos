@@ -67,7 +67,7 @@ public class SortingImpl implements Sorting {
   private final CuratorFramework curator;
   
   public SortingImpl(String zookeepers) {
-    RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
+    RetryPolicy retryPolicy = new ExponentialBackoffRetry(2000, 3);
     curator = CuratorFrameworkFactory.newClient(zookeepers, retryPolicy);
     curator.start();
   }

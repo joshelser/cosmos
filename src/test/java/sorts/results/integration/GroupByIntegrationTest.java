@@ -12,6 +12,7 @@ import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
 import org.apache.accumulo.minicluster.MiniAccumuloConfig;
 import org.apache.curator.test.TestingServer;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -79,6 +80,11 @@ public class GroupByIntegrationTest extends SortsIntegrationSetup {
     sorts = new SortingImpl(zk.getConnectString());
     inst = new ZooKeeperInstance(mac.getInstanceName(), mac.getZooKeepers());
     con = inst.getConnector("root", new PasswordToken("foo"));
+  }
+  
+  @After
+  public void closeSorts() throws Exception {
+    sorts.close();
   }
   
   @Test
