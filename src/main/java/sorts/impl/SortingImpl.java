@@ -51,6 +51,7 @@ import sorts.results.impl.MultimapQueryResult;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import com.google.common.io.Closeables;
 
 public class SortingImpl implements Sorting {
   private static final Logger log = LoggerFactory.getLogger(SortingImpl.class);
@@ -94,7 +95,11 @@ public class SortingImpl implements Sorting {
       
       // Stop unless we're already stopped
       if (!CuratorFrameworkState.STOPPED.equals(state)) {
-        curator.close();
+        try {
+          Closeables.close(curator, true);
+        } catch (IOException e) {
+          log.warn("Caught IOException closing Curator connection", e);
+        }
       }
     }
   }
@@ -127,8 +132,7 @@ public class SortingImpl implements Sorting {
   }
   
   @Override
-  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults) throws TableNotFoundException, MutationsRejectedException,
-      UnexpectedStateException, IOException {
+  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults) throws Exception {
     checkNotNull(id);
     checkNotNull(queryResults);
     
@@ -140,57 +144,76 @@ public class SortingImpl implements Sorting {
       throw e;
     }
     
-    Set<Index> columnsToIndex = id.columnsToIndex();
-    
+    InterProcessMutex lock = getMutex(id);
+
+    // TODO We don't need to lock on multiple calls to addResults; however, we need to lock over adding the
+    //   new records to make sure a call to index() doesn't come in while we're processing a stale set of Columns to index
+    boolean locked = false;
+    int count = 1;
     BatchWriter bw = null, metadataBw = null;
-    try {
-      bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
-      metadataBw = id.connector().createBatchWriter(id.metadataTable(), DEFAULT_BW_CONFIG);
-      
-      // TODO This is broken with the identity set
-      final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
-      final Text holder = new Text();
-      
-      for (QueryResult<?> result : queryResults) {
-        bw.addMutation(addDocument(id, result));
-        Mutation columnMutation = new Mutation(id.uuid());
-        
-        for (Entry<Column,SValue> entry : result.columnValues()) {
-          final Column c = entry.getKey();
-          final SValue v = entry.getValue();
-          holder.set(c.column());
+    
+    while (!locked && count < 4) {
+      if (locked = lock.acquire(10, TimeUnit.SECONDS)) {
+        try {
+          // Add the values of columns to the sortableresult as we want
+          Set<Index> columnsToIndex = id.columnsToIndex();
           
-          columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, EMPTY_VALUE);
+          bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
+          metadataBw = id.connector().createBatchWriter(id.metadataTable(), DEFAULT_BW_CONFIG);
           
-          if (columns.containsKey(c)) {
-            for (Index index : columns.get(c)) {
-              Mutation m = getDocumentPrefix(id, result, v.value());
+          // TODO This is broken with the identity set
+          final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
+          final Text holder = new Text();
+          
+          for (QueryResult<?> result : queryResults) {
+            bw.addMutation(addDocument(id, result));
+            Mutation columnMutation = new Mutation(id.uuid());
+            
+            for (Entry<Column,SValue> entry : result.columnValues()) {
+              final Column c = entry.getKey();
+              final SValue v = entry.getValue();
+              holder.set(c.column());
               
-              final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
-              m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
+              columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, EMPTY_VALUE);
               
-              bw.addMutation(m);
+              if (columns.containsKey(c)) {
+                for (Index index : columns.get(c)) {
+                  Mutation m = getDocumentPrefix(id, result, v.value());
+                  
+                  final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
+                  m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
+                  
+                  bw.addMutation(m);
+                }
+              }
             }
+            
+            metadataBw.addMutation(columnMutation);
           }
+        } catch (MutationsRejectedException e) {
+          log.error("Caught exception adding results for {}", id, e);
+          throw e;
+        } catch (TableNotFoundException e) {
+          log.error("Caught exception adding results for {}", id, e);
+          throw e;
+        } catch (RuntimeException e) {
+          log.error("Caught exception adding results for {}", id, e);
+          throw e;
+        } finally {
+          if (null != bw) {
+            bw.close();
+          }
+          if (null != metadataBw) {
+            metadataBw.close();
+          }
+          
+          // Don't hog the lock
+          lock.release();
         }
+      } else {
+        count++;
+        log.warn("addResults() on {} could not acquire lock after {} seconds. Attempting acquire #{}", new Object[] {id.uuid(), LOCK_SECS, count});
         
-        metadataBw.addMutation(columnMutation);
-      }
-    } catch (MutationsRejectedException e) {
-      log.error("Caught exception adding results for {}", id, e);
-      throw e;
-    } catch (TableNotFoundException e) {
-      log.error("Caught exception adding results for {}", id, e);
-      throw e;
-    } catch (RuntimeException e) {
-      log.error("Caught exception adding results for {}", id, e);
-      throw e;
-    } finally {
-      if (null != bw) {
-        bw.close();
-      }
-      if (null != metadataBw) {
-        metadataBw.close();
       }
     }
   }
@@ -228,19 +251,22 @@ public class SortingImpl implements Sorting {
     final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
     final int numCols = columns.keySet().size();
     
-    InterProcessMutex lock = new InterProcessMutex(curator, SortingImpl.CURATOR_PREFIX + id.uuid());
+    InterProcessMutex lock = getMutex(id);
     
     boolean locked = false;
     int count = 1;
+    BatchWriter bw = null;
+    CloseableIterable<MultimapQueryResult> results = null;
+    
     while (!locked && count < 4) {
       if (locked = lock.acquire(10, TimeUnit.SECONDS)) {
-        // Add the values of columns to the sortableresult as we want future results to be indexed the same way
-        id.addColumnsToIndex(columns.values());
-        
-        CloseableIterable<MultimapQueryResult> results = fetch(id);
-        
-        BatchWriter bw = null;
         try {
+          // Add the values of columns to the sortableresult as we want future results to be indexed the same way
+          id.addColumnsToIndex(columns.values());
+          
+          // Get the results we have to update
+          results = fetch(id);
+          
           bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
           
           // Iterate over the results we have
@@ -290,13 +316,14 @@ public class SortingImpl implements Sorting {
           if (null != results) {
             results.close();
           }
+          
+          lock.release();
         }
         
         return;
       } else {
         count++;
-        log.warn("Could not acquire lock after {} seconds. Attempting acquire #{}", LOCK_SECS, count);
-        
+        log.warn("index() on {} could not acquire lock after {} seconds. Attempting acquire #{}", new Object[] {id.uuid(), LOCK_SECS, count}); 
       }
     }
     
@@ -521,5 +548,9 @@ public class SortingImpl implements Sorting {
     }
     
     return columns;
+  }
+  
+  protected final InterProcessMutex getMutex(SortableResult id) {
+    return new InterProcessMutex(curator, SortingImpl.CURATOR_PREFIX + id.uuid());
   }
 }
