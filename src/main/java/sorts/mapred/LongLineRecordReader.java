@@ -39,14 +39,14 @@ import org.apache.hadoop.util.LineReader;
  * to read lines.
  */
 public class LongLineRecordReader extends RecordReader<LongWritable,Text> {
-  private CompressionCodecFactory compressionCodecs = null;
-  private long start;
-  private long pos;
-  private long end;
-  private LfLineReader in;
-  private int maxLineLength;
-  private LongWritable key = null;
-  private Text value = null;
+  protected CompressionCodecFactory compressionCodecs = null;
+  protected long start;
+  protected long pos;
+  protected long end;
+  protected LfLineReader in;
+  protected int maxLineLength;
+  protected LongWritable key = null;
+  protected Text value = null;
   
   @Override
   public void initialize(InputSplit genericSplit, TaskAttemptContext context) throws IOException {

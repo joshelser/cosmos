@@ -16,6 +16,7 @@
  */
 package sorts.mapred;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -36,32 +37,10 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-public class AggregatingRecordReaderTest {
-  
-  public static class MyErrorHandler implements ErrorHandler {
-    
-    @Override
-    public void error(SAXParseException exception) throws SAXException {
-      // System.out.println(exception.getMessage());
-    }
-    
-    @Override
-    public void fatalError(SAXParseException exception) throws SAXException {
-      // System.out.println(exception.getMessage());
-    }
-    
-    @Override
-    public void warning(SAXParseException exception) throws SAXException {
-      // System.out.println(exception.getMessage());
-    }
-    
-  }
-  
+public class AggregatingRecordReaderTest {  
   private static final String xml1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<page>\n" + "  <a>A</a>\n" + "  <b>B</b>\n" + "</page>\n"
       + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<page>\n" + "  <a>C</a>\n" + "  <b>D</b>\n" + "</page>\n" + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       + "<page>\n" + "  <a>E</a>\n" + "  <b>F</b>\n" + "</page>\n";
@@ -75,8 +54,6 @@ public class AggregatingRecordReaderTest {
   private static final String xml4 = "<page>" + "  <a>A</a>" + "  <b>B</b>" + "</page>" + "<page>" + "  <a>C</a>" + "  <b>D</b>" + "</page>" + "<page>"
       + "  <a>E</a>" + "  <b>F</b>" + "</page>";
   
-  private static final String xml5 = "<doc attr=\"G\">" + "  <a>A</a>" + "  <b>B</b>" + "</page>" + "<page>" + "  <a>C</a>" + "  <b>D</b>" + "</page>"
-      + "<doc attr=\"H\"/>" + "<page>" + "  <a>E</a>" + "  <b>F</b>" + "</page>" + "<doc attr=\"I\"/>";
   
   private Configuration conf = null;
   private TaskAttemptContext ctx;
@@ -116,25 +93,6 @@ public class AggregatingRecordReaderTest {
     
     reader = new StringReader(xml.toString());
     source = new InputSource(reader);
-  }
-  
-  @Test
-  public void testIncorrectArgs() throws Exception {
-    File f = createFile(xml1);
-    
-    // Create FileSplit
-    Path p = new Path(f.toURI().toString());
-    FileSplit split = new FileSplit(p, 0, f.length(), null);
-    AggregatingRecordReader reader = new AggregatingRecordReader();
-    try {
-      reader.initialize(split, ctx);
-      // If we got here, then the code didnt throw an exception
-      fail();
-    } catch (Exception e) {
-      // Do nothing, we succeeded
-      f = null;
-    }
-    reader.close();
   }
   
   @Test
@@ -208,14 +166,7 @@ public class AggregatingRecordReaderTest {
     testXML(reader.getCurrentValue(), "A", "B", "");
     assertTrue(reader.nextKeyValue());
     testXML(reader.getCurrentValue(), "C", "D", "");
-    assertTrue(reader.nextKeyValue());
-    try {
-      testXML(reader.getCurrentValue(), "E", "", "");
-      fail("Fragment returned, and it somehow passed XML parsing.");
-    } catch (SAXParseException e) {
-      // ignore
-    }
-    assertTrue(!reader.nextKeyValue());
+    assertFalse(reader.nextKeyValue());
   }
   
   @Test
@@ -239,26 +190,19 @@ public class AggregatingRecordReaderTest {
   }
   
   @Test
-  public void testNoEndTokenHandling() throws Exception {
-    File f = createFile(xml5);
+  public void testShortSplit() throws Exception {
+    File f = createFile(xml3);
+    
     // Create FileSplit
     Path p = new Path(f.toURI().toString());
-    FileSplit split = new FileSplit(p, 0, f.length(), null);
+    FileSplit split = new FileSplit(p, 0, 10, null);
     
     // Initialize the RecordReader
     AggregatingRecordReader reader = new AggregatingRecordReader();
     reader.initialize(split, ctx);
-    assertTrue("Not enough records returned.", reader.nextKeyValue());
-    testXML(reader.getCurrentValue(), "A", "B", "G");
-    assertTrue("Not enough records returned.", reader.nextKeyValue());
-    testXML(reader.getCurrentValue(), "C", "D", "");
-    assertTrue("Not enough records returned.", reader.nextKeyValue());
-    testXML(reader.getCurrentValue(), "", "", "H");
-    assertTrue("Not enough records returned.", reader.nextKeyValue());
-    testXML(reader.getCurrentValue(), "E", "F", "");
-    assertTrue("Not enough records returned.", reader.nextKeyValue());
-    testXML(reader.getCurrentValue(), "", "", "I");
-    assertTrue("Too many records returned.", !reader.nextKeyValue());
+    assertTrue(reader.nextKeyValue());
+    testXML(reader.getCurrentValue(), "A", "B", "");
+    assertFalse(reader.nextKeyValue());
   }
   
 }

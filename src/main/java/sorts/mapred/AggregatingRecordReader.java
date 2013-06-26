@@ -89,11 +89,21 @@ public class AggregatingRecordReader extends LongLineRecordReader {
         return true;
       }
     }
-    // If we have anything loaded in the agg value (and we found a start)
-    // then we ran out of data before finding the end. Just return the
-    // data we have and if it's not valid, downstream parsing of the data
-    // will fail.
-    if (returnPartialMatches && startFound && aggValue.getLength() > 0) {
+
+    boolean endFound = false;
+    
+    // We found a start tag but no end tag
+    if (aggValue.getLength() > 0 && startFound) {
+      final Text buf = new Text();
+      int bytesRead = 0;
+      while (!endFound && (bytesRead = in.readLine(buf)) > 0) {
+        if (process(buf)) {
+          endFound = true;
+        }
+      }
+    }
+    
+    if (endFound) {
       startFound = false;
       counter++;
       return true;
