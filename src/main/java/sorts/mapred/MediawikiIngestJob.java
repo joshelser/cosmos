@@ -1,9 +1,6 @@
 package sorts.mapred;
 
 import org.apache.accumulo.core.client.BatchWriterConfig;
-import org.apache.accumulo.core.client.Connector;
-import org.apache.accumulo.core.client.ZooKeeperInstance;
-import org.apache.accumulo.core.client.admin.TableOperations;
 import org.apache.accumulo.core.client.mapreduce.AccumuloOutputFormat;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Mutation;
@@ -35,7 +32,9 @@ public class MediawikiIngestJob extends Configured implements Tool {
     String user = "mediawiki";
     PasswordToken passwd = new PasswordToken("password");    
     
+    conf.set("io.file.buffer.size", Integer.toString(64*1024*1024));
     FileInputFormat.setInputPaths(job, new Path("/enwiki-20111201-pages-articles.xml"));
+    FileInputFormat.setMinInputSplitSize(job, 1024*1024*100);
     
     job.setMapperClass(MediawikiMapper.class);
     job.setNumReduceTasks(0);
