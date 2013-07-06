@@ -37,7 +37,7 @@ public interface Sorting {
    * @param id
    * @param queryResults
    */
-  public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults) throws Exception;
+  public void addResults(SortableResult id, Iterable<? extends QueryResult<?>> queryResults) throws Exception;
   
   /**
    * Closes the state of the given SortableResult. No additional results can be written after the set has been finalized. 

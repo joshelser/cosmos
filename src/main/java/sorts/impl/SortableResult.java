@@ -26,16 +26,21 @@ public class SortableResult {
   
   protected final Connector connector;
   protected final Authorizations auths;
+  protected final boolean lockOnUpdates;
   protected final String dataTable, metadataTable;
   protected final String UUID;
   
   protected Set<Index> columnsToIndex;
   
   public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
-    this(connector, auths, columnsToIndex, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
+    this(connector, auths, columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, String dataTable, String metadataTable) {
+  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+    this(connector, auths, columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
+  }
+  
+  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
     checkNotNull(connector);
     checkNotNull(auths);
     checkNotNull(columnsToIndex);
@@ -44,6 +49,7 @@ public class SortableResult {
     
     this.connector = connector;
     this.auths = auths;
+    this.lockOnUpdates = lockOnUpdates;
     
     // Make sure we don't try to make a real Set out of the IdentitySet
     if (columnsToIndex instanceof IdentitySet) {
@@ -98,6 +104,10 @@ public class SortableResult {
     return this.columnsToIndex;
   }
   
+  public boolean lockOnUpdates() {
+    return this.lockOnUpdates;
+  }
+  
   public String dataTable() {
     return this.dataTable;
   }
@@ -126,8 +136,12 @@ public class SortableResult {
     return new SortableResult(connector, auths, columnsToIndex);
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, String dataTable, String metadataTable) {
-    return new SortableResult(connector, auths, columnsToIndex, dataTable, metadataTable);
+  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+    return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates);
+  }
+  
+  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
+    return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
   }
   
 }
