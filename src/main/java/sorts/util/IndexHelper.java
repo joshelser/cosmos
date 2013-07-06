@@ -55,13 +55,13 @@ public class IndexHelper {
   }
   
   public Set<Index> indicesForColumn(Column c) {
+    if (indexEverything) {
+      return Sets.newHashSet(Index.define(c, Order.ASCENDING), Index.define(c, Order.DESCENDING));
+    }
+    
     Set<Index> ret = this.columnsToIndex.get(c);
     
     if (null == ret) {
-      if (indexEverything) {
-        return Sets.newHashSet(Index.define(c, Order.ASCENDING), Index.define(c, Order.DESCENDING));
-      }
-      
       // Let the user know that they did something dumb
       // If they checked shouldIndex, they would know that they don't need to call this
       throw new NoSuchElementException("No such index is defined for this column");

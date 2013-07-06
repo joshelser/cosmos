@@ -2,6 +2,7 @@ package sorts.results;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -25,6 +26,7 @@ import sorts.options.Defaults;
 import sorts.options.Index;
 import sorts.options.Paging;
 import sorts.results.impl.MultimapQueryResult;
+import sorts.util.IdentitySet;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
@@ -189,6 +191,77 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(2, Iterables.size(results));
     
     results.close();
+    s.close();
+  }
+  
+  @Test
+  public void indexEverything() throws Exception {
+    Multimap<Column,SValue> data = HashMultimap.create();
+    
+    data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
+    data.put(Column.create("SIZE"), SValue.create("2", VIZ));
+    
+    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    
+    Set<Index> columnsToIndex = IdentitySet.<Index> create();
+    
+    SortableResult id = SortableResult.create(c, AUTHS, columnsToIndex);
+    
+    Sorting s = new SortingImpl(zkConnectString());
+    
+    s.register(id);
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    
+    data = HashMultimap.create();
+    data.put(Column.create("TEXT"), SValue.create("bar", VIZ));
+    data.put(Column.create("SIZE"), SValue.create("3", VIZ));
+    
+    mqr = new MultimapQueryResult(data, "2", VIZ);
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    
+    // 2 records with 2 columns (forward and reverse), plus the UID pointer (8+2=10)
+    Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
+    Assert.assertEquals(10, Iterables.size(scanner));
+    
+    scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
+    Assert.assertEquals(3, Iterables.size(scanner));
+    
+    s.finalize(id);
+    
+    CloseableIterable<MultimapQueryResult> results = s.fetch(id);
+    
+    Assert.assertEquals(2, Iterables.size(results));
+    results.close();
+
+    // Sort by TEXT: should be docid "2" then "1"
+    results = s.fetch(id, Index.define("TEXT"));
+    Iterator<MultimapQueryResult> resultsIter = results.iterator();
+    
+    Assert.assertTrue(resultsIter.hasNext());
+    Assert.assertEquals("2", resultsIter.next().docId());
+    
+    Assert.assertTrue(resultsIter.hasNext());
+    Assert.assertEquals("1", resultsIter.next().docId());
+    
+    Assert.assertFalse(resultsIter.hasNext());
+    results.close();
+    
+    // Sort by SIZE: should be docid "1" then "2"
+    results = s.fetch(id, Index.define("SIZE"));
+    resultsIter = results.iterator();
+    
+    Assert.assertTrue(resultsIter.hasNext());
+    Assert.assertEquals("1", resultsIter.next().docId());
+    
+    Assert.assertTrue(resultsIter.hasNext());
+    Assert.assertEquals("2", resultsIter.next().docId());
+    
+    Assert.assertFalse(resultsIter.hasNext());
+    results.close();
+
+    s.delete(id);
     s.close();
   }
   
