@@ -25,8 +25,6 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
-import org.apache.curator.framework.state.ConnectionState;
-import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
@@ -47,10 +45,10 @@ import sorts.results.PagedQueryResult;
 import sorts.results.QueryResult;
 import sorts.results.SValue;
 import sorts.results.impl.MultimapQueryResult;
+import sorts.util.IndexHelper;
+import sorts.util.Single;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
 import com.google.common.io.Closeables;
 
 public class SortingImpl implements Sorting {
@@ -74,23 +72,23 @@ public class SortingImpl implements Sorting {
     curator = CuratorFrameworkFactory.newClient(zookeepers, retryPolicy);
     curator.start();
     
-    //TODO http://curator.incubator.apache.org/curator-recipes/shared-reentrant-lock.html 
-    // "Error handling: ... strongly recommended that you add a ConnectionStateListener and 
+    // TODO http://curator.incubator.apache.org/curator-recipes/shared-reentrant-lock.html
+    // "Error handling: ... strongly recommended that you add a ConnectionStateListener and
     // watch for SUSPENDED and LOST state changes"
     
-//    curator.getConnectionStateListenable().addListener(new ConnectionStateListener() {
-//
-//      @Override
-//      public void stateChanged(CuratorFramework client, ConnectionState newState) {
-//        
-//      }
-//      
-//    });
+    // curator.getConnectionStateListenable().addListener(new ConnectionStateListener() {
+    //
+    // @Override
+    // public void stateChanged(CuratorFramework client, ConnectionState newState) {
+    //
+    // }
+    //
+    // });
   }
   
   @Override
   public void close() {
-    synchronized(curator) {
+    synchronized (curator) {
       CuratorFrameworkState state = curator.getState();
       
       // Stop unless we're already stopped
@@ -132,6 +130,13 @@ public class SortingImpl implements Sorting {
   }
   
   @Override
+  public void addResult(SortableResult id, QueryResult<?> queryResult) throws Exception {
+    checkNotNull(queryResult);
+    
+    addResults(id, Single.<QueryResult<?>> create(queryResult));
+  }
+  
+  @Override
   public void addResults(SortableResult id, Iterable<QueryResult<?>> queryResults) throws Exception {
     checkNotNull(id);
     checkNotNull(queryResults);
@@ -145,9 +150,9 @@ public class SortingImpl implements Sorting {
     }
     
     InterProcessMutex lock = getMutex(id);
-
+    
     // TODO We don't need to lock on multiple calls to addResults; however, we need to lock over adding the
-    //   new records to make sure a call to index() doesn't come in while we're processing a stale set of Columns to index
+    // new records to make sure a call to index() doesn't come in while we're processing a stale set of Columns to index
     boolean locked = false;
     int count = 1;
     BatchWriter bw = null, metadataBw = null;
@@ -161,8 +166,7 @@ public class SortingImpl implements Sorting {
           bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
           metadataBw = id.connector().createBatchWriter(id.metadataTable(), DEFAULT_BW_CONFIG);
           
-          // TODO This is broken with the identity set
-          final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
+          final IndexHelper indexHelper = IndexHelper.create(columnsToIndex);
           final Text holder = new Text();
           
           for (QueryResult<?> result : queryResults) {
@@ -176,8 +180,8 @@ public class SortingImpl implements Sorting {
               
               columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, EMPTY_VALUE);
               
-              if (columns.containsKey(c)) {
-                for (Index index : columns.get(c)) {
+              if (indexHelper.shouldIndex(c)) {
+                for (Index index : indexHelper.indicesForColumn(c)) {
                   Mutation m = getDocumentPrefix(id, result, v.value());
                   
                   final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
@@ -236,9 +240,7 @@ public class SortingImpl implements Sorting {
   }
   
   @Override
-  // TODO I should be the one that's providing locking here to make sure that no records are inserted
-  // while the columnsToIndex map is updated
-  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws Exception {
+  public void index(SortableResult id, Set<Index> columnsToIndex) throws Exception {
     checkNotNull(id);
     checkNotNull(columnsToIndex);
     
@@ -248,8 +250,8 @@ public class SortingImpl implements Sorting {
       throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
     }
     
-    final Multimap<Column,Index> columns = mapForIndexedColumns(columnsToIndex);
-    final int numCols = columns.keySet().size();
+    final IndexHelper indexHelper = IndexHelper.create(columnsToIndex);
+    final int numCols = indexHelper.columnCount();
     
     InterProcessMutex lock = getMutex(id);
     
@@ -262,7 +264,7 @@ public class SortingImpl implements Sorting {
       if (locked = lock.acquire(10, TimeUnit.SECONDS)) {
         try {
           // Add the values of columns to the sortableresult as we want future results to be indexed the same way
-          id.addColumnsToIndex(columns.values());
+          id.addColumnsToIndex(columnsToIndex);
           
           // Get the results we have to update
           results = fetch(id);
@@ -276,35 +278,47 @@ public class SortingImpl implements Sorting {
             // we want to index
             if (result.columnSize() > numCols) {
               // It's more efficient to go over each column to index
-              for (Entry<Column,Index> entry : columns.entries()) {
-                if (result.containsKey(entry.getKey())) {
-                  Collection<SValue> values = result.get(entry.getKey());
-                  for (SValue value : values) {
-                    Mutation m = getDocumentPrefix(id, result, value.value());
-                    
-                    final String direction = Order.ASCENDING.equals(entry.getValue().order()) ? FORWARD : REVERSE;
-                    m.put(entry.getValue().column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
-                    
-                    bw.addMutation(m);
-                  }
+              for (Column columnToIndex : indexHelper.columnIndices().keySet()) {
+                
+                // Determine if the object contains the column we need to index
+                if (result.containsKey(columnToIndex)) {
+                  // If so, get the value(s) for that column
+                  final Collection<Index> indices = indexHelper.indicesForColumn(columnToIndex);
+                  final Collection<SValue> values = result.get(columnToIndex);
+                  
+                  addIndicesForRecord(id, result, bw, indices, values);
+                  
+                  /*
+                   * for (SValue value : values) { Mutation m = getDocumentPrefix(id, result, value.value());
+                   * 
+                   * // Place an Index entry for each value in each direction defined for (Index index : indexHelper.indicesForColumn(columnToIndex)) { final
+                   * String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE; m.put(columnToIndex.toString(), direction + NULL_BYTE_STR +
+                   * result.docId(), result.documentVisibility(), result.toValue()); }
+                   * 
+                   * bw.addMutation(m); }
+                   */
                 }
               }
             } else {
               // Otherwise it's more efficient to iterate over the columns of the result
               for (Entry<Column,SValue> entry : result.columnValues()) {
-                if (columns.containsKey(entry.getKey())) {
-                  final Collection<Index> indexes = columns.get(entry.getKey());
-                  for (Index index : indexes) {
-                    final Collection<SValue> svalues = result.get(index.column());
-                    for (SValue value : svalues) {
-                      Mutation m = getDocumentPrefix(id, result, value.value());
-                      
-                      final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
-                      m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
-                      
-                      bw.addMutation(m);
-                    }
-                  }
+                final Column column = entry.getKey();
+                
+                // Determine if we should index this column
+                if (indexHelper.shouldIndex(column)) {
+                  final Collection<Index> indices = indexHelper.indicesForColumn(column);
+                  final Collection<SValue> values = result.get(column);
+                  
+                  addIndicesForRecord(id, result, bw, indices, values);
+                  /*
+                   * for (SValue value : values) { Mutation m = getDocumentPrefix(id, result, value.value());
+                   * 
+                   * // Place an Index entry for each value in each direction defined for (Index index : indexes) { final String direction =
+                   * Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE; m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(),
+                   * result.documentVisibility(), result.toValue()); }
+                   * 
+                   * bw.addMutation(m); }
+                   */
                 }
               }
             }
@@ -323,11 +337,35 @@ public class SortingImpl implements Sorting {
         return;
       } else {
         count++;
-        log.warn("index() on {} could not acquire lock after {} seconds. Attempting acquire #{}", new Object[] {id.uuid(), LOCK_SECS, count}); 
+        log.warn("index() on {} could not acquire lock after {} seconds. Attempting acquire #{}", new Object[] {id.uuid(), LOCK_SECS, count});
       }
     }
     
     throw new IllegalStateException("Could not acquire lock during index() after " + count + " attempts");
+  }
+  
+  /**
+   * For a QueryResult, write the Index(es) for the Column the SValues came from.
+   * @param id
+   * @param result
+   * @param bw
+   * @param indices
+   * @param values
+   * @throws MutationsRejectedException
+   * @throws IOException
+   */
+  protected void addIndicesForRecord(SortableResult id, MultimapQueryResult result, BatchWriter bw, Collection<Index> indices, Collection<SValue> values) throws MutationsRejectedException, IOException {
+    for (SValue value : values) {
+      Mutation m = getDocumentPrefix(id, result, value.value());
+      
+      // Place an Index entry for each value in each direction defined
+      for (Index index : indices) {
+        final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
+        m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
+      }
+      
+      bw.addMutation(m);
+    }
   }
   
   @Override
@@ -356,7 +394,6 @@ public class SortingImpl implements Sorting {
     BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
     bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
     bs.fetchColumnFamily(DOCID_FIELD_NAME_TEXT);
-    
     
     return CloseableIterable.create(bs, Iterables.transform(bs, new KVToMultimap()));
   }
@@ -467,7 +504,6 @@ public class SortingImpl implements Sorting {
     bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
     bs.fetchColumnFamily(colf);
     
-    
     IteratorSetting cfg = new IteratorSetting(50, GroupByRowSuffixIterator.class);
     bs.addScanIterator(cfg);
     
@@ -538,16 +574,6 @@ public class SortingImpl implements Sorting {
   
   protected UnexpectedStateException unexpectedState(SortableResult id, State expected, State actual) {
     return new UnexpectedStateException("Invalid state " + id + " for " + id + ". Expected " + expected + " but was " + actual);
-  }
-  
-  protected HashMultimap<Column,Index> mapForIndexedColumns(Iterable<Index> columnsToIndex) {
-    final HashMultimap<Column,Index> columns = HashMultimap.create();
-    
-    for (Index index : columnsToIndex) {
-      columns.put(index.column(), index);
-    }
-    
-    return columns;
   }
   
   protected final InterProcessMutex getMutex(SortableResult id) {

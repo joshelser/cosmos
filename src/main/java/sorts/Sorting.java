@@ -1,6 +1,7 @@
 package sorts;
 
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.TableNotFoundException;
@@ -20,6 +21,15 @@ import com.google.common.collect.Ordering;
 public interface Sorting {
   
   public void register(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException;
+  
+  /**
+   * Adds a result to the given SortableResult
+   * 
+   * @param id
+   * @param queryResult
+   * @throws Exception
+   */
+  public void addResult(SortableResult id, QueryResult<?> queryResult) throws Exception;
   
   /**
    * Add results to the given SortableResult
@@ -44,7 +54,7 @@ public interface Sorting {
    * @param id
    * @param columnsToIndex
    */
-  public void index(SortableResult id, Iterable<Index> columnsToIndex) throws Exception;
+  public void index(SortableResult id, Set<Index> columnsToIndex) throws Exception;
   
   /**
    * Fetch all columns present for a given {@link SortableResult}
