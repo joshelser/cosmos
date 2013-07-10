@@ -38,7 +38,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
  * 
  */
 public class MediawikiQueries {
-  public static final int MAX_SIZE = 8000;
+  public static final int MAX_SIZE = 16000;
   public static final int MAX_OFFSET = 11845576 - MAX_SIZE;
   public static final int MAX_ROW = 999999999;
   
@@ -128,16 +128,18 @@ public class MediawikiQueries {
       Stopwatch sw = new Stopwatch();
       int prev = Integer.MIN_VALUE;
       sw.start();
-      final CloseableIterable<MultimapQueryResult> results = this.sorts.fetch(id, Index.define(Defaults.DOCID_FIELD_NAME));
+      
+//      final CloseableIterable<MultimapQueryResult> results = this.sorts.fetch(id, Index.define(Defaults.DOCID_FIELD_NAME));
+      final CloseableIterable<MultimapQueryResult> results = this.sorts.fetch(id, Index.define(REVISION_ID));
       for (MultimapQueryResult r : results) {
         int current = Integer.parseInt(r.docId());
-        /*if (prev > current) {
+        if (prev > current) {
           System.out.println("WOAH, got " + current + " docid which was greater than the previous " + prev);
           results.close();
           System.exit(1);
         }
         
-        prev = current;*/
+        prev = current;
       }
       
       sw.stop();
@@ -150,7 +152,7 @@ public class MediawikiQueries {
       sw.start();
       this.sorts.delete(id);
       sw.stop();
-      System.out.println("Took " + sw.toString() + " to delete results");
+      System.out.println("Took " + sw.toString() + " to delete results\n");
       
       iters++;
     }
