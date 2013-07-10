@@ -42,7 +42,7 @@ public class DedupingPredicate implements Predicate<Entry<Key,Value>> {
     
     String uid = null;
     try {
-      uid = Text.decode(holder.getBytes(), index + 1, holder.getLength());
+      uid = Text.decode(holder.getBytes(), index + 1, holder.getLength() - (index + 1));
     } catch (CharacterCodingException e) {
       throw new RuntimeException(e);
     }
