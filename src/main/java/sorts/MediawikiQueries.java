@@ -20,6 +20,7 @@ import sorts.impl.SortingImpl;
 import sorts.mediawiki.MediawikiPage.Page;
 import sorts.mediawiki.MediawikiPage.Page.Revision;
 import sorts.mediawiki.MediawikiPage.Page.Revision.Contributor;
+import sorts.options.Defaults;
 import sorts.options.Index;
 import sorts.results.CloseableIterable;
 import sorts.results.Column;
@@ -28,6 +29,7 @@ import sorts.results.impl.MultimapQueryResult;
 import sorts.util.IdentitySet;
 
 import com.google.common.base.Function;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -123,21 +125,32 @@ public class MediawikiQueries {
       System.out.println("Fetched " + recordsReturned + "/" + numRecords);
       bs.close();
       
+      Stopwatch sw = new Stopwatch();
       int prev = Integer.MIN_VALUE;
-      final CloseableIterable<MultimapQueryResult> results = this.sorts.fetch(id, Index.define(SortingImpl.DOCID_FIELD_NAME));
+      sw.start();
+      final CloseableIterable<MultimapQueryResult> results = this.sorts.fetch(id, Index.define(Defaults.DOCID_FIELD_NAME));
       for (MultimapQueryResult r : results) {
         int current = Integer.parseInt(r.docId());
-        if (prev > current) {
+        /*if (prev > current) {
           System.out.println("WOAH, got " + current + " docid which was greater than the previous " + prev);
           results.close();
           System.exit(1);
         }
         
-        prev = current;
+        prev = current;*/
       }
       
+      sw.stop();
+      
+      System.out.println("Took " + sw.toString() + " to fetch results");
+      
       results.close();
+
+      sw = new Stopwatch();
+      sw.start();
       this.sorts.delete(id);
+      sw.stop();
+      System.out.println("Took " + sw.toString() + " to delete results");
       
       iters++;
     }

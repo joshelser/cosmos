@@ -16,10 +16,11 @@ import org.apache.accumulo.core.client.BatchWriter;
 import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.IteratorSetting;
 import org.apache.accumulo.core.client.MutationsRejectedException;
+import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.client.TableNotFoundException;
+import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
-import org.apache.accumulo.core.data.Value;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -36,6 +37,8 @@ import sorts.SortingMetadata.State;
 import sorts.UnexpectedStateException;
 import sorts.UnindexedColumnException;
 import sorts.accumulo.GroupByRowSuffixIterator;
+import sorts.accumulo.OrderFilter;
+import sorts.options.Defaults;
 import sorts.options.Index;
 import sorts.options.Order;
 import sorts.options.Paging;
@@ -53,14 +56,6 @@ import com.google.common.io.Closeables;
 
 public class SortingImpl implements Sorting {
   private static final Logger log = LoggerFactory.getLogger(SortingImpl.class);
-  
-  public static final String NULL_BYTE_STR = "\0";
-  public static final String DOCID_FIELD_NAME = "SORTS_DOCID";
-  public static final Text DOCID_FIELD_NAME_TEXT = new Text(DOCID_FIELD_NAME);
-  public static final String FORWARD = "f";
-  public static final String REVERSE = "r";
-  public static final Value EMPTY_VALUE = new Value(new byte[0]);
-  public static final String CURATOR_PREFIX = "/sorts/";
   
   public static final long LOCK_SECS = 10;
   
@@ -168,15 +163,17 @@ public class SortingImpl implements Sorting {
         } else {
           count++;
           log.warn("addResults() on {} could not acquire lock after {} seconds. Attempting acquire #{}", new Object[] {id.uuid(), LOCK_SECS, count});
-          
         }
+        
+        throw new IllegalStateException("Could not acquire lock during index() after " + count + " attempts");
       }
     } else {
       performAdd(id, queryResults);
     }
   }
   
-  protected void performAdd(SortableResult id, Iterable<? extends QueryResult<?>> queryResults) throws MutationsRejectedException, TableNotFoundException, IOException {
+  protected void performAdd(SortableResult id, Iterable<? extends QueryResult<?>> queryResults) throws MutationsRejectedException, TableNotFoundException,
+      IOException {
     BatchWriter bw = null, metadataBw = null;
     
     try {
@@ -198,14 +195,14 @@ public class SortingImpl implements Sorting {
           final SValue v = entry.getValue();
           holder.set(c.column());
           
-          columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, EMPTY_VALUE);
+          columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, Defaults.EMPTY_VALUE);
           
           if (indexHelper.shouldIndex(c)) {
             for (Index index : indexHelper.indicesForColumn(c)) {
               Mutation m = getDocumentPrefix(id, result, v.value());
               
-              final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
-              m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
+              final String direction = Order.direction(index.order());
+              m.put(index.column().toString(), direction + Defaults.NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
               
               bw.addMutation(m);
             }
@@ -269,13 +266,14 @@ public class SortingImpl implements Sorting {
     boolean locked = false;
     int count = 1;
     
+    // Only perform locking when the client requests it
     if (id.lockOnUpdates) {
       while (!locked && count < 4) {
         if (locked = lock.acquire(10, TimeUnit.SECONDS)) {
           try {
             performUpdate(id, columnsToIndex);
             
-          } finally {          
+          } finally {
             lock.release();
           }
           
@@ -284,15 +282,16 @@ public class SortingImpl implements Sorting {
           count++;
           log.warn("index() on {} could not acquire lock after {} seconds. Attempting acquire #{}", new Object[] {id.uuid(), LOCK_SECS, count});
         }
+        
+        throw new IllegalStateException("Could not acquire lock during index() after " + count + " attempts");
       }
     } else {
       performUpdate(id, columnsToIndex);
     }
-    
-    throw new IllegalStateException("Could not acquire lock during index() after " + count + " attempts");
   }
   
-  protected void performUpdate(SortableResult id, Set<Index> columnsToIndex) throws TableNotFoundException, UnexpectedStateException, MutationsRejectedException, IOException {
+  protected void performUpdate(SortableResult id, Set<Index> columnsToIndex) throws TableNotFoundException, UnexpectedStateException,
+      MutationsRejectedException, IOException {
     final IndexHelper indexHelper = IndexHelper.create(columnsToIndex);
     final int numCols = indexHelper.columnCount();
     CloseableIterable<MultimapQueryResult> results = null;
@@ -368,8 +367,8 @@ public class SortingImpl implements Sorting {
       
       // Place an Index entry for each value in each direction defined
       for (Index index : indices) {
-        final String direction = Order.ASCENDING.equals(index.order()) ? FORWARD : REVERSE;
-        m.put(index.column().toString(), direction + NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
+        final String direction = Order.direction(index.order());
+        m.put(index.column().toString(), direction + Defaults.NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
       }
       
       bw.addMutation(m);
@@ -401,7 +400,7 @@ public class SortingImpl implements Sorting {
     
     BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
     bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
-    bs.fetchColumnFamily(DOCID_FIELD_NAME_TEXT);
+    bs.fetchColumnFamily(Defaults.DOCID_FIELD_NAME_TEXT);
     
     return CloseableIterable.create(bs, Iterables.transform(bs, new KVToMultimap()));
   }
@@ -429,7 +428,7 @@ public class SortingImpl implements Sorting {
     }
     
     BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
-    bs.setRanges(Collections.singleton(Range.exact(id.uuid() + NULL_BYTE_STR + value)));
+    bs.setRanges(Collections.singleton(Range.exact(id.uuid() + Defaults.NULL_BYTE_STR + value)));
     bs.fetchColumnFamily(new Text(column.column()));
     
     return CloseableIterable.transform(bs, new KVToMultimap());
@@ -469,19 +468,23 @@ public class SortingImpl implements Sorting {
       log.error("{} is not indexed by {}", ordering, id);
       throw new UnindexedColumnException();
     }
-  
-    // TODO seriously? batchscanner when order is important?
-    BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
-    bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
-    bs.fetchColumnFamily(new Text(ordering.column().column()));
+    
+    Scanner scanner = id.connector().createScanner(id.dataTable(), id.auths());
+    scanner.setRange(Range.prefix(id.uuid()));
+    scanner.fetchColumnFamily(new Text(ordering.column().column()));
+
+    // TODO Need to post filter on cq-prefix to only look at the ordering we want
+    IteratorSetting filter = new IteratorSetting(50, "cgFilter", OrderFilter.class);
+    filter.addOption(OrderFilter.PREFIX, Order.direction(ordering.order()));
+    scanner.addScanIterator(filter);
     
     // TODO Also need to adhere to the Ordering on the Index
     
     // If the client has told us they don't want duplicate records, lets not give them duplicate records
     if (duplicateUidsAllowed) {
-      return CloseableIterable.transform(bs, new KVToMultimap());
+      return CloseableIterable.transform(scanner, new KVToMultimap());
     } else {
-      return CloseableIterable.filterAndTransform(bs, new DedupingPredicate(), new KVToMultimap());
+      return CloseableIterable.filterAndTransform(scanner, new DedupingPredicate(), new KVToMultimap());
     }
   }
   
@@ -566,7 +569,7 @@ public class SortingImpl implements Sorting {
   }
   
   protected Mutation getDocumentPrefix(SortableResult id, QueryResult<?> queryResult, String suffix) {
-    return new Mutation(id.uuid() + NULL_BYTE_STR + suffix);
+    return new Mutation(id.uuid() + Defaults.NULL_BYTE_STR + suffix);
   }
   
   protected Mutation addDocument(SortableResult id, QueryResult<?> queryResult) throws IOException {
@@ -574,7 +577,7 @@ public class SortingImpl implements Sorting {
     
     // TODO be more space efficient here and store a reference to the document once in Accumulo
     // merits: don't bloat the default locality group's index, less size overall
-    m.put(DOCID_FIELD_NAME, FORWARD + NULL_BYTE_STR + queryResult.docId(), queryResult.documentVisibility(), queryResult.toValue());
+    m.put(Defaults.DOCID_FIELD_NAME, Order.FORWARD + Defaults.NULL_BYTE_STR + queryResult.docId(), queryResult.documentVisibility(), queryResult.toValue());
     
     return m;
   }
@@ -588,6 +591,7 @@ public class SortingImpl implements Sorting {
   }
   
   protected final InterProcessMutex getMutex(SortableResult id) {
-    return new InterProcessMutex(curator, SortingImpl.CURATOR_PREFIX + id.uuid());
+    return new InterProcessMutex(curator, Defaults.CURATOR_PREFIX + id.uuid());
   }
+  
 }

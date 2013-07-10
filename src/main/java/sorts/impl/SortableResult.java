@@ -70,9 +70,9 @@ public class SortableResult {
   }
   
   protected void createIfNotExists(TableOperations tops, String tableName) {
-    if (!tops.exists(this.dataTable)) {
+    if (!tops.exists(tableName)) {
       try {
-        tops.create(this.dataTable);
+        tops.create(tableName);
         
         //TODO Make a better API than runtimeexception? Do (should) I care?
         // If the user we were given can't do what's necessary, then
@@ -80,13 +80,13 @@ public class SortableResult {
         // I suppose best to just make a named-exception then so people
         // specifically know what happened.
       } catch (AccumuloException e) {
-        log.error("Could not create table '{}'", this.dataTable, e);
+        log.error("Could not create table '{}'", tableName, e);
         throw new RuntimeException(e);
       } catch (AccumuloSecurityException e) {
-        log.error("Could not create table '{}'", this.dataTable, e);
+        log.error("Could not create table '{}'", tableName, e);
         throw new RuntimeException(e);
       } catch (TableExistsException e) {
-        log.error("Could not create table '{}'", this.dataTable, e);
+        log.error("Could not create table '{}'", tableName, e);
         throw new RuntimeException(e);
       } 
     }

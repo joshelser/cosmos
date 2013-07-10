@@ -78,10 +78,17 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     results = s.fetch(id, Index.define("TEXT"));
     
-    // This should really be two...
+    // This should really be two, but w/e because we allow dupes
     Assert.assertEquals(4, Iterables.size(results));
     
     results.close();
+    
+    results = s.fetch(id, Index.define("TEXT"), false);
+    
+    Assert.assertEquals(2, Iterables.size(results));
+    
+    results.close();
+    
     s.close();
   }
   
