@@ -11,7 +11,7 @@ import org.apache.hadoop.io.WritableUtils;
 
 import com.google.common.base.Preconditions;
 
-public class SValue implements Writable {
+public class SValue implements Writable, Comparable<SValue> {
   private String value;
   private ColumnVisibility visibility;
   
@@ -82,5 +82,16 @@ public class SValue implements Writable {
     in.readFully(cvBytes);
     
     this.visibility = new ColumnVisibility(cvBytes);
+  }
+
+  @Override
+  public int compareTo(SValue o) {
+    int res = this.value.compareTo(o.value);
+    
+    if (0 == res) {
+      return this.visibility.toString().compareTo(o.visibility.toString());
+    }
+    
+    return res;
   }
 }
