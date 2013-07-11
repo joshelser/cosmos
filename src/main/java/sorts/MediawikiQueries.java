@@ -1,9 +1,15 @@
 package sorts;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.accumulo.core.client.BatchScanner;
 import org.apache.accumulo.core.client.Connector;
@@ -20,7 +26,6 @@ import sorts.impl.SortingImpl;
 import sorts.mediawiki.MediawikiPage.Page;
 import sorts.mediawiki.MediawikiPage.Page.Revision;
 import sorts.mediawiki.MediawikiPage.Page.Revision.Contributor;
-import sorts.options.Defaults;
 import sorts.options.Index;
 import sorts.results.CloseableIterable;
 import sorts.results.Column;
@@ -32,6 +37,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
@@ -105,13 +112,11 @@ public class MediawikiQueries {
       
       this.sorts.register(id);
       
-      System.out.println("Iteration " + iters);
-      final AtomicInteger recordsReturned = new AtomicInteger(0);
-      
-      this.sorts.addResults(id, Iterables.transform(inputIterable, new Function<Entry<Key,Value>,MultimapQueryResult>() {
+      System.out.println(Thread.currentThread().getName() + ": Iteration " + iters);
+      long recordsReturned = 0l;
+      Function<Entry<Key,Value>,MultimapQueryResult> func = new Function<Entry<Key,Value>,MultimapQueryResult>() {
         @Override
         public MultimapQueryResult apply(Entry<Key,Value> input) {
-          recordsReturned.incrementAndGet();
           Page p;
           try {
             p = Page.parseFrom(input.getValue().get());
@@ -120,31 +125,89 @@ public class MediawikiQueries {
           }
           return pagesToQueryResult(p);
         }
-      }));
+      };
       
-      System.out.println("Fetched " + recordsReturned + "/" + numRecords);
-      bs.close();
+      ArrayList<MultimapQueryResult> tformSource = Lists.newArrayListWithCapacity(20000);
       
       Stopwatch sw = new Stopwatch();
-      int prev = Integer.MIN_VALUE;
+      Stopwatch tformSw = new Stopwatch();
+      
+      for (Entry<Key,Value> input : inputIterable) {
+        tformSw.start();
+        tformSource.add(func.apply(input));
+        tformSw.stop();
+        recordsReturned++;
+      }
+      
+      sw.start();
+      this.sorts.addResults(id, tformSource);
+      sw.stop();
+      
+      System.out.println(Thread.currentThread().getName() + ": Took " + tformSw + " transforming and " + sw + " to store " + recordsReturned + " records");
+      bs.close();
+      
+      sw = new Stopwatch();
+//      int prev = Integer.MIN_VALUE;
+      String prev = null;
+      String lastDocId = null;
+      long resultCount = 0l;
       sw.start();
       
 //      final CloseableIterable<MultimapQueryResult> results = this.sorts.fetch(id, Index.define(Defaults.DOCID_FIELD_NAME));
       final CloseableIterable<MultimapQueryResult> results = this.sorts.fetch(id, Index.define(REVISION_ID));
-      for (MultimapQueryResult r : results) {
-        int current = Integer.parseInt(r.docId());
+      Iterator<MultimapQueryResult> resultsIter = results.iterator();
+      
+      for (; resultsIter.hasNext(); ) {
+        MultimapQueryResult r = resultsIter.next();
+        
+        sw.stop();
+        resultCount++;
+        
+        Collection<SValue> values = r.get(REVISION_ID);
+        
+        TreeSet<SValue> sortedValues = Sets.newTreeSet(values);
+        
+        if (null == prev) {
+          prev = sortedValues.first().value();
+        } else {
+          boolean plausible = false;
+          Iterator<SValue> iter = sortedValues.iterator();
+          for (; !plausible && iter.hasNext(); ) {
+            String val = iter.next().value();
+            if (prev.compareTo(val) < 0) {
+              plausible = true;
+            }
+          }
+          
+          if (!plausible) {
+            System.out.println(Thread.currentThread().getName() + ": woah buddy, " + lastDocId + " shouldn't have come before " + r.docId());
+            results.close();
+            System.exit(1);
+          }
+        }
+        
+        lastDocId = r.docId();
+        
+        /*int current = Integer.parseInt(r.docId());
         if (prev > current) {
           System.out.println("WOAH, got " + current + " docid which was greater than the previous " + prev);
           results.close();
           System.exit(1);
         }
         
-        prev = current;
+        prev = current;*/
+       
+        sw.start();
       }
       
       sw.stop();
       
-      System.out.println("Took " + sw.toString() + " to fetch results");
+      if (resultCount != recordsReturned) {
+        System.out.println(Thread.currentThread().getName() + ": Expected to get " + recordsReturned + " records but got " + resultCount);
+        System.exit(1);
+      }
+      
+      System.out.println(Thread.currentThread().getName() + ": Took " + sw.toString() + " to fetch results");
       
       results.close();
 
@@ -152,15 +215,30 @@ public class MediawikiQueries {
       sw.start();
       this.sorts.delete(id);
       sw.stop();
-      System.out.println("Took " + sw.toString() + " to delete results\n");
+      System.out.println(Thread.currentThread().getName() + ": Took " + sw.toString() + " to delete results");
       
       iters++;
     }
   }
   
+  public static Runnable runQueries(final int numQueries) {
+    return new Runnable() {
+      public void run() {
+        try {
+          (new MediawikiQueries()).run(numQueries);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    };
+  }
+  
   public static void main(String[] args) throws Exception {
-    MediawikiQueries queries = new MediawikiQueries();
+    ExecutorService runner = Executors.newFixedThreadPool(3);
+    for (int i = 0; i < 4; i++) {
+      runner.execute(runQueries(4));
+    }
     
-    queries.run(10);
+    runner.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
   }
 }
