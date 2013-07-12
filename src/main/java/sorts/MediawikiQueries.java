@@ -26,6 +26,7 @@ import sorts.impl.SortingImpl;
 import sorts.mediawiki.MediawikiPage.Page;
 import sorts.mediawiki.MediawikiPage.Page.Revision;
 import sorts.mediawiki.MediawikiPage.Page.Revision.Contributor;
+import sorts.options.Defaults;
 import sorts.options.Index;
 import sorts.results.CloseableIterable;
 import sorts.results.Column;
@@ -146,79 +147,131 @@ public class MediawikiQueries {
       System.out.println(Thread.currentThread().getName() + ": Took " + tformSw + " transforming and " + sw + " to store " + recordsReturned + " records");
       bs.close();
       
-      sw = new Stopwatch();
-//      int prev = Integer.MIN_VALUE;
-      String prev = null;
-      String lastDocId = null;
-      long resultCount = 0l;
-      sw.start();
-      
-//      final CloseableIterable<MultimapQueryResult> results = this.sorts.fetch(id, Index.define(Defaults.DOCID_FIELD_NAME));
-      final CloseableIterable<MultimapQueryResult> results = this.sorts.fetch(id, Index.define(REVISION_ID));
-      Iterator<MultimapQueryResult> resultsIter = results.iterator();
-      
-      for (; resultsIter.hasNext(); ) {
-        MultimapQueryResult r = resultsIter.next();
+      // Run a bunch of queries
+      for (int i = 0; i < 3; i++) {
+        long resultCount;
+        String name;
         
-        sw.stop();
-        resultCount++;
-        
-        Collection<SValue> values = r.get(REVISION_ID);
-        
-        TreeSet<SValue> sortedValues = Sets.newTreeSet(values);
-        
-        if (null == prev) {
-          prev = sortedValues.first().value();
+        if (0 == i) {
+          resultCount = docIdFetch(id);
+          name = "docIdFetch";
+        } else if (1 == i) {
+          resultCount = columnFetch(id, REVISION_ID);
+          name = "revisionIdFetch";
         } else {
-          boolean plausible = false;
-          Iterator<SValue> iter = sortedValues.iterator();
-          for (; !plausible && iter.hasNext(); ) {
-            String val = iter.next().value();
-            if (prev.compareTo(val) < 0) {
-              plausible = true;
-            }
-          }
-          
-          if (!plausible) {
-            System.out.println(Thread.currentThread().getName() + ": woah buddy, " + lastDocId + " shouldn't have come before " + r.docId());
-            results.close();
-            System.exit(1);
-          }
+          resultCount = columnFetch(id, PAGE_ID);
+          name = "pageIdFetch";
         }
         
-        lastDocId = r.docId();
-        
-        /*int current = Integer.parseInt(r.docId());
-        if (prev > current) {
-          System.out.println("WOAH, got " + current + " docid which was greater than the previous " + prev);
-          results.close();
+        if (resultCount != recordsReturned) {
+          System.out.println(Thread.currentThread().getName() +  " " + name + ": Expected to get " + recordsReturned + " records but got " + resultCount);
           System.exit(1);
         }
-        
-        prev = current;*/
-       
-        sw.start();
       }
       
-      sw.stop();
-      
-      if (resultCount != recordsReturned) {
-        System.out.println(Thread.currentThread().getName() + ": Expected to get " + recordsReturned + " records but got " + resultCount);
-        System.exit(1);
-      }
-      
-      System.out.println(Thread.currentThread().getName() + ": Took " + sw.toString() + " to fetch results");
-      
-      results.close();
-
+      // Delete the results
       sw = new Stopwatch();
+      
       sw.start();
       this.sorts.delete(id);
       sw.stop();
+      
       System.out.println(Thread.currentThread().getName() + ": Took " + sw.toString() + " to delete results");
       
       iters++;
     }
+    
+    this.sorts.close();
+  }
+  
+  public long docIdFetch(SortableResult id) throws Exception {
+    Stopwatch sw = new Stopwatch();
+    
+    // This is dumb, I didn't pad the docids...
+    String prev = "!";
+    long resultCount = 0l;
+    sw.start();
+    
+    final CloseableIterable<MultimapQueryResult> results = this.sorts.fetch(id, Index.define(Defaults.DOCID_FIELD_NAME));
+    
+    for (MultimapQueryResult r : results) {
+      sw.stop();
+      
+      resultCount++;
+      
+      String current = r.docId();
+      if (prev.compareTo(current) > 0) {
+        System.out.println("WOAH, got " + current + " docid which was greater than the previous " + prev);
+        results.close();
+        System.exit(1);
+      }
+      
+      prev = current;
+     
+      sw.start();
+    }
+    
+    sw.stop();
+    
+    System.out.println(Thread.currentThread().getName() + ": docIdFetch - Took " + sw.toString() + " to fetch results");
+    
+    results.close();
+    
+    return resultCount;
+  }
+  
+  public long columnFetch(SortableResult id, Column colToFetch) throws Exception {
+    Stopwatch sw = new Stopwatch();
+    String prev = null;
+    String lastDocId = null;
+    long resultCount = 0l;
+    
+    sw.start();
+    final CloseableIterable<MultimapQueryResult> results = this.sorts.fetch(id, Index.define(colToFetch));
+    Iterator<MultimapQueryResult> resultsIter = results.iterator();
+    
+    for (; resultsIter.hasNext(); ) {
+      MultimapQueryResult r = resultsIter.next();
+      
+      sw.stop();
+      resultCount++;
+      
+      Collection<SValue> values = r.get(colToFetch);
+      
+      TreeSet<SValue> sortedValues = Sets.newTreeSet(values);
+      
+      if (null == prev) {
+        prev = sortedValues.first().value();
+      } else {
+        boolean plausible = false;
+        Iterator<SValue> iter = sortedValues.iterator();
+        for (; !plausible && iter.hasNext(); ) {
+          String val = iter.next().value();
+          if (prev.compareTo(val) < 0) {
+            plausible = true;
+          }
+        }
+        
+        if (!plausible) {
+          System.out.println(Thread.currentThread().getName() + ": " + colToFetch + " - " + lastDocId + " shouldn't have come before " + r.docId());
+          System.out.println(prev + " compared to " + sortedValues);
+          results.close();
+          System.exit(1);
+        }
+      }
+      
+      lastDocId = r.docId();
+     
+      sw.start();
+    }
+    
+    sw.stop();
+
+    System.out.println(Thread.currentThread().getName() +  ": " + colToFetch + " - Took " + sw.toString() + " to fetch results");
+    
+    results.close();
+    
+    return resultCount;    
   }
   
   public static Runnable runQueries(final int numQueries) {
@@ -236,9 +289,10 @@ public class MediawikiQueries {
   public static void main(String[] args) throws Exception {
     ExecutorService runner = Executors.newFixedThreadPool(3);
     for (int i = 0; i < 4; i++) {
-      runner.execute(runQueries(4));
+      runner.execute(runQueries(2));
     }
     
+    runner.shutdown();
     runner.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
   }
 }

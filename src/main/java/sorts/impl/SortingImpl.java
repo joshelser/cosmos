@@ -472,6 +472,7 @@ public class SortingImpl implements Sorting {
     Scanner scanner = id.connector().createScanner(id.dataTable(), id.auths());
     scanner.setRange(Range.prefix(id.uuid()));
     scanner.fetchColumnFamily(new Text(ordering.column().column()));
+    scanner.setBatchSize(200);
 
     // TODO Need to post filter on cq-prefix to only look at the ordering we want
     IteratorSetting filter = new IteratorSetting(50, "cgFilter", OrderFilter.class);
