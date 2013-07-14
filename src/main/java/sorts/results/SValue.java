@@ -62,7 +62,7 @@ public class SValue implements Writable, Comparable<SValue> {
   
   @Override
   public String toString() {
-    return visibility + ": " + value;
+    return visibility + ": \"" + value + "\"";
   }
 
   public void write(DataOutput out) throws IOException {
