@@ -18,7 +18,6 @@ import org.apache.accumulo.core.client.IteratorSetting;
 import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.client.TableNotFoundException;
-import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
 import org.apache.curator.RetryPolicy;
@@ -199,7 +198,7 @@ public class SortingImpl implements Sorting {
           
           if (indexHelper.shouldIndex(c)) {
             for (Index index : indexHelper.indicesForColumn(c)) {
-              Mutation m = getDocumentPrefix(id, result, v.value());
+              Mutation m = getDocumentPrefix(id, result, v.value(), index.order());
               
               final String direction = Order.direction(index.order());
               m.put(index.column().toString(), direction + Defaults.NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
@@ -362,16 +361,15 @@ public class SortingImpl implements Sorting {
    */
   protected void addIndicesForRecord(SortableResult id, MultimapQueryResult result, BatchWriter bw, Collection<Index> indices, Collection<SValue> values)
       throws MutationsRejectedException, IOException {
-    for (SValue value : values) {
-      Mutation m = getDocumentPrefix(id, result, value.value());
+    // Place an Index entry for each value in each direction defined
+    for (Index index : indices) {
+      for (SValue value : values) {
+        Mutation m = getDocumentPrefix(id, result, value.value(), index.order());
       
-      // Place an Index entry for each value in each direction defined
-      for (Index index : indices) {
         final String direction = Order.direction(index.order());
         m.put(index.column().toString(), direction + Defaults.NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
-      }
-      
-      bw.addMutation(m);
+        bw.addMutation(m);
+      }      
     }
   }
   
@@ -569,12 +567,16 @@ public class SortingImpl implements Sorting {
     SortingMetadata.remove(id);
   }
   
-  protected Mutation getDocumentPrefix(SortableResult id, QueryResult<?> queryResult, String suffix) {
-    return new Mutation(id.uuid() + Defaults.NULL_BYTE_STR + suffix);
+  protected Mutation getDocumentPrefix(SortableResult id, QueryResult<?> queryResult, String suffix, Order order) {
+    if (Order.ASCENDING.equals(order)) {
+      return new Mutation(id.uuid() + Defaults.NULL_BYTE_STR + suffix);
+    } else {
+      return new Mutation(id.uuid() + Defaults.NULL_BYTE_STR + new StringBuilder(suffix).reverse());
+    }
   }
   
   protected Mutation addDocument(SortableResult id, QueryResult<?> queryResult) throws IOException {
-    Mutation m = getDocumentPrefix(id, queryResult, queryResult.docId());
+    Mutation m = getDocumentPrefix(id, queryResult, queryResult.docId(), Order.ASCENDING);
     
     // TODO be more space efficient here and store a reference to the document once in Accumulo
     // merits: don't bloat the default locality group's index, less size overall
