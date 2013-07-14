@@ -1,10 +1,13 @@
 package sorts.accumulo;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.apache.accumulo.core.client.BatchScanner;
 import org.apache.accumulo.core.client.BatchWriter;
@@ -13,10 +16,16 @@ import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.IteratorSetting;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
+import org.apache.accumulo.core.conf.AccumuloConfiguration;
+import org.apache.accumulo.core.data.ByteSequence;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
+import org.apache.accumulo.core.iterators.IteratorEnvironment;
+import org.apache.accumulo.core.iterators.IteratorUtil.IteratorScope;
+import org.apache.accumulo.core.iterators.SortedKeyValueIterator;
+import org.apache.accumulo.core.iterators.SortedMapIterator;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
 import org.apache.accumulo.minicluster.MiniAccumuloConfig;
@@ -31,6 +40,7 @@ import org.junit.experimental.categories.Category;
 import sorts.results.integration.IntegrationTests;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 
 /**
@@ -49,7 +59,7 @@ public class GroupByRowSuffixIteratorTest {
     mac = new MiniAccumuloCluster(macConfig);
     
     mac.start();
-
+    
     // Do this now so we don't forget later (or get an exception)
     tmp.deleteOnExit();
   }
@@ -99,11 +109,8 @@ public class GroupByRowSuffixIteratorTest {
       }
     }
     
-    Map<Key,Long> results = ImmutableMap.<Key,Long> builder()
-        .put(new Key("1_a", "a", "a", 0), 2l)
-        .put(new Key("1_b", "a", "a", 0), 1l)
-        .put(new Key("1_c", "a", "a", 0), 3l)
-        .build();
+    Map<Key,Long> results = ImmutableMap.<Key,Long> builder().put(new Key("1_a", "a", "b", 0), 2l).put(new Key("1_b", "a", "a", 0), 1l)
+        .put(new Key("1_c", "c", "a", 0), 3l).build();
     
     BatchScanner bs = c.createBatchScanner(tableName, new Authorizations(), 1);
     bs.setRanges(Collections.singleton(new Range()));
@@ -119,10 +126,10 @@ public class GroupByRowSuffixIteratorTest {
         
         Assert.assertTrue("Results did not contain: " + entry.getKey(), results.containsKey(entry.getKey()));
         Assert.assertEquals(results.get(entry.getKey()).longValue(), writable.get());
-
+        
         count++;
       }
-
+      
       Assert.assertEquals(results.size(), count);
     } finally {
       if (null != bs) {
@@ -130,7 +137,6 @@ public class GroupByRowSuffixIteratorTest {
       }
     }
   }
-
   
   @Test
   public void testMultipleRows() throws Exception {
@@ -138,7 +144,7 @@ public class GroupByRowSuffixIteratorTest {
     Connector c = zk.getConnector("root", new PasswordToken("root"));
     
     final String tableName = "foo";
-
+    
     if (c.tableOperations().exists(tableName)) {
       c.tableOperations().delete(tableName);
     }
@@ -150,18 +156,18 @@ public class GroupByRowSuffixIteratorTest {
       bw = c.createBatchWriter(tableName, new BatchWriterConfig());
       
       for (int i = 1; i < 6; i++) {
-        Mutation m = new Mutation(i+ "_a");
+        Mutation m = new Mutation(i + "_a");
         m.put("a", "a", 0, "");
         m.put("a", "b", 0, "");
         
         bw.addMutation(m);
         
-        m = new Mutation(i+ "_b");
+        m = new Mutation(i + "_b");
         m.put("a", "a", 0, "");
         
         bw.addMutation(m);
         
-        m = new Mutation(i+ "_c");
+        m = new Mutation(i + "_c");
         m.put("a", "a", 0, "");
         m.put("b", "a", 0, "");
         m.put("c", "a", 0, "");
@@ -175,11 +181,8 @@ public class GroupByRowSuffixIteratorTest {
     }
     
     for (int i = 1; i < 6; i++) {
-      Map<Key,Long> results = ImmutableMap.<Key,Long> builder()
-          .put(new Key(i + "_a", "a", "a", 0), 2l)
-          .put(new Key(i + "_b", "a", "a", 0), 1l)
-          .put(new Key(i + "_c", "a", "a", 0), 3l)
-          .build();
+      Map<Key,Long> results = ImmutableMap.<Key,Long> builder().put(new Key(i + "_a", "a", "b", 0), 2l).put(new Key(i + "_b", "a", "a", 0), 1l)
+          .put(new Key(i + "_c", "c", "a", 0), 3l).build();
       
       BatchScanner bs = c.createBatchScanner(tableName, new Authorizations(), 1);
       bs.setRanges(Collections.singleton(Range.prefix(Integer.toString(i))));
@@ -195,10 +198,10 @@ public class GroupByRowSuffixIteratorTest {
           
           Assert.assertTrue("Results did not contain: " + entry.getKey(), results.containsKey(entry.getKey()));
           Assert.assertEquals(results.get(entry.getKey()).longValue(), writable.get());
-  
+          
           count++;
         }
-  
+        
         Assert.assertEquals(results.size(), count);
       } finally {
         if (null != bs) {
@@ -207,7 +210,6 @@ public class GroupByRowSuffixIteratorTest {
       }
     }
   }
-
   
   @Test
   public void testSingleRowSingleColumn() throws Exception {
@@ -249,11 +251,8 @@ public class GroupByRowSuffixIteratorTest {
       }
     }
     
-    Map<Key,Long> results = ImmutableMap.<Key,Long> builder()
-        .put(new Key("1_a", "col1", "1", 0), 2l)
-        .put(new Key("1_b", "col1", "1", 0), 1l)
-        .put(new Key("1_c", "col1", "1", 0), 1l)
-        .build();
+    Map<Key,Long> results = ImmutableMap.<Key,Long> builder().put(new Key("1_a", "col1", "2", 0), 2l).put(new Key("1_b", "col1", "1", 0), 1l)
+        .put(new Key("1_c", "col1", "1", 0), 1l).build();
     
     BatchScanner bs = c.createBatchScanner(tableName, new Authorizations(), 1);
     bs.setRanges(Collections.singleton(new Range()));
@@ -270,10 +269,10 @@ public class GroupByRowSuffixIteratorTest {
         
         Assert.assertTrue("Results did not contain: " + entry.getKey(), results.containsKey(entry.getKey()));
         Assert.assertEquals(results.get(entry.getKey()).longValue(), writable.get());
-
+        
         count++;
       }
-
+      
       Assert.assertEquals(results.size(), count);
     } finally {
       if (null != bs) {
@@ -281,7 +280,6 @@ public class GroupByRowSuffixIteratorTest {
       }
     }
   }
-
   
   @Test
   public void testManyRowsSingleColumn() throws Exception {
@@ -326,11 +324,8 @@ public class GroupByRowSuffixIteratorTest {
     }
     
     for (int i = 1; i < 6; i++) {
-      Map<Key,Long> results = ImmutableMap.<Key,Long> builder()
-          .put(new Key(i + "_a", "col1", "1", 0), 2l)
-          .put(new Key(i + "_b", "col1", "1", 0), 1l)
-          .put(new Key(i + "_c", "col1", "1", 0), 1l)
-          .build();
+      Map<Key,Long> results = ImmutableMap.<Key,Long> builder().put(new Key(i + "_a", "col1", "2", 0), 2l).put(new Key(i + "_b", "col1", "1", 0), 1l)
+          .put(new Key(i + "_c", "col1", "1", 0), 1l).build();
       
       BatchScanner bs = c.createBatchScanner(tableName, new Authorizations(), 1);
       bs.setRanges(Collections.singleton(Range.prefix(Integer.toString(i))));
@@ -347,10 +342,10 @@ public class GroupByRowSuffixIteratorTest {
           
           Assert.assertTrue("Results did not contain: " + entry.getKey(), results.containsKey(entry.getKey()));
           Assert.assertEquals(results.get(entry.getKey()).longValue(), writable.get());
-  
+          
           count++;
         }
-  
+        
         Assert.assertEquals(results.size(), count);
       } finally {
         if (null != bs) {
@@ -358,5 +353,68 @@ public class GroupByRowSuffixIteratorTest {
         }
       }
     }
+  }
+  
+  @Test
+  public void testReseek() throws Exception {
+    TreeMap<Key,Value> data = Maps.newTreeMap();
+    data.put(new Key("foo\u0000bell", "RESTAURANT", "f\u00001"), new Value());
+    data.put(new Key("foo\u0000bell", "RESTAURANT", "f\u00002"), new Value());
+    data.put(new Key("foo\u0000taco", "RESTAURANT", "f\u00001"), new Value());
+    data.put(new Key("foo\u0000taco", "RESTAURANT", "f\u00002"), new Value());
+    data.put(new Key("foo\u0000taco", "RESTAURANT", "f\u00003"), new Value());
+    
+    SortedMapIterator source = new SortedMapIterator(data);
+    
+    GroupByRowSuffixIterator iter = new GroupByRowSuffixIterator();
+    iter.init(source, Collections.<String,String> emptyMap(), new IteratorEnvironment() {
+      @Override
+      public SortedKeyValueIterator<Key,Value> reserveMapFileReader(final String mapFileName) throws IOException {
+        return null;
+      }
+      
+      @Override
+      public AccumuloConfiguration getConfig() {
+        return null;
+      }
+      
+      @Override
+      public IteratorScope getIteratorScope() {
+        return null;
+      }
+      
+      @Override
+      public boolean isFullMajorCompaction() {
+        return false;
+      }
+      
+      @Override
+      public void registerSideChannel(final SortedKeyValueIterator<Key,Value> iter) {}
+    });
+    
+    iter.seek(Range.prefix("foo"), Collections.<ByteSequence> emptySet(), false);
+    
+    Assert.assertTrue(iter.hasTop());
+    
+    Assert.assertEquals(new Key("foo\u0000bell", "RESTAURANT", "f\u00002"), iter.getTopKey());
+    VLongWritable actual = new VLongWritable(), expected = new VLongWritable(2);
+    
+    actual.readFields(new DataInputStream(new ByteArrayInputStream(iter.getTopValue().get())));
+    Assert.assertEquals(expected, actual);
+    
+    iter.seek(new Range(new Key("foo\u0000bell", "RESTAURANT", "f\u00002"), false, new Key("fop"), false), Collections.<ByteSequence> emptySet(), false);
+    
+    Assert.assertTrue(iter.hasTop());
+
+    Assert.assertEquals(new Key("foo\u0000taco", "RESTAURANT", "f\u00003"), iter.getTopKey());
+    actual = new VLongWritable();
+    expected = new VLongWritable(3);
+    
+    actual.readFields(new DataInputStream(new ByteArrayInputStream(iter.getTopValue().get())));
+    Assert.assertEquals(expected, actual);
+    
+    iter.next();
+    
+    Assert.assertFalse(iter.hasTop());
   }
 }
