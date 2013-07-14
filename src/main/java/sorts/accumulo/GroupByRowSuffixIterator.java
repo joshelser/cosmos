@@ -135,6 +135,7 @@ public class GroupByRowSuffixIterator implements SortedKeyValueIterator<Key,Valu
       currentKey = getSource().getTopKey();
     }
     
+    this.topKey = currentKey;
     this.count.set(keyCount);
   }
   
