@@ -473,7 +473,7 @@ public class SortingImpl implements Sorting {
     scanner.setBatchSize(200);
 
     // TODO Need to post filter on cq-prefix to only look at the ordering we want
-    IteratorSetting filter = new IteratorSetting(50, "cgFilter", OrderFilter.class);
+    IteratorSetting filter = new IteratorSetting(50, "cqFilter", OrderFilter.class);
     filter.addOption(OrderFilter.PREFIX, Order.direction(ordering.order()));
     scanner.addScanIterator(filter);
     
@@ -516,8 +516,14 @@ public class SortingImpl implements Sorting {
     BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
     bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
     bs.fetchColumnFamily(colf);
+
+
+    // TODO Need to post filter on cq-prefix to only look at the ordering we want
+    IteratorSetting filter = new IteratorSetting(50, "cqFilter", OrderFilter.class);
+    filter.addOption(OrderFilter.PREFIX, Order.FORWARD);
+    bs.addScanIterator(filter);
     
-    IteratorSetting cfg = new IteratorSetting(50, GroupByRowSuffixIterator.class);
+    IteratorSetting cfg = new IteratorSetting(60, GroupByRowSuffixIterator.class);
     bs.addScanIterator(cfg);
     
     return CloseableIterable.transform(bs, new GroupByFunction());

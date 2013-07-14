@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,6 +41,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -47,7 +50,11 @@ import com.google.protobuf.InvalidProtocolBufferException;
  */
 public class MediawikiQueries {
   public static final int MAX_SIZE = 16000;
+  
+  // MAX_OFFSET is a little misleading because the max pageID is 33928886
+  // Don't have contiguous pageIDs
   public static final int MAX_OFFSET = 11845576 - MAX_SIZE;
+  
   public static final int MAX_ROW = 999999999;
   
   public static final ColumnVisibility cv = new ColumnVisibility("en");
@@ -98,9 +105,7 @@ public class MediawikiQueries {
     int iters = 0;
     
     while (iters < numIterations) {
-      SortableResult id = SortableResult.create(this.con, 
-          this.con.securityOperations().getUserAuthorizations(this.con.whoami()), 
-          IdentitySet.<Index> create());
+      SortableResult id = SortableResult.create(this.con, this.con.securityOperations().getUserAuthorizations(this.con.whoami()), IdentitySet.<Index> create());
       
       int offset = offsetR.nextInt(MAX_OFFSET);
       int numRecords = cardinalityR.nextInt(MAX_SIZE);
@@ -113,7 +118,7 @@ public class MediawikiQueries {
       
       this.sorts.register(id);
       
-      System.out.println(Thread.currentThread().getName() + ": Iteration " + iters);
+      System.out.println(Thread.currentThread().getName() + ": " + id.uuid() + " - Iteration " + iters);
       long recordsReturned = 0l;
       Function<Entry<Key,Value>,MultimapQueryResult> func = new Function<Entry<Key,Value>,MultimapQueryResult>() {
         @Override
@@ -148,7 +153,7 @@ public class MediawikiQueries {
       bs.close();
       
       // Run a bunch of queries
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 7; i++) {
         long resultCount;
         String name;
         
@@ -158,13 +163,31 @@ public class MediawikiQueries {
         } else if (1 == i) {
           resultCount = columnFetch(id, REVISION_ID);
           name = "revisionIdFetch";
-        } else {
+        } else if (2 == i) {
           resultCount = columnFetch(id, PAGE_ID);
           name = "pageIdFetch";
+        } else if (3 == i) {
+          groupBy(id, REVISION_ID);
+          // no sense to verify here
+          resultCount = recordsReturned;
+          name = "groupByRevisionId";
+        } else if (4 == i) {
+          groupBy(id, PAGE_ID);
+          // no sense to verify here
+          resultCount = recordsReturned;
+          name = "groupByRevisionId";
+        } else if (5 == i) {
+          resultCount = columnFetch(id, CONTRIBUTOR_USERNAME);
+          name = "contributorUsernameFetch";
+        } else {
+          groupBy(id, CONTRIBUTOR_USERNAME);
+          // no sense to verify here
+          resultCount = recordsReturned;
+          name = "groupByContributorUsername";
         }
         
         if (resultCount != recordsReturned) {
-          System.out.println(Thread.currentThread().getName() +  " " + name + ": Expected to get " + recordsReturned + " records but got " + resultCount);
+          System.out.println(Thread.currentThread().getName() + " " + name + ": Expected to get " + recordsReturned + " records but got " + resultCount);
           System.exit(1);
         }
       }
@@ -207,7 +230,7 @@ public class MediawikiQueries {
       }
       
       prev = current;
-     
+      
       sw.start();
     }
     
@@ -230,7 +253,7 @@ public class MediawikiQueries {
     final CloseableIterable<MultimapQueryResult> results = this.sorts.fetch(id, Index.define(colToFetch));
     Iterator<MultimapQueryResult> resultsIter = results.iterator();
     
-    for (; resultsIter.hasNext(); ) {
+    for (; resultsIter.hasNext();) {
       MultimapQueryResult r = resultsIter.next();
       
       sw.stop();
@@ -245,9 +268,9 @@ public class MediawikiQueries {
       } else {
         boolean plausible = false;
         Iterator<SValue> iter = sortedValues.iterator();
-        for (; !plausible && iter.hasNext(); ) {
+        for (; !plausible && iter.hasNext();) {
           String val = iter.next().value();
-          if (prev.compareTo(val) < 0) {
+          if (prev.compareTo(val) <= 0) {
             plausible = true;
           }
         }
@@ -261,17 +284,72 @@ public class MediawikiQueries {
       }
       
       lastDocId = r.docId();
-     
+      
       sw.start();
     }
     
     sw.stop();
-
-    System.out.println(Thread.currentThread().getName() +  ": " + colToFetch + " - Took " + sw.toString() + " to fetch results");
+    
+    System.out.println(Thread.currentThread().getName() + ": " + colToFetch + " - Took " + sw.toString() + " to fetch results");
     
     results.close();
     
-    return resultCount;    
+    return resultCount;
+  }
+  
+  public void groupBy(SortableResult id, Column colToFetch) throws Exception {
+    Stopwatch sw = new Stopwatch();
+    
+    sw.start();
+    final CloseableIterable<Entry<SValue,Long>> results = this.sorts.groupResults(id, colToFetch);
+    TreeMap<SValue,Long> counts = Maps.newTreeMap();
+    
+    for (Entry<SValue,Long> entry : results) {
+      counts.put(entry.getKey(), entry.getValue());
+    }
+    
+    results.close();
+    sw.stop();
+    
+    System.out.println(Thread.currentThread().getName() + ": " + colToFetch + " - Took " + sw.toString() + " to group results");
+
+//    System.out.println(counts);
+    
+    final CloseableIterable<MultimapQueryResult> verifyResults = this.sorts.fetch(id, Index.define(colToFetch));
+    TreeMap<SValue,Long> records = Maps.newTreeMap();
+    for (MultimapQueryResult r : verifyResults) {
+      if (r.containsKey(colToFetch)) {
+        for (SValue val : r.get(colToFetch)) {
+          if (records.containsKey(val)) {
+            records.put(val, records.get(val) + 1);
+          } else {
+            records.put(val, 1l);
+          }
+        }
+      }
+    }
+
+    verifyResults.close();
+    
+    if (counts.size() != records.size()) {
+      System.out.println(Thread.currentThread().getName() + ": " + colToFetch + " - Expected " + records.size() + " groups but found " + counts.size());
+      System.exit(1);
+    }
+    
+    Set<SValue> countKeys= counts.keySet(), recordKeys = records.keySet();
+    for (SValue k : countKeys) {
+      if (!recordKeys.contains(k)) {
+        System.out.println(Thread.currentThread().getName() + ": " + colToFetch + " - Expected to have count for " + k); 
+        System.exit(1); 
+      }
+      
+      Long actual = counts.get(k), expected = records.get(k);
+      
+      if (!actual.equals(expected)) {
+        System.out.println(Thread.currentThread().getName() + ": " + colToFetch + " - Expected " + expected + " value(s) but found " + actual + " value(s) for " + k.value());
+        System.exit(1);
+      }
+    }
   }
   
   public static Runnable runQueries(final int numQueries) {
@@ -288,7 +366,7 @@ public class MediawikiQueries {
   
   public static void main(String[] args) throws Exception {
     ExecutorService runner = Executors.newFixedThreadPool(3);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 1; i++) {
       runner.execute(runQueries(2));
     }
     
