@@ -51,6 +51,7 @@ import sorts.util.IndexHelper;
 import sorts.util.Single;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 
 public class SortingImpl implements Sorting {
@@ -184,17 +185,23 @@ public class SortingImpl implements Sorting {
       
       final IndexHelper indexHelper = IndexHelper.create(columnsToIndex);
       final Text holder = new Text();
+      final Set<Column> columnsAlreadyIndexed = Sets.newHashSet(); 
       
       for (QueryResult<?> result : queryResults) {
         bw.addMutation(addDocument(id, result));
         Mutation columnMutation = new Mutation(id.uuid());
-        
+	boolean newColumnIndexed = false;        
+
         for (Entry<Column,SValue> entry : result.columnValues()) {
           final Column c = entry.getKey();
           final SValue v = entry.getValue();
-          holder.set(c.column());
           
-          columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, Defaults.EMPTY_VALUE);
+	  if (!columnsAlreadyIndexed.contains(c.column())) {
+            holder.set(c.column());
+            columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, Defaults.EMPTY_VALUE);
+	    columnsAlreadyIndexed.add(c);
+	    newColumnIndexed = true;
+	  }
           
           if (indexHelper.shouldIndex(c)) {
             for (Index index : indexHelper.indicesForColumn(c)) {
@@ -208,7 +215,9 @@ public class SortingImpl implements Sorting {
           }
         }
         
-        metadataBw.addMutation(columnMutation);
+	if (newColumnIndexed) {
+	  metadataBw.addMutation(columnMutation);
+	}
       }
     } catch (MutationsRejectedException e) {
       log.error("Caught exception adding results for {}", id, e);
@@ -472,12 +481,10 @@ public class SortingImpl implements Sorting {
     scanner.fetchColumnFamily(new Text(ordering.column().column()));
     scanner.setBatchSize(200);
 
-    // TODO Need to post filter on cq-prefix to only look at the ordering we want
+    // Filter on cq-prefix to only look at the ordering we want
     IteratorSetting filter = new IteratorSetting(50, "cqFilter", OrderFilter.class);
     filter.addOption(OrderFilter.PREFIX, Order.direction(ordering.order()));
     scanner.addScanIterator(filter);
-    
-    // TODO Also need to adhere to the Ordering on the Index
     
     // If the client has told us they don't want duplicate records, lets not give them duplicate records
     if (duplicateUidsAllowed) {
@@ -518,7 +525,7 @@ public class SortingImpl implements Sorting {
     bs.fetchColumnFamily(colf);
 
 
-    // TODO Need to post filter on cq-prefix to only look at the ordering we want
+    // Filter on cq-prefix to only look at the ordering we want
     IteratorSetting filter = new IteratorSetting(50, "cqFilter", OrderFilter.class);
     filter.addOption(OrderFilter.PREFIX, Order.FORWARD);
     bs.addScanIterator(filter);
