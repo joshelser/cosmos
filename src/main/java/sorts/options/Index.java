@@ -29,6 +29,10 @@ public class Index {
     return new Index(column);
   }
   
+  public static Index define(String columnName, Order order) {
+	return define(Column.create(columnName), order);
+  }
+  
   public static Index define(Column column, Order order) {
     return new Index(column, order);
   }
