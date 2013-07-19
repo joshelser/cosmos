@@ -24,6 +24,7 @@ import sorts.impl.SortableResult;
 import sorts.impl.SortingImpl;
 import sorts.options.Defaults;
 import sorts.options.Index;
+import sorts.options.Order;
 import sorts.options.Paging;
 import sorts.results.impl.MultimapQueryResult;
 import sorts.util.IdentitySet;
@@ -267,7 +268,34 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Assert.assertFalse(resultsIter.hasNext());
     results.close();
+    
+    // Sort by TEXT descending, 1 then 2
+    results = s.fetch(id, Index.define("TEXT", Order.DESCENDING));
 
+    resultsIter = results.iterator();
+    
+    Assert.assertTrue(resultsIter.hasNext());
+    Assert.assertEquals("1", resultsIter.next().docId());
+    
+    Assert.assertTrue(resultsIter.hasNext());
+    Assert.assertEquals("2", resultsIter.next().docId());
+    
+    Assert.assertFalse(resultsIter.hasNext());
+    results.close();
+    
+    // Sort by SIZE descending: should be docid "2" then "1"
+    results = s.fetch(id, Index.define("SIZE", Order.DESCENDING));
+    resultsIter = results.iterator();
+    
+    Assert.assertTrue(resultsIter.hasNext());
+    Assert.assertEquals("2", resultsIter.next().docId());
+    
+    Assert.assertTrue(resultsIter.hasNext());
+    Assert.assertEquals("1", resultsIter.next().docId());
+    
+    Assert.assertFalse(resultsIter.hasNext());
+    results.close();
+    
     s.delete(id);
     s.close();
   }
