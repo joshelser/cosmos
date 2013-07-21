@@ -155,7 +155,7 @@ public class MediawikiQueries {
       Random r = new Random();
       
       // Run a bunch of queries
-      for (int count = 0; i < 30; i++) {
+      for (int count = 0; count < 30; count++) {
         long resultCount;
         String name;
         int i = r.nextInt(9);
