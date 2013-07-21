@@ -199,7 +199,7 @@ public class SortingImpl implements Sorting {
           final Column c = entry.getKey();
           final SValue v = entry.getValue();
           
-          if (!columnsAlreadyIndexed.contains(c.column())) {
+          if (!columnsAlreadyIndexed.contains(c)) {
             holder.set(c.column());
             columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, Defaults.EMPTY_VALUE);
             columnsAlreadyIndexed.add(c);
