@@ -545,12 +545,6 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(2, Iterables.size(results));
     results.close();
     
-    Scanner scanner = id.connector().createScanner(Defaults.DATA_TABLE, id.auths());
-    scanner.setRange(new Range());
-    for (Entry<Key,Value> entry : scanner) {
-      System.out.println(entry);
-    }
-    
     // Sort by TEXT descending, 1 then 2
     results = s.fetch(id, Index.define("TEXT", Order.DESCENDING));
     
