@@ -141,7 +141,6 @@ public class SortingMetadata {
       bs = id.connector().createBatchScanner(id.metadataTable(), id.auths(), 10);
       bs.setRanges(Collections.singleton(Range.exact(id.uuid())));
       bs.fetchColumnFamily(COLUMN_COLFAM);
-      bs.setTimeout(5, TimeUnit.MINUTES);
       
       return Iterables.transform(bs, new Function<Entry<Key,Value>,Column> () {
         private final Text holder = new Text();
