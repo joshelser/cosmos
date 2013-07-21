@@ -18,6 +18,8 @@ import org.apache.accumulo.core.client.IteratorSetting;
 import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.client.TableNotFoundException;
+import org.apache.accumulo.core.client.lexicoder.ReverseLexicoder;
+import org.apache.accumulo.core.client.lexicoder.StringLexicoder;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
 import org.apache.curator.RetryPolicy;
@@ -61,6 +63,7 @@ public class SortingImpl implements Sorting {
   
   private final BatchWriterConfig DEFAULT_BW_CONFIG = new BatchWriterConfig();
   private final CuratorFramework curator;
+  private final ReverseLexicoder<String> revLex = new ReverseLexicoder<String>(new StringLexicoder());
   
   public SortingImpl(String zookeepers) {
     RetryPolicy retryPolicy = new ExponentialBackoffRetry(2000, 3);
@@ -185,23 +188,23 @@ public class SortingImpl implements Sorting {
       
       final IndexHelper indexHelper = IndexHelper.create(columnsToIndex);
       final Text holder = new Text();
-      final Set<Column> columnsAlreadyIndexed = Sets.newHashSet(); 
+      final Set<Column> columnsAlreadyIndexed = Sets.newHashSet();
       
       for (QueryResult<?> result : queryResults) {
         bw.addMutation(addDocument(id, result));
         Mutation columnMutation = new Mutation(id.uuid());
-	boolean newColumnIndexed = false;        
-
+        boolean newColumnIndexed = false;
+        
         for (Entry<Column,SValue> entry : result.columnValues()) {
           final Column c = entry.getKey();
           final SValue v = entry.getValue();
           
-	  if (!columnsAlreadyIndexed.contains(c.column())) {
+          if (!columnsAlreadyIndexed.contains(c.column())) {
             holder.set(c.column());
             columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, Defaults.EMPTY_VALUE);
-	    columnsAlreadyIndexed.add(c);
-	    newColumnIndexed = true;
-	  }
+            columnsAlreadyIndexed.add(c);
+            newColumnIndexed = true;
+          }
           
           if (indexHelper.shouldIndex(c)) {
             for (Index index : indexHelper.indicesForColumn(c)) {
@@ -215,9 +218,9 @@ public class SortingImpl implements Sorting {
           }
         }
         
-	if (newColumnIndexed) {
-	  metadataBw.addMutation(columnMutation);
-	}
+        if (newColumnIndexed) {
+          metadataBw.addMutation(columnMutation);
+        }
       }
     } catch (MutationsRejectedException e) {
       log.error("Caught exception adding results for {}", id, e);
@@ -374,11 +377,11 @@ public class SortingImpl implements Sorting {
     for (Index index : indices) {
       for (SValue value : values) {
         Mutation m = getDocumentPrefix(id, result, value.value(), index.order());
-      
+        
         final String direction = Order.direction(index.order());
         m.put(index.column().toString(), direction + Defaults.NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
         bw.addMutation(m);
-      }      
+      }
     }
   }
   
@@ -480,7 +483,7 @@ public class SortingImpl implements Sorting {
     scanner.setRange(Range.prefix(id.uuid()));
     scanner.fetchColumnFamily(new Text(ordering.column().column()));
     scanner.setBatchSize(200);
-
+    
     // Filter on cq-prefix to only look at the ordering we want
     IteratorSetting filter = new IteratorSetting(50, "cqFilter", OrderFilter.class);
     filter.addOption(OrderFilter.PREFIX, Order.direction(ordering.order()));
@@ -523,8 +526,7 @@ public class SortingImpl implements Sorting {
     BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
     bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
     bs.fetchColumnFamily(colf);
-
-
+    
     // Filter on cq-prefix to only look at the ordering we want
     IteratorSetting filter = new IteratorSetting(50, "cqFilter", OrderFilter.class);
     filter.addOption(OrderFilter.PREFIX, Order.FORWARD);
@@ -581,11 +583,18 @@ public class SortingImpl implements Sorting {
   }
   
   protected Mutation getDocumentPrefix(SortableResult id, QueryResult<?> queryResult, String suffix, Order order) {
+    final Text t = new Text();
+    byte[] b = id.uuid().getBytes();
+    t.append(b, 0, b.length);
+    t.append(new byte[] {0}, 0, 1);
     if (Order.ASCENDING.equals(order)) {
-      return new Mutation(id.uuid() + Defaults.NULL_BYTE_STR + suffix);
+      t.append(suffix.getBytes(), 0, suffix.getBytes().length);
     } else {
-      return new Mutation(id.uuid() + Defaults.NULL_BYTE_STR + new StringBuilder(suffix).reverse());
+      b = this.revLex.encode(suffix);
+      t.append(b, 0, b.length);
     }
+    
+    return new Mutation(t);
   }
   
   protected Mutation addDocument(SortableResult id, QueryResult<?> queryResult) throws IOException {
