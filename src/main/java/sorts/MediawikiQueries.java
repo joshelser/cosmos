@@ -152,10 +152,13 @@ public class MediawikiQueries {
       System.out.println(Thread.currentThread().getName() + ": Took " + tformSw + " transforming and " + sw + " to store " + recordsReturned + " records");
       bs.close();
       
+      Random r = new Random();
+      
       // Run a bunch of queries
-      for (int i = 0; i < 7; i++) {
+      for (int count = 0; i < 30; i++) {
         long resultCount;
         String name;
+        int i = r.nextInt(9);
         
         if (0 == i) {
           resultCount = docIdFetch(id);
@@ -179,11 +182,19 @@ public class MediawikiQueries {
         } else if (5 == i) {
           resultCount = columnFetch(id, CONTRIBUTOR_USERNAME);
           name = "contributorUsernameFetch";
-        } else {
+        } else if (6 == i) {
           groupBy(id, CONTRIBUTOR_USERNAME);
           // no sense to verify here
           resultCount = recordsReturned;
           name = "groupByContributorUsername";
+        } else if (7 == i) {
+          resultCount = columnFetch(id, CONTRIBUTOR_ID);
+          name = "contributorIdFetch";
+        } else {//if (8 == i) {
+          groupBy(id, CONTRIBUTOR_ID);
+          // no sense to verify here
+          resultCount = recordsReturned;
+          name = "groupByContributorID";
         }
         
         if (resultCount != recordsReturned) {
@@ -366,8 +377,8 @@ public class MediawikiQueries {
   
   public static void main(String[] args) throws Exception {
     ExecutorService runner = Executors.newFixedThreadPool(3);
-    for (int i = 0; i < 1; i++) {
-      runner.execute(runQueries(2));
+    for (int i = 0; i < 3; i++) {
+      runner.execute(runQueries(200));
     }
     
     runner.shutdown();
