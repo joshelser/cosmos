@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
@@ -133,6 +134,7 @@ public class MediawikiQueries {
         }
       };
       
+      Map<Column,Long> counts = Maps.newHashMap();
       ArrayList<MultimapQueryResult> tformSource = Lists.newArrayListWithCapacity(20000);
       
       Stopwatch sw = new Stopwatch();
@@ -140,8 +142,13 @@ public class MediawikiQueries {
       
       for (Entry<Key,Value> input : inputIterable) {
         tformSw.start();
-        tformSource.add(func.apply(input));
+        
+        MultimapQueryResult r = func.apply(input);
+        tformSource.add(r);
+        
         tformSw.stop();
+        
+        loadCountsForRecord(counts, r);
         recordsReturned++;
       }
       
@@ -161,45 +168,40 @@ public class MediawikiQueries {
         int i = r.nextInt(9);
         
         if (0 == i) {
-          resultCount = docIdFetch(id);
+          resultCount = docIdFetch(id, counts);
           name = "docIdFetch";
         } else if (1 == i) {
-          resultCount = columnFetch(id, REVISION_ID);
+          resultCount = columnFetch(id, REVISION_ID, counts);
           name = "revisionIdFetch";
         } else if (2 == i) {
-          resultCount = columnFetch(id, PAGE_ID);
+          resultCount = columnFetch(id, PAGE_ID, counts);
           name = "pageIdFetch";
         } else if (3 == i) {
-          groupBy(id, REVISION_ID);
+          groupBy(id, REVISION_ID, counts);
           // no sense to verify here
           resultCount = recordsReturned;
           name = "groupByRevisionId";
         } else if (4 == i) {
-          groupBy(id, PAGE_ID);
+          groupBy(id, PAGE_ID, counts);
           // no sense to verify here
           resultCount = recordsReturned;
           name = "groupByRevisionId";
         } else if (5 == i) {
-          resultCount = columnFetch(id, CONTRIBUTOR_USERNAME);
+          resultCount = columnFetch(id, CONTRIBUTOR_USERNAME, counts);
           name = "contributorUsernameFetch";
         } else if (6 == i) {
-          groupBy(id, CONTRIBUTOR_USERNAME);
+          groupBy(id, CONTRIBUTOR_USERNAME, counts);
           // no sense to verify here
           resultCount = recordsReturned;
           name = "groupByContributorUsername";
         } else if (7 == i) {
-          resultCount = columnFetch(id, CONTRIBUTOR_ID);
+          resultCount = columnFetch(id, CONTRIBUTOR_ID, counts);
           name = "contributorIdFetch";
         } else {//if (8 == i) {
-          groupBy(id, CONTRIBUTOR_ID);
+          groupBy(id, CONTRIBUTOR_ID, counts);
           // no sense to verify here
           resultCount = recordsReturned;
           name = "groupByContributorID";
-        }
-        
-        if (resultCount != recordsReturned) {
-          System.out.println(Thread.currentThread().getName() + " " + name + ": Expected to get " + recordsReturned + " records but got " + resultCount);
-          System.exit(1);
         }
       }
       
@@ -218,7 +220,18 @@ public class MediawikiQueries {
     this.sorts.close();
   }
   
-  public long docIdFetch(SortableResult id) throws Exception {
+  public void loadCountsForRecord(Map<Column,Long> counts, MultimapQueryResult r) {
+	  for (Entry<Column,SValue> entry : r.columnValues()) {
+		  Column c = entry.getKey();
+		  if (counts.containsKey(c)) {
+			  counts.put(c, counts.get(c)+1);
+		  } else {
+			  counts.put(c, 1l);
+		  }
+	  }
+  }
+  
+  public long docIdFetch(SortableResult id, Map<Column,Long> counts) throws Exception {
     Stopwatch sw = new Stopwatch();
     
     // This is dumb, I didn't pad the docids...
@@ -254,7 +267,7 @@ public class MediawikiQueries {
     return resultCount;
   }
   
-  public long columnFetch(SortableResult id, Column colToFetch) throws Exception {
+  public long columnFetch(SortableResult id, Column colToFetch, Map<Column,Long> counts) throws Exception {
     Stopwatch sw = new Stopwatch();
     String prev = null;
     String lastDocId = null;
@@ -305,10 +318,17 @@ public class MediawikiQueries {
     
     results.close();
     
+    long expected = counts.containsKey(colToFetch) ? counts.get(colToFetch) : -1;
+    
+    if (resultCount != expected) {
+      System.out.println(Thread.currentThread().getName() + " " + colToFetch + ": Expected to get " + expected + " records but got " + resultCount);
+      System.exit(1);
+    }
+    
     return resultCount;
   }
   
-  public void groupBy(SortableResult id, Column colToFetch) throws Exception {
+  public void groupBy(SortableResult id, Column colToFetch, Map<Column,Long> columnCounts) throws Exception {
     Stopwatch sw = new Stopwatch();
     
     sw.start();
