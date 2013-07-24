@@ -50,6 +50,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
  * 
  */
 public class MediawikiQueries {
+  public static final String TIMINGS = "[TIMINGS] ";
   public static final int MAX_SIZE = 16000;
   
   // MAX_OFFSET is a little misleading because the max pageID is 33928886
@@ -62,6 +63,10 @@ public class MediawikiQueries {
   
   public static final Column PAGE_ID = Column.create("PAGE_ID"), REVISION_ID = Column.create("REVISION_ID"), REVISION_TIMESTAMP = Column
       .create("REVISION_TIMESTAMP"), CONTRIBUTOR_USERNAME = Column.create("CONTRIBUTOR_USERNAME"), CONTRIBUTOR_ID = Column.create("CONTRIBUTOR_ID");
+  
+  public static void logTiming(long numResults, long duration, String action) {
+    System.err.println(TIMINGS + numResults + " " + duration + " " + action);
+  }
   
   public static MultimapQueryResult pagesToQueryResult(Page p) {
     HashMultimap<Column,SValue> data = HashMultimap.create();
@@ -156,7 +161,12 @@ public class MediawikiQueries {
       this.sorts.addResults(id, tformSource);
       sw.stop();
       
+      long actualNumResults = tformSource.size();
+      
       System.out.println(Thread.currentThread().getName() + ": Took " + tformSw + " transforming and " + sw + " to store " + recordsReturned + " records");
+      logTiming(actualNumResults, tformSw.elapsed(TimeUnit.MILLISECONDS), "transformInput");
+      logTiming(actualNumResults, sw.elapsed(TimeUnit.MILLISECONDS), "ingest");
+
       bs.close();
       
       Random r = new Random();
@@ -168,37 +178,37 @@ public class MediawikiQueries {
         int i = r.nextInt(9);
         
         if (0 == i) {
-          resultCount = docIdFetch(id, counts);
+          resultCount = docIdFetch(id, counts, actualNumResults);
           name = "docIdFetch";
         } else if (1 == i) {
-          resultCount = columnFetch(id, REVISION_ID, counts);
+          resultCount = columnFetch(id, REVISION_ID, counts, actualNumResults);
           name = "revisionIdFetch";
         } else if (2 == i) {
-          resultCount = columnFetch(id, PAGE_ID, counts);
+          resultCount = columnFetch(id, PAGE_ID, counts, actualNumResults);
           name = "pageIdFetch";
         } else if (3 == i) {
-          groupBy(id, REVISION_ID, counts);
+          groupBy(id, REVISION_ID, counts, actualNumResults);
           // no sense to verify here
           resultCount = recordsReturned;
           name = "groupByRevisionId";
         } else if (4 == i) {
-          groupBy(id, PAGE_ID, counts);
+          groupBy(id, PAGE_ID, counts, actualNumResults);
           // no sense to verify here
           resultCount = recordsReturned;
           name = "groupByRevisionId";
         } else if (5 == i) {
-          resultCount = columnFetch(id, CONTRIBUTOR_USERNAME, counts);
+          resultCount = columnFetch(id, CONTRIBUTOR_USERNAME, counts, actualNumResults);
           name = "contributorUsernameFetch";
         } else if (6 == i) {
-          groupBy(id, CONTRIBUTOR_USERNAME, counts);
+          groupBy(id, CONTRIBUTOR_USERNAME, counts, actualNumResults);
           // no sense to verify here
           resultCount = recordsReturned;
           name = "groupByContributorUsername";
         } else if (7 == i) {
-          resultCount = columnFetch(id, CONTRIBUTOR_ID, counts);
+          resultCount = columnFetch(id, CONTRIBUTOR_ID, counts, actualNumResults);
           name = "contributorIdFetch";
         } else {//if (8 == i) {
-          groupBy(id, CONTRIBUTOR_ID, counts);
+          groupBy(id, CONTRIBUTOR_ID, counts, actualNumResults);
           // no sense to verify here
           resultCount = recordsReturned;
           name = "groupByContributorID";
@@ -213,6 +223,7 @@ public class MediawikiQueries {
       sw.stop();
       
       System.out.println(Thread.currentThread().getName() + ": Took " + sw.toString() + " to delete results");
+      logTiming(actualNumResults, sw.elapsed(TimeUnit.MILLISECONDS), "deleteResults");
       
       iters++;
     }
@@ -231,7 +242,7 @@ public class MediawikiQueries {
 	  }
   }
   
-  public long docIdFetch(SortableResult id, Map<Column,Long> counts) throws Exception {
+  public long docIdFetch(SortableResult id, Map<Column,Long> counts, long totalResults) throws Exception {
     Stopwatch sw = new Stopwatch();
     
     // This is dumb, I didn't pad the docids...
@@ -261,13 +272,14 @@ public class MediawikiQueries {
     sw.stop();
     
     System.out.println(Thread.currentThread().getName() + ": docIdFetch - Took " + sw.toString() + " to fetch results");
+    logTiming(totalResults, sw.elapsed(TimeUnit.MILLISECONDS), "docIdFetch");
     
     results.close();
     
     return resultCount;
   }
   
-  public long columnFetch(SortableResult id, Column colToFetch, Map<Column,Long> counts) throws Exception {
+  public long columnFetch(SortableResult id, Column colToFetch, Map<Column,Long> counts, long totalResults) throws Exception {
     Stopwatch sw = new Stopwatch();
     String prev = null;
     String lastDocId = null;
@@ -315,7 +327,8 @@ public class MediawikiQueries {
     sw.stop();
     
     System.out.println(Thread.currentThread().getName() + ": " + colToFetch + " - Took " + sw.toString() + " to fetch results");
-    
+    logTiming(totalResults, sw.elapsed(TimeUnit.MILLISECONDS), "fetch:" + colToFetch);
+
     results.close();
     
     long expected = counts.containsKey(colToFetch) ? counts.get(colToFetch) : -1;
@@ -328,7 +341,7 @@ public class MediawikiQueries {
     return resultCount;
   }
   
-  public void groupBy(SortableResult id, Column colToFetch, Map<Column,Long> columnCounts) throws Exception {
+  public void groupBy(SortableResult id, Column colToFetch, Map<Column,Long> columnCounts, long totalResults) throws Exception {
     Stopwatch sw = new Stopwatch();
     
     sw.start();
@@ -343,6 +356,7 @@ public class MediawikiQueries {
     sw.stop();
     
     System.out.println(Thread.currentThread().getName() + ": " + colToFetch + " - Took " + sw.toString() + " to group results");
+    logTiming(totalResults, sw.elapsed(TimeUnit.MILLISECONDS), "groupBy:" + colToFetch);
 
 //    System.out.println(counts);
     

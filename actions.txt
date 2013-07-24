@@ -1,0 +1,11 @@
+deleteResults
+docIdFetch
+fetch:CONTRIBUTOR_ID
+fetch:CONTRIBUTOR_USERNAME
+fetch:PAGE_ID
+fetch:REVISION_ID
+groupBy:CONTRIBUTOR_ID
+groupBy:CONTRIBUTOR_USERNAME
+groupBy:PAGE_ID
+groupBy:REVISION_ID
+ingest
