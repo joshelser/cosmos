@@ -5,13 +5,16 @@ import static java.util.UUID.randomUUID;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.apache.accumulo.core.client.AccumuloException;
 import org.apache.accumulo.core.client.AccumuloSecurityException;
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.TableExistsException;
+import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.client.admin.TableOperations;
 import org.apache.accumulo.core.security.Authorizations;
+import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +22,14 @@ import sorts.options.Defaults;
 import sorts.options.Index;
 import sorts.util.IdentitySet;
 
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 
 public class SortableResult {
   private static final Logger log = LoggerFactory.getLogger(SortableResult.class);
+  
+  private static final SortedSet<Text> SPLITS = ImmutableSortedSet.of(new Text("0"), new Text("1"), new Text("2"), new Text("3"), new Text("4"), new Text("5"),
+      new Text("6"), new Text("7"), new Text("8"), new Text("9"));
   
   protected final Connector connector;
   protected final Authorizations auths;
@@ -53,7 +60,7 @@ public class SortableResult {
     
     // Make sure we don't try to make a real Set out of the IdentitySet
     if (columnsToIndex instanceof IdentitySet) {
-      this.columnsToIndex = columnsToIndex; 
+      this.columnsToIndex = columnsToIndex;
     } else {
       this.columnsToIndex = Sets.newHashSet(columnsToIndex);
     }
@@ -66,6 +73,7 @@ public class SortableResult {
     TableOperations tops = this.connector.tableOperations();
     
     createIfNotExists(tops, this.dataTable());
+    splitTable(tops, this.dataTable());
     createIfNotExists(tops, this.metadataTable());
   }
   
@@ -74,7 +82,7 @@ public class SortableResult {
       try {
         tops.create(tableName);
         
-        //TODO Make a better API than runtimeexception? Do (should) I care?
+        // TODO Make a better API than runtimeexception? Do (should) I care?
         // If the user we were given can't do what's necessary, then
         // it needed to be done ahead of time. Either way it's fatal?
         // I suppose best to just make a named-exception then so people
@@ -88,7 +96,35 @@ public class SortableResult {
       } catch (TableExistsException e) {
         log.error("Could not create table '{}'", tableName, e);
         throw new RuntimeException(e);
-      } 
+      }
+    }
+  }
+  
+  /**
+   * Make sure we have a reasonable number of splits for the data table
+   * or else concurrency will just grind to a halt. 
+   * @param tops
+   * @param tableName
+   */
+  protected void splitTable(TableOperations tops, String tableName) {
+    try {
+      // Having 10 splits should be no problem on a single machine
+      // so we can always split to that point
+      final int EXPECTED_SPLITS = 10;
+      Collection<Text> splits = tops.listSplits(tableName, EXPECTED_SPLITS);
+      
+      if (splits.size() < EXPECTED_SPLITS) {
+        tops.addSplits(tableName, SPLITS);
+      }
+    } catch (TableNotFoundException e) {
+      log.error("Could not add splits to table '{}'", tableName, e);
+      throw new RuntimeException(e);
+    } catch (AccumuloException e) {
+      log.error("Could not add splits to table '{}'", tableName, e);
+      throw new RuntimeException(e);
+    } catch (AccumuloSecurityException e) {
+      log.error("Could not add splits to table '{}'", tableName, e);
+      throw new RuntimeException(e);
     }
   }
   
@@ -140,7 +176,8 @@ public class SortableResult {
     return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates);
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
+  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable,
+      String metadataTable) {
     return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
   }
   
