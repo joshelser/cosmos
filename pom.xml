@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>joshelser</groupId>
   <artifactId>accumulo-sort</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
   <!-- Keep Maven from complaining about platform-dependent builds -->
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
