@@ -157,6 +157,16 @@ public interface Sorting {
   public PagedQueryResult<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
+   * Given a docId contained in the {@link SortableResult}, fetch the record  
+   * @param id
+   * @param docId
+   * @return
+   * @throws TableNotFoundException
+   * @throws UnexpectedStateException
+   */
+  public MultimapQueryResult contents(SortableResult id, String docId) throws TableNotFoundException, UnexpectedStateException;
+  
+  /**
    * Clean up references to the data referenced by this SortableResult
    * 
    * @param id

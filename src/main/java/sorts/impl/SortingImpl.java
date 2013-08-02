@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -20,8 +22,10 @@ import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.client.lexicoder.ReverseLexicoder;
 import org.apache.accumulo.core.client.lexicoder.StringLexicoder;
+import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
+import org.apache.accumulo.core.data.Value;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -211,7 +215,7 @@ public class SortingImpl implements Sorting {
               Mutation m = getDocumentPrefix(id, result, v.value(), index.order());
               
               final String direction = Order.direction(index.order());
-              m.put(index.column().toString(), direction + Defaults.NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
+              m.put(index.column().toString(), direction + Defaults.NULL_BYTE_STR + result.docId(), v.visibility(), Defaults.EMPTY_VALUE);
               
               bw.addMutation(m);
             }
@@ -379,7 +383,7 @@ public class SortingImpl implements Sorting {
         Mutation m = getDocumentPrefix(id, result, value.value(), index.order());
         
         final String direction = Order.direction(index.order());
-        m.put(index.column().toString(), direction + Defaults.NULL_BYTE_STR + result.docId(), result.documentVisibility(), result.toValue());
+        m.put(index.column().toString(), direction + Defaults.NULL_BYTE_STR + result.docId(), value.visibility(), Defaults.EMPTY_VALUE);
         bw.addMutation(m);
       }
     }
@@ -412,7 +416,7 @@ public class SortingImpl implements Sorting {
     bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
     bs.fetchColumnFamily(Defaults.DOCID_FIELD_NAME_TEXT);
     
-    return CloseableIterable.create(bs, Iterables.transform(bs, new KVToMultimap()));
+    return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id));
   }
   
   @Override
@@ -441,7 +445,7 @@ public class SortingImpl implements Sorting {
     bs.setRanges(Collections.singleton(Range.exact(id.uuid() + Defaults.NULL_BYTE_STR + value)));
     bs.fetchColumnFamily(new Text(column.column()));
     
-    return CloseableIterable.transform(bs, new KVToMultimap());
+    return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id));
   }
   
   @Override
@@ -491,9 +495,9 @@ public class SortingImpl implements Sorting {
     
     // If the client has told us they don't want duplicate records, lets not give them duplicate records
     if (duplicateUidsAllowed) {
-      return CloseableIterable.transform(scanner, new KVToMultimap());
+      return CloseableIterable.transform(scanner, new IndexToMultimapQueryResult(this, id));
     } else {
-      return CloseableIterable.filterAndTransform(scanner, new DedupingPredicate(), new KVToMultimap());
+      return CloseableIterable.filterAndTransform(scanner, new DedupingPredicate(), new IndexToMultimapQueryResult(this, id));
     }
   }
   
@@ -549,6 +553,34 @@ public class SortingImpl implements Sorting {
   }
   
   @Override
+  public MultimapQueryResult contents(SortableResult id, String docId) throws TableNotFoundException, UnexpectedStateException {
+    checkNotNull(id);
+    checkNotNull(docId);
+    
+    State s = SortingMetadata.getState(id);
+    
+    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+    }
+    
+    Scanner scanner = id.connector().createScanner(id.dataTable(), id.auths());
+    scanner.setRange(Range.exact(id.uuid() + Defaults.NULL_BYTE_STR + docId));
+    scanner.fetchColumnFamily(Defaults.CONTENTS_COLFAM_TEXT);
+    
+    Iterator<Entry<Key,Value>> iter = scanner.iterator();
+    if (!iter.hasNext()) {
+      scanner.close();
+      
+      throw new NoSuchElementException("No such result for " + docId + " in " + id.uuid());
+    } else {
+      Value value = iter.next().getValue();
+      scanner.close();
+      
+      return KeyValueToMultimapQueryResult.transform(value);
+    }
+  }
+  
+  @Override
   public void delete(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
@@ -600,9 +632,11 @@ public class SortingImpl implements Sorting {
   protected Mutation addDocument(SortableResult id, QueryResult<?> queryResult) throws IOException {
     Mutation m = getDocumentPrefix(id, queryResult, queryResult.docId(), Order.ASCENDING);
     
-    // TODO be more space efficient here and store a reference to the document once in Accumulo
-    // merits: don't bloat the default locality group's index, less size overall
-    m.put(Defaults.DOCID_FIELD_NAME, Order.FORWARD + Defaults.NULL_BYTE_STR + queryResult.docId(), queryResult.documentVisibility(), queryResult.toValue());
+    // Store the docId as a searchable entry
+    m.put(Defaults.DOCID_FIELD_NAME, Order.FORWARD + Defaults.NULL_BYTE_STR + queryResult.docId(), queryResult.documentVisibility(), Defaults.EMPTY_VALUE);
+    
+    // Write the contents for this record once
+    m.put(Defaults.CONTENTS_COLFAM_TEXT, new Text(), queryResult.documentVisibility(), queryResult.toValue());
     
     return m;
   }

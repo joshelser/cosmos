@@ -64,7 +64,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(6, Iterables.size(scanner));
+    Assert.assertEquals(8, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(2, Iterables.size(scanner));
@@ -111,7 +111,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(3, Iterables.size(scanner));
+    Assert.assertEquals(4, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(2, Iterables.size(scanner));
@@ -147,7 +147,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(1, Iterables.size(scanner));
+    Assert.assertEquals(2, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(2, Iterables.size(scanner));
@@ -155,7 +155,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.index(id, Collections.singleton(Index.define("TEXT")));
     
     scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(3, Iterables.size(scanner));
+    Assert.assertEquals(4, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(2, Iterables.size(scanner));
@@ -187,7 +187,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(6, Iterables.size(scanner));
+    Assert.assertEquals(8, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(2, Iterables.size(scanner));
@@ -231,7 +231,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     // 2 records with 2 columns (forward and reverse), plus the UID pointer (8+2=10)
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(10, Iterables.size(scanner));
+    Assert.assertEquals(12, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(3, Iterables.size(scanner));
@@ -320,7 +320,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(1, Iterables.size(scanner));
+    Assert.assertEquals(2, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(2, Iterables.size(scanner));
@@ -328,7 +328,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.index(id, Sets.newHashSet(Index.define("TEXT"), Index.define("DOESNTEXIST")));
     
     scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
-    Assert.assertEquals(4, Iterables.size(scanner));
+    Assert.assertEquals(5, Iterables.size(scanner));
     
     scanner = c.createScanner(Defaults.METADATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(2, Iterables.size(scanner));

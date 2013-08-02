@@ -15,4 +15,8 @@ public abstract class Defaults {
   public static final Text DOCID_FIELD_NAME_TEXT = new Text(DOCID_FIELD_NAME);
   public static final Value EMPTY_VALUE = new Value(new byte[0]);
   public static final String CURATOR_PREFIX = "/sorts/";
+  
+  public static final String CONTENTS_LG_NAME = "contents";
+  public static final String CONTENTS_COLFAM = "CONTENTS";
+  public static final Text CONTENTS_COLFAM_TEXT = new Text(CONTENTS_COLFAM);
 }

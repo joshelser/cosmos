@@ -4,6 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.UUID.randomUUID;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -74,6 +76,7 @@ public class SortableResult {
     
     createIfNotExists(tops, this.dataTable());
     splitTable(tops, this.dataTable());
+    addLocalityGroups(tops, this.dataTable());
     createIfNotExists(tops, this.metadataTable());
   }
   
@@ -124,6 +127,39 @@ public class SortableResult {
       throw new RuntimeException(e);
     } catch (AccumuloSecurityException e) {
       log.error("Could not add splits to table '{}'", tableName, e);
+      throw new RuntimeException(e);
+    }
+  }
+ 
+  /**
+   * Ensure that the {@link Defaults.CONTENT_LG_NAME} locality group is configured
+   * @param tops
+   * @param tableName
+   */
+  protected void addLocalityGroups(TableOperations tops, String tableName) {
+    try {
+      Map<String,Set<Text>> localityGroups = tops.getLocalityGroups(tableName);
+      
+      // If we don't have a locality group specified with the expected name
+      // create one automatically
+      if (!localityGroups.containsKey(Defaults.CONTENTS_LG_NAME)) {
+        localityGroups.put(Defaults.CONTENTS_LG_NAME, Collections.singleton(Defaults.CONTENTS_COLFAM_TEXT));
+        
+        tops.setLocalityGroups(tableName, localityGroups);
+      } else {
+        Set<Text> colfams = localityGroups.get(Defaults.CONTENTS_LG_NAME);
+        if (!colfams.contains(Defaults.CONTENTS_COLFAM_TEXT)) {
+          log.warn("The {} locality group does not contain the expected column family {}", Defaults.CONTENTS_LG_NAME, Defaults.CONTENTS_COLFAM_TEXT);
+        }
+      }
+    } catch (AccumuloException e) {
+      log.error("Could not add locality groups to table '{}'", tableName, e);
+      throw new RuntimeException(e);
+    } catch (AccumuloSecurityException e) {
+      log.error("Could not add locality groups to table '{}'", tableName, e);
+      throw new RuntimeException(e);
+    } catch (TableNotFoundException e) {
+      log.error("Could not add locality groups to table '{}'", tableName, e);
       throw new RuntimeException(e);
     }
   }
