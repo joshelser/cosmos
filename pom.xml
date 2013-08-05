@@ -7,7 +7,6 @@
   <version>0.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Cosmos</name>
-  <classifier>accumulo1.4</classifier>
   <modules>
     <module>core</module>
     <module>test</module>
@@ -152,11 +151,14 @@
           <version>2.4</version>
           <executions>
             <execution>
-              <id>jar</id>
+              <id>default-jar</id>
               <phase>package</phase>
               <goals>
                 <goal>jar</goal>
               </goals>
+              <configuration>
+                <classifier>accumulo1.4</classifier>
+              </configuration>
             </execution>
           </executions>
         </plugin>
