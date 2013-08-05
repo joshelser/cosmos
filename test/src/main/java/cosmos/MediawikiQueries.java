@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.accumulo.core.client.BatchScanner;
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
-import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
@@ -99,8 +98,8 @@ public class MediawikiQueries {
   protected final Cosmos sorts;
   
   public MediawikiQueries() throws Exception {
-    ZooKeeperInstance zk = new ZooKeeperInstance("accumulo1.5", "localhost");
-    this.con = zk.getConnector("mediawiki", new PasswordToken("password"));
+    ZooKeeperInstance zk = new ZooKeeperInstance("accumulo1.4", "localhost");
+    this.con = zk.getConnector("mediawiki", "password");
     
     this.sorts = new CosmosImpl("localhost");
   }

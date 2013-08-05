@@ -16,6 +16,7 @@ import org.apache.accumulo.core.client.TableExistsException;
 import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.client.admin.TableOperations;
 import org.apache.accumulo.core.security.Authorizations;
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +115,7 @@ public class SortableResult {
       // Having 10 splits should be no problem on a single machine
       // so we can always split to that point
       final int EXPECTED_SPLITS = 10;
-      Collection<Text> splits = tops.listSplits(tableName, EXPECTED_SPLITS);
+      Collection<Text> splits = tops.getSplits(tableName, EXPECTED_SPLITS);
       
       if (splits.size() < EXPECTED_SPLITS) {
         tops.addSplits(tableName, SPLITS);
@@ -128,6 +129,8 @@ public class SortableResult {
     } catch (AccumuloSecurityException e) {
       log.error("Could not add splits to table '{}'", tableName, e);
       throw new RuntimeException(e);
+    } catch (NotImplementedException e) {
+      log.warn("Could not add splits to MockInstance");
     }
   }
  
@@ -161,6 +164,8 @@ public class SortableResult {
     } catch (TableNotFoundException e) {
       log.error("Could not add locality groups to table '{}'", tableName, e);
       throw new RuntimeException(e);
+    } catch (NotImplementedException e) {
+      log.warn("Could not interact with locality groups in MockInstance");
     }
   }
   

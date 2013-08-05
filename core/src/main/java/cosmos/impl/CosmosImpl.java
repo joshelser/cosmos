@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.accumulo.core.client.BatchDeleter;
 import org.apache.accumulo.core.client.BatchScanner;
 import org.apache.accumulo.core.client.BatchWriter;
-import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.IteratorSetting;
 import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.Scanner;
@@ -64,7 +63,10 @@ public class CosmosImpl implements Cosmos {
   
   public static final long LOCK_SECS = 10;
   
-  private final BatchWriterConfig DEFAULT_BW_CONFIG = new BatchWriterConfig();
+  public static final Long DEFAULT_MAX_MEMORY = 50 * 1024 * 1024l;
+  public static final Long DEFAULT_MAX_LATENCY = 2 * 60 * 1000l;
+  public static final Integer DEFAULT_MAX_WRITE_THREADS = 3;
+  
   private final CuratorFramework curator;
   private final ReverseLexicoder<String> revLex = new ReverseLexicoder<String>(new StringLexicoder());
   
@@ -186,8 +188,8 @@ public class CosmosImpl implements Cosmos {
       // Add the values of columns to the sortableresult as we want
       Set<Index> columnsToIndex = id.columnsToIndex();
       
-      bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
-      metadataBw = id.connector().createBatchWriter(id.metadataTable(), DEFAULT_BW_CONFIG);
+      bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_MAX_MEMORY, DEFAULT_MAX_LATENCY, DEFAULT_MAX_WRITE_THREADS);
+      metadataBw = id.connector().createBatchWriter(id.metadataTable(), DEFAULT_MAX_MEMORY, DEFAULT_MAX_LATENCY, DEFAULT_MAX_WRITE_THREADS);
       
       final IndexHelper indexHelper = IndexHelper.create(columnsToIndex);
       final Text holder = new Text();
@@ -318,7 +320,7 @@ public class CosmosImpl implements Cosmos {
       // Get the results we have to update
       results = fetch(id);
       
-      bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
+      bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_MAX_MEMORY, DEFAULT_MAX_LATENCY, DEFAULT_MAX_WRITE_THREADS);
       
       // Iterate over the results we have
       for (MultimapQueryResult result : results) {
@@ -568,12 +570,12 @@ public class CosmosImpl implements Cosmos {
     
     Iterator<Entry<Key,Value>> iter = scanner.iterator();
     if (!iter.hasNext()) {
-      scanner.close();
+      // scanner.close();
       
       throw new NoSuchElementException("No such result for " + docId + " in " + id.uuid());
     } else {
       Value value = iter.next().getValue();
-      scanner.close();
+      // scanner.close();
       
       return KeyValueToMultimapQueryResult.transform(value);
     }
@@ -598,7 +600,7 @@ public class CosmosImpl implements Cosmos {
     // Delete of the Keys
     BatchDeleter bd = null;
     try {
-      bd = id.connector().createBatchDeleter(id.dataTable(), id.auths(), 4, new BatchWriterConfig());
+      bd = id.connector().createBatchDeleter(id.dataTable(), id.auths(), 4, DEFAULT_MAX_MEMORY, DEFAULT_MAX_LATENCY, DEFAULT_MAX_WRITE_THREADS);
       bd.setRanges(Collections.singleton(Range.prefix(id.uuid())));
       
       bd.delete();

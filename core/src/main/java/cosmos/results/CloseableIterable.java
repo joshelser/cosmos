@@ -5,6 +5,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import org.apache.accumulo.core.client.BatchScanner;
+import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.client.ScannerBase;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Value;
@@ -52,7 +54,9 @@ public class CloseableIterable<T> implements Results<T> {
   
   @Override
   public void close() {
-    scanner.close();
+    if (!(this.scanner instanceof Scanner)) {
+      ((BatchScanner) scanner).close();
+    }
   }
   
 }

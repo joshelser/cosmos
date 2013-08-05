@@ -2,7 +2,6 @@ package cosmos.results;
 
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.mock.MockInstance;
-import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.curator.test.TestingServer;
@@ -24,8 +23,7 @@ public class AbstractSortableTest {
   @Before
   public void setup() throws Exception {
     MockInstance mi = new MockInstance();
-    PasswordToken pw = new PasswordToken("");
-    c = mi.getConnector("root", pw);
+    c = mi.getConnector("root", "");
     c.securityOperations().changeUserAuthorizations("root", new Authorizations("test"));
     c.tableOperations().create(Defaults.DATA_TABLE);
     c.tableOperations().create(Defaults.METADATA_TABLE);

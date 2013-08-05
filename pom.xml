@@ -7,6 +7,7 @@
   <version>0.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Cosmos</name>
+  <classifier>accumulo1.4</classifier>
   <modules>
     <module>core</module>
     <module>test</module>
@@ -15,7 +16,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <version.accumulo>1.5.0</version.accumulo>
+    <version.accumulo>1.4.3</version.accumulo>
   </properties>
   <dependencyManagement>
     <dependencies>

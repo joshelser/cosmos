@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Value;
+import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.VLongWritable;
 
@@ -28,7 +29,7 @@ public class GroupByFunction implements Function<Entry<Key,Value>,Entry<SValue,L
     String value = getValueFromKey(entry.getKey());
     
     //TODO Add Cache for CV
-    SValue sval = SValue.create(value, entry.getKey().getColumnVisibilityParsed());
+    SValue sval = SValue.create(value, new ColumnVisibility(entry.getKey().getColumnVisibility()));
     VLongWritable writable = GroupByRowSuffixIterator.getWritable(entry.getValue());
     
     return Maps.immutableEntry(sval, writable.get());

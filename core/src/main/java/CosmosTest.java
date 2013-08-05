@@ -9,7 +9,6 @@ import org.apache.accumulo.core.client.IteratorSetting;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.lexicoder.ReverseLexicoder;
 import org.apache.accumulo.core.client.lexicoder.StringLexicoder;
-import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Range;
 import org.apache.hadoop.io.Text;
 
@@ -55,7 +54,7 @@ public class CosmosTest {
   public static void main(String[] args) throws Exception {
     foo(args);
     ZooKeeperInstance zk = new ZooKeeperInstance("accumulo1.5", "localhost");
-    Connector con = zk.getConnector("mediawiki", new PasswordToken("password"));
+    Connector con = zk.getConnector("mediawiki", "password");
 
     BatchScanner bs = con.createBatchScanner(Defaults.DATA_TABLE, con.securityOperations().getUserAuthorizations("mediawiki"), 10);
     bs.setRanges(Collections.singleton(Range.prefix("55b672e0-a5c8-4ff7-81a9-bfd7e52cde74")));

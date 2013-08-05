@@ -1,8 +1,6 @@
 package cosmos.mapred;
 
-import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.mapreduce.AccumuloOutputFormat;
-import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -11,6 +9,8 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+
+import cosmos.impl.CosmosImpl;
 
 /**
  * 
@@ -36,7 +36,7 @@ public class MediawikiIngestJob extends Configured implements Tool {
     String zookeepers = "localhost:2181";
     String instanceName = "accumulo1.5";
     String user = "mediawiki";
-    PasswordToken passwd = new PasswordToken("password");    
+    String passwd = "password";
     
     //conf.set("io.file.buffer.size", Integer.toString(64*1024*1024));
     FileInputFormat.setInputPaths(job, inputFiles);
@@ -48,14 +48,11 @@ public class MediawikiIngestJob extends Configured implements Tool {
     job.setMapOutputValueClass(Mutation.class);
     job.setOutputFormatClass(AccumuloOutputFormat.class);
     
-    BatchWriterConfig bwConfig = new BatchWriterConfig();
-    
     job.setInputFormatClass(MediawikiInputFormat.class);
-    AccumuloOutputFormat.setZooKeeperInstance(job, instanceName, zookeepers);
-    AccumuloOutputFormat.setConnectorInfo(job, user, passwd);
-    AccumuloOutputFormat.setBatchWriterOptions(job, bwConfig);
-    AccumuloOutputFormat.setCreateTables(job, true);
-    AccumuloOutputFormat.setDefaultTableName(job, tablename);
+    AccumuloOutputFormat.setZooKeeperInstance(conf, instanceName, zookeepers);
+    AccumuloOutputFormat.setOutputInfo(conf, user, passwd.getBytes(), true, tablename);
+    AccumuloOutputFormat.setMaxMutationBufferSize(conf, CosmosImpl.DEFAULT_MAX_MEMORY);
+    AccumuloOutputFormat.setMaxLatency(conf, CosmosImpl.DEFAULT_MAX_LATENCY.intValue());
     
     return job.waitForCompletion(true) ? 0 : 1;
   }
