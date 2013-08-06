@@ -1,0 +1,9 @@
+Cosmos
+Copyright 2013 Josh Elser
+
+Portions of this software include code from the 
+Apache Accumulo project which was developed by 
+the Apache Software Foundation (http://www.apache.org)
+
+This product includes enwiki-20111201-metadata-articles-[1-4].xml.gz which are
+selections from a larger file (http://dumps.wikimedia.org/enwiki/20111201/enwiki-20111201-pages-articles.xml.bz2), the contents of which are license under the CC-BY-SA license.
