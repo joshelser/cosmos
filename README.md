@@ -31,3 +31,13 @@ As such, each operation lazily creates the result set so as to avoid excessive J
 
 Cosmos requires a functioning Accumulo instance and a ZooKeeper instance (can be the same as the 
 ZooKeeper instance used by the Accumulo installation).
+
+## License
+
+In keeping with the Apache Hadoop ecosphere, Cosmos is licensed with the Apache Software License.
+
+Copyright 2013 Josh Elser
+
+## Contributors
+
+Josh Elser -- SRA International
