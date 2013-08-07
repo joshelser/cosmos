@@ -1,0 +1,14 @@
+
+cosmos
+cosmos.accumulo
+cosmos.impl
+cosmos.mapred
+cosmos.mediawiki
+cosmos.options
+cosmos.results
+cosmos.results.impl
+cosmos.util
+org.apache.accumulo.core.client.lexicoder
+org.apache.accumulo.core.client.lexicoder.impl
+org.apache.accumulo.core.util
+org.mediawiki.xml.export_0
