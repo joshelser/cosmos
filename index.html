@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Cosmos by joshelser</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/joshelser/cosmos">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/joshelser/cosmos/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/joshelser/cosmos/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Cosmos</h1>
+          <p>Accumulo-backed sorting, filtering and grouping of sparse, columnar data sets</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/joshelser">joshelser</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>
+<a name="cosmos" class="anchor" href="#cosmos"><span class="octicon octicon-link"></span></a>Cosmos</h1>
+
+<p>Cosmos was driven by the necessity to sort, filter and count large swaths of 
+data queried from an Accumulo instance. Cosmos currently accepts columnar data sets
+without a guaranteed schema. Because of this, and the support for multiple users 
+to write concurrently to one Accumulo instance using Cosmos, this software scales 
+well given sufficient Accumulo nodes for the concurrent client write threads.</p>
+
+<h2>
+<a name="using-cosmos" class="anchor" href="#using-cosmos"><span class="octicon octicon-link"></span></a>Using Cosmos</h2>
+
+<p>Build the cosmos-core jar using <code>mvn package</code> and place it on the Accumulo classpath
+in addition to your application. Your client code must then implement the transformation
+from your data model to the MultimapQueryResult. From here, you can treat your records 
+uniformly using the Cosmos API.</p>
+
+<h2>
+<a name="functionality" class="anchor" href="#functionality"><span class="octicon octicon-link"></span></a>Functionality</h2>
+
+<p>Cosmos supports the followign features:</p>
+
+<ol>
+<li>Fetch records by unique identifier</li>
+<li>Fetch records by column, ascending or descending</li>
+<li>Fetch records by value in a column</li>
+<li>Count unique occurrences of a value in a column (SQL groupby)</li>
+</ol><p>For each call above, result sets can also be paginated by Cosmos to alleviate large result sets. 
+As such, each operation lazily creates the result set so as to avoid excessive Java heap usage.</p>
+
+<h2>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<p>Cosmos requires a functioning Accumulo instance and a ZooKeeper instance (can be the same as the 
+ZooKeeper instance used by the Accumulo installation).</p>
+
+<h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>In keeping with the Apache Hadoop ecosphere, Cosmos is licensed with the Apache Software License.</p>
+
+<p>Copyright 2013 Josh Elser</p>
+
+<h2>
+<a name="contributors" class="anchor" href="#contributors"><span class="octicon octicon-link"></span></a>Contributors</h2>
+
+<p>Josh Elser -- SRA International</p>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
