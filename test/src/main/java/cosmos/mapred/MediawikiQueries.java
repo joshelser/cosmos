@@ -79,7 +79,7 @@ import cosmos.util.IdentitySet;
  * 
  */
 public class MediawikiQueries {
-  public static final boolean preloadData = true;
+  public static final boolean preloadData = false;
   
   public static final String TIMINGS = "[TIMINGS] ";
   public static final int MAX_SIZE = 16000;
