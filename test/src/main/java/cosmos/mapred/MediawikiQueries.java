@@ -38,6 +38,7 @@ import org.apache.accumulo.core.client.BatchScanner;
 import org.apache.accumulo.core.client.BatchWriter;
 import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.Connector;
+import org.apache.accumulo.core.client.TableExistsException;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Key;
@@ -441,6 +442,7 @@ public class MediawikiQueries {
   
   public static void main(String[] args) throws Exception {
     if (preloadData) {
+      CosmosIntegrationSetup.initializeJaxb();
       MediawikiQueries queries = new MediawikiQueries();
       MediawikiMapper mapper = new MediawikiMapper();
       mapper.setup(null);
@@ -449,7 +451,7 @@ public class MediawikiQueries {
       
       try {
         queries.con.tableOperations().create("sortswiki");
-      } catch (Exception e) {
+      } catch (TableExistsException e) {
         
       }
       BatchWriter bw = queries.con.createBatchWriter("sortswiki", new BatchWriterConfig());
@@ -462,6 +464,7 @@ public class MediawikiQueries {
           Mutation m = new Mutation(Integer.toString(i));
           m.put(new Text(), new Text(), v);
           bw.addMutation(m);
+          i++;
         }
         bw.flush();
       }
