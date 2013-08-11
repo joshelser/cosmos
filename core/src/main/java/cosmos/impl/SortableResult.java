@@ -35,6 +35,7 @@ import org.apache.accumulo.core.client.TableExistsException;
 import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.client.admin.TableOperations;
 import org.apache.accumulo.core.security.Authorizations;
+import org.apache.accumulo.trace.instrument.Trace;
 import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,14 +62,18 @@ public class SortableResult {
   protected Set<Index> columnsToIndex;
   
   public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
-    this(connector, auths, columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
+    this(connector, auths, columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE, Defaults.ENABLE_TRACING);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
-    this(connector, auths, columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
+  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean enableTracing) {
+    this(connector, auths, columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE, enableTracing);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
+  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean enableTracing, boolean lockOnUpdates) {
+    this(connector, auths, columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE, enableTracing);
+  }
+  
+  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable, boolean enableTracing) {
     checkNotNull(connector);
     checkNotNull(auths);
     checkNotNull(columnsToIndex);
@@ -97,6 +102,10 @@ public class SortableResult {
     splitTable(tops, this.dataTable());
     addLocalityGroups(tops, this.dataTable());
     createIfNotExists(tops, this.metadataTable());
+    
+    if (enableTracing) {
+      Trace.on("Cosmos:" + this.UUID);
+    }
   }
   
   protected void createIfNotExists(TableOperations tops, String tableName) {
@@ -227,13 +236,17 @@ public class SortableResult {
     return new SortableResult(connector, auths, columnsToIndex);
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
-    return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates);
+  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean enableTracing) {
+    return new SortableResult(connector, auths, columnsToIndex, enableTracing);
+  }
+  
+  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean enableTracing, boolean lockOnUpdates) {
+    return new SortableResult(connector, auths, columnsToIndex, enableTracing, lockOnUpdates);
   }
   
   public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable,
-      String metadataTable) {
-    return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
+      String metadataTable, boolean enableTracing) {
+    return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates, dataTable, metadataTable, enableTracing);
   }
   
 }

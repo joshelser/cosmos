@@ -24,6 +24,7 @@ import org.apache.hadoop.io.Text;
 
 public abstract class Defaults {
   public static final boolean LOCK_ON_UPDATES = false;
+  public static final boolean ENABLE_TRACING = false;
   public static final String DATA_TABLE = "cosmos";
   public static final String METADATA_TABLE = "metacosmos";
   

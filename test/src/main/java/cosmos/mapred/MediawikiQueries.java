@@ -142,7 +142,7 @@ public class MediawikiQueries {
     int iters = 0;
     
     while (iters < numIterations) {
-      SortableResult id = SortableResult.create(this.con, this.con.securityOperations().getUserAuthorizations(this.con.whoami()), IdentitySet.<Index> create());
+      SortableResult id = SortableResult.create(this.con, this.con.securityOperations().getUserAuthorizations(this.con.whoami()), IdentitySet.<Index> create(), true);
       
       int offset = offsetR.nextInt(MAX_OFFSET);
       int numRecords = cardinalityR.nextInt(MAX_SIZE);
@@ -473,7 +473,7 @@ public class MediawikiQueries {
     }
     
     ExecutorService runner = Executors.newFixedThreadPool(3);
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 1; i++) {
       runner.execute(runQueries(200));
     }
     
