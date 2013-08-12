@@ -10,6 +10,7 @@
   <modules>
     <module>core</module>
     <module>test</module>
+    <module>tracing</module>
   </modules>
   <!-- Keep Maven from complaining about platform-dependent builds -->
   <properties>
@@ -27,6 +28,11 @@
       <dependency>
         <groupId>cosmos</groupId>
         <artifactId>cosmos-test</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>cosmos</groupId>
+        <artifactId>cosmos-tracing</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
