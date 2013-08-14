@@ -103,6 +103,7 @@ public class SortableResult {
     createIfNotExists(tops, this.metadataTable());
     
     this.tracer = new Tracer(uuid());
+    ensureTracingTableExists();
   }
   
   protected void createIfNotExists(TableOperations tops, String tableName) {
@@ -187,6 +188,17 @@ public class SortableResult {
       log.error("Could not add locality groups to table '{}'", tableName, e);
       throw new RuntimeException(e);
     }
+  }
+  
+  protected void ensureTracingTableExists() {    
+    try {
+      AccumuloTraceStore.ensureTables(connector());
+    } catch (AccumuloException e) {
+      throw new RuntimeException(e);
+    } catch (AccumuloSecurityException e) {
+      throw new RuntimeException(e);
+    }
+    
   }
   
   public Connector connector() {

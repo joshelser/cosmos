@@ -100,6 +100,7 @@ public class Tracer {
     }
     
     recordMutation.put(UUID.getBytes(), new byte[0], builder.build().toByteArray());
+    
     Mutation timeMutation = new Mutation(revLongLex.encode(begin));
     timeMutation.put(TIME.getBytes(), this.uuid.getBytes(), longLex.encode(duration));
     

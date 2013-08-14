@@ -78,7 +78,7 @@ public class CloseableIterable<T> implements Results<T> {
       public boolean hasNext() {
         boolean hasNext = delegate.hasNext();
         
-        if (!hasNext) {
+        if (!hasNext && sw.isRunning()) {
           sw.stop();
         }
         

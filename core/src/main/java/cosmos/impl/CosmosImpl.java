@@ -744,6 +744,9 @@ public class CosmosImpl implements Cosmos {
       SortingMetadata.remove(id);
     } finally {
       sw.stop();
+      
+      // Be nice and when the client deletes these results, automatically flush the traces for them too
+      id.sendTraces();
     }
   }
   

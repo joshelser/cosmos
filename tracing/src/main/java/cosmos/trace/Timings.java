@@ -10,127 +10,321 @@ public final class Timings {
   }
   public interface TimedRegionsOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;
+    /**
+     * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+     */
     java.util.List<cosmos.trace.Timings.TimedRegions.TimedRegion> 
         getRegionList();
+    /**
+     * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+     */
     cosmos.trace.Timings.TimedRegions.TimedRegion getRegion(int index);
+    /**
+     * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+     */
     int getRegionCount();
+    /**
+     * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+     */
     java.util.List<? extends cosmos.trace.Timings.TimedRegions.TimedRegionOrBuilder> 
         getRegionOrBuilderList();
+    /**
+     * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+     */
     cosmos.trace.Timings.TimedRegions.TimedRegionOrBuilder getRegionOrBuilder(
         int index);
   }
+  /**
+   * Protobuf type {@code cosmos.trace.TimedRegions}
+   */
   public static final class TimedRegions extends
       com.google.protobuf.GeneratedMessage
       implements TimedRegionsOrBuilder {
     // Use TimedRegions.newBuilder() to construct.
-    private TimedRegions(Builder builder) {
+    private TimedRegions(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private TimedRegions(boolean noInit) {}
-    
+    private TimedRegions(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final TimedRegions defaultInstance;
     public static TimedRegions getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public TimedRegions getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TimedRegions(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                region_ = new java.util.ArrayList<cosmos.trace.Timings.TimedRegions.TimedRegion>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              region_.add(input.readMessage(cosmos.trace.Timings.TimedRegions.TimedRegion.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          region_ = java.util.Collections.unmodifiableList(region_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_fieldAccessorTable;
+      return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              cosmos.trace.Timings.TimedRegions.class, cosmos.trace.Timings.TimedRegions.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<TimedRegions> PARSER =
+        new com.google.protobuf.AbstractParser<TimedRegions>() {
+      public TimedRegions parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TimedRegions(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TimedRegions> getParserForType() {
+      return PARSER;
+    }
+
     public interface TimedRegionOrBuilder
         extends com.google.protobuf.MessageOrBuilder {
-      
+
       // required string description = 1;
+      /**
+       * <code>required string description = 1;</code>
+       */
       boolean hasDescription();
-      String getDescription();
-      
+      /**
+       * <code>required string description = 1;</code>
+       */
+      java.lang.String getDescription();
+      /**
+       * <code>required string description = 1;</code>
+       */
+      com.google.protobuf.ByteString
+          getDescriptionBytes();
+
       // required uint64 duration = 2;
+      /**
+       * <code>required uint64 duration = 2;</code>
+       */
       boolean hasDuration();
+      /**
+       * <code>required uint64 duration = 2;</code>
+       */
       long getDuration();
     }
+    /**
+     * Protobuf type {@code cosmos.trace.TimedRegions.TimedRegion}
+     */
     public static final class TimedRegion extends
         com.google.protobuf.GeneratedMessage
         implements TimedRegionOrBuilder {
       // Use TimedRegion.newBuilder() to construct.
-      private TimedRegion(Builder builder) {
+      private TimedRegion(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
         super(builder);
+        this.unknownFields = builder.getUnknownFields();
       }
-      private TimedRegion(boolean noInit) {}
-      
+      private TimedRegion(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
       private static final TimedRegion defaultInstance;
       public static TimedRegion getDefaultInstance() {
         return defaultInstance;
       }
-      
+
       public TimedRegion getDefaultInstanceForType() {
         return defaultInstance;
       }
-      
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private TimedRegion(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                bitField0_ |= 0x00000001;
+                description_ = input.readBytes();
+                break;
+              }
+              case 16: {
+                bitField0_ |= 0x00000002;
+                duration_ = input.readUInt64();
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_TimedRegion_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_TimedRegion_fieldAccessorTable;
+        return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_TimedRegion_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                cosmos.trace.Timings.TimedRegions.TimedRegion.class, cosmos.trace.Timings.TimedRegions.TimedRegion.Builder.class);
       }
-      
+
+      public static com.google.protobuf.Parser<TimedRegion> PARSER =
+          new com.google.protobuf.AbstractParser<TimedRegion>() {
+        public TimedRegion parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new TimedRegion(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<TimedRegion> getParserForType() {
+        return PARSER;
+      }
+
       private int bitField0_;
       // required string description = 1;
       public static final int DESCRIPTION_FIELD_NUMBER = 1;
       private java.lang.Object description_;
+      /**
+       * <code>required string description = 1;</code>
+       */
       public boolean hasDescription() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      public String getDescription() {
+      /**
+       * <code>required string description = 1;</code>
+       */
+      public java.lang.String getDescription() {
         java.lang.Object ref = description_;
-        if (ref instanceof String) {
-          return (String) ref;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
         } else {
           com.google.protobuf.ByteString bs = 
               (com.google.protobuf.ByteString) ref;
-          String s = bs.toStringUtf8();
-          if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
             description_ = s;
           }
           return s;
         }
       }
-      private com.google.protobuf.ByteString getDescriptionBytes() {
+      /**
+       * <code>required string description = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getDescriptionBytes() {
         java.lang.Object ref = description_;
-        if (ref instanceof String) {
+        if (ref instanceof java.lang.String) {
           com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
           description_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
-      
+
       // required uint64 duration = 2;
       public static final int DURATION_FIELD_NUMBER = 2;
       private long duration_;
+      /**
+       * <code>required uint64 duration = 2;</code>
+       */
       public boolean hasDuration() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
+      /**
+       * <code>required uint64 duration = 2;</code>
+       */
       public long getDuration() {
         return duration_;
       }
-      
+
       private void initFields() {
         description_ = "";
         duration_ = 0L;
@@ -139,7 +333,7 @@ public final class Timings {
       public final boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
         if (isInitialized != -1) return isInitialized == 1;
-        
+
         if (!hasDescription()) {
           memoizedIsInitialized = 0;
           return false;
@@ -151,7 +345,7 @@ public final class Timings {
         memoizedIsInitialized = 1;
         return true;
       }
-      
+
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
         getSerializedSize();
@@ -163,12 +357,12 @@ public final class Timings {
         }
         getUnknownFields().writeTo(output);
       }
-      
+
       private int memoizedSerializedSize = -1;
       public int getSerializedSize() {
         int size = memoizedSerializedSize;
         if (size != -1) return size;
-      
+
         size = 0;
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           size += com.google.protobuf.CodedOutputStream
@@ -182,94 +376,83 @@ public final class Timings {
         memoizedSerializedSize = size;
         return size;
       }
-      
+
       private static final long serialVersionUID = 0L;
       @java.lang.Override
       protected java.lang.Object writeReplace()
           throws java.io.ObjectStreamException {
         return super.writeReplace();
       }
-      
+
       public static cosmos.trace.Timings.TimedRegions.TimedRegion parseFrom(
           com.google.protobuf.ByteString data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static cosmos.trace.Timings.TimedRegions.TimedRegion parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static cosmos.trace.Timings.TimedRegions.TimedRegion parseFrom(byte[] data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static cosmos.trace.Timings.TimedRegions.TimedRegion parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static cosmos.trace.Timings.TimedRegions.TimedRegion parseFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static cosmos.trace.Timings.TimedRegions.TimedRegion parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
       public static cosmos.trace.Timings.TimedRegions.TimedRegion parseDelimitedFrom(java.io.InputStream input)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input);
       }
       public static cosmos.trace.Timings.TimedRegions.TimedRegion parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
       }
       public static cosmos.trace.Timings.TimedRegions.TimedRegion parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static cosmos.trace.Timings.TimedRegions.TimedRegion parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
-      
+
       public static Builder newBuilder() { return Builder.create(); }
       public Builder newBuilderForType() { return newBuilder(); }
       public static Builder newBuilder(cosmos.trace.Timings.TimedRegions.TimedRegion prototype) {
         return newBuilder().mergeFrom(prototype);
       }
       public Builder toBuilder() { return newBuilder(this); }
-      
+
       @java.lang.Override
       protected Builder newBuilderForType(
           com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         Builder builder = new Builder(parent);
         return builder;
       }
+      /**
+       * Protobuf type {@code cosmos.trace.TimedRegions.TimedRegion}
+       */
       public static final class Builder extends
           com.google.protobuf.GeneratedMessage.Builder<Builder>
          implements cosmos.trace.Timings.TimedRegions.TimedRegionOrBuilder {
@@ -277,18 +460,21 @@ public final class Timings {
             getDescriptor() {
           return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_TimedRegion_descriptor;
         }
-        
+
         protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_TimedRegion_fieldAccessorTable;
+          return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_TimedRegion_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  cosmos.trace.Timings.TimedRegions.TimedRegion.class, cosmos.trace.Timings.TimedRegions.TimedRegion.Builder.class);
         }
-        
+
         // Construct using cosmos.trace.Timings.TimedRegions.TimedRegion.newBuilder()
         private Builder() {
           maybeForceBuilderInitialization();
         }
-        
-        private Builder(BuilderParent parent) {
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
           super(parent);
           maybeForceBuilderInitialization();
         }
@@ -299,7 +485,7 @@ public final class Timings {
         private static Builder create() {
           return new Builder();
         }
-        
+
         public Builder clear() {
           super.clear();
           description_ = "";
@@ -308,20 +494,20 @@ public final class Timings {
           bitField0_ = (bitField0_ & ~0x00000002);
           return this;
         }
-        
+
         public Builder clone() {
           return create().mergeFrom(buildPartial());
         }
-        
+
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return cosmos.trace.Timings.TimedRegions.TimedRegion.getDescriptor();
+          return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_TimedRegion_descriptor;
         }
-        
+
         public cosmos.trace.Timings.TimedRegions.TimedRegion getDefaultInstanceForType() {
           return cosmos.trace.Timings.TimedRegions.TimedRegion.getDefaultInstance();
         }
-        
+
         public cosmos.trace.Timings.TimedRegions.TimedRegion build() {
           cosmos.trace.Timings.TimedRegions.TimedRegion result = buildPartial();
           if (!result.isInitialized()) {
@@ -329,17 +515,7 @@ public final class Timings {
           }
           return result;
         }
-        
-        private cosmos.trace.Timings.TimedRegions.TimedRegion buildParsed()
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          cosmos.trace.Timings.TimedRegions.TimedRegion result = buildPartial();
-          if (!result.isInitialized()) {
-            throw newUninitializedMessageException(
-              result).asInvalidProtocolBufferException();
-          }
-          return result;
-        }
-        
+
         public cosmos.trace.Timings.TimedRegions.TimedRegion buildPartial() {
           cosmos.trace.Timings.TimedRegions.TimedRegion result = new cosmos.trace.Timings.TimedRegions.TimedRegion(this);
           int from_bitField0_ = bitField0_;
@@ -356,7 +532,7 @@ public final class Timings {
           onBuilt();
           return result;
         }
-        
+
         public Builder mergeFrom(com.google.protobuf.Message other) {
           if (other instanceof cosmos.trace.Timings.TimedRegions.TimedRegion) {
             return mergeFrom((cosmos.trace.Timings.TimedRegions.TimedRegion)other);
@@ -365,11 +541,13 @@ public final class Timings {
             return this;
           }
         }
-        
+
         public Builder mergeFrom(cosmos.trace.Timings.TimedRegions.TimedRegion other) {
           if (other == cosmos.trace.Timings.TimedRegions.TimedRegion.getDefaultInstance()) return this;
           if (other.hasDescription()) {
-            setDescription(other.getDescription());
+            bitField0_ |= 0x00000001;
+            description_ = other.description_;
+            onChanged();
           }
           if (other.hasDuration()) {
             setDuration(other.getDuration());
@@ -377,7 +555,7 @@ public final class Timings {
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
         }
-        
+
         public final boolean isInitialized() {
           if (!hasDescription()) {
             
@@ -389,62 +567,69 @@ public final class Timings {
           }
           return true;
         }
-        
+
         public Builder mergeFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder(
-              this.getUnknownFields());
-          while (true) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              default: {
-                if (!parseUnknownField(input, unknownFields,
-                                       extensionRegistry, tag)) {
-                  this.setUnknownFields(unknownFields.build());
-                  onChanged();
-                  return this;
-                }
-                break;
-              }
-              case 10: {
-                bitField0_ |= 0x00000001;
-                description_ = input.readBytes();
-                break;
-              }
-              case 16: {
-                bitField0_ |= 0x00000002;
-                duration_ = input.readUInt64();
-                break;
-              }
+          cosmos.trace.Timings.TimedRegions.TimedRegion parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (cosmos.trace.Timings.TimedRegions.TimedRegion) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
             }
           }
+          return this;
         }
-        
         private int bitField0_;
-        
+
         // required string description = 1;
         private java.lang.Object description_ = "";
+        /**
+         * <code>required string description = 1;</code>
+         */
         public boolean hasDescription() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
-        public String getDescription() {
+        /**
+         * <code>required string description = 1;</code>
+         */
+        public java.lang.String getDescription() {
           java.lang.Object ref = description_;
-          if (!(ref instanceof String)) {
-            String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
             description_ = s;
             return s;
           } else {
-            return (String) ref;
+            return (java.lang.String) ref;
           }
         }
-        public Builder setDescription(String value) {
+        /**
+         * <code>required string description = 1;</code>
+         */
+        public com.google.protobuf.ByteString
+            getDescriptionBytes() {
+          java.lang.Object ref = description_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            description_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string description = 1;</code>
+         */
+        public Builder setDescription(
+            java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
@@ -453,71 +638,109 @@ public final class Timings {
           onChanged();
           return this;
         }
+        /**
+         * <code>required string description = 1;</code>
+         */
         public Builder clearDescription() {
           bitField0_ = (bitField0_ & ~0x00000001);
           description_ = getDefaultInstance().getDescription();
           onChanged();
           return this;
         }
-        void setDescription(com.google.protobuf.ByteString value) {
-          bitField0_ |= 0x00000001;
+        /**
+         * <code>required string description = 1;</code>
+         */
+        public Builder setDescriptionBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
           description_ = value;
           onChanged();
+          return this;
         }
-        
+
         // required uint64 duration = 2;
         private long duration_ ;
+        /**
+         * <code>required uint64 duration = 2;</code>
+         */
         public boolean hasDuration() {
           return ((bitField0_ & 0x00000002) == 0x00000002);
         }
+        /**
+         * <code>required uint64 duration = 2;</code>
+         */
         public long getDuration() {
           return duration_;
         }
+        /**
+         * <code>required uint64 duration = 2;</code>
+         */
         public Builder setDuration(long value) {
           bitField0_ |= 0x00000002;
           duration_ = value;
           onChanged();
           return this;
         }
+        /**
+         * <code>required uint64 duration = 2;</code>
+         */
         public Builder clearDuration() {
           bitField0_ = (bitField0_ & ~0x00000002);
           duration_ = 0L;
           onChanged();
           return this;
         }
-        
+
         // @@protoc_insertion_point(builder_scope:cosmos.trace.TimedRegions.TimedRegion)
       }
-      
+
       static {
         defaultInstance = new TimedRegion(true);
         defaultInstance.initFields();
       }
-      
+
       // @@protoc_insertion_point(class_scope:cosmos.trace.TimedRegions.TimedRegion)
     }
-    
+
     // repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;
     public static final int REGION_FIELD_NUMBER = 1;
     private java.util.List<cosmos.trace.Timings.TimedRegions.TimedRegion> region_;
+    /**
+     * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+     */
     public java.util.List<cosmos.trace.Timings.TimedRegions.TimedRegion> getRegionList() {
       return region_;
     }
+    /**
+     * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+     */
     public java.util.List<? extends cosmos.trace.Timings.TimedRegions.TimedRegionOrBuilder> 
         getRegionOrBuilderList() {
       return region_;
     }
+    /**
+     * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+     */
     public int getRegionCount() {
       return region_.size();
     }
+    /**
+     * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+     */
     public cosmos.trace.Timings.TimedRegions.TimedRegion getRegion(int index) {
       return region_.get(index);
     }
+    /**
+     * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+     */
     public cosmos.trace.Timings.TimedRegions.TimedRegionOrBuilder getRegionOrBuilder(
         int index) {
       return region_.get(index);
     }
-    
+
     private void initFields() {
       region_ = java.util.Collections.emptyList();
     }
@@ -525,7 +748,7 @@ public final class Timings {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       for (int i = 0; i < getRegionCount(); i++) {
         if (!getRegion(i).isInitialized()) {
           memoizedIsInitialized = 0;
@@ -535,7 +758,7 @@ public final class Timings {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -544,12 +767,12 @@ public final class Timings {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       for (int i = 0; i < region_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -559,94 +782,83 @@ public final class Timings {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     public static cosmos.trace.Timings.TimedRegions parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static cosmos.trace.Timings.TimedRegions parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static cosmos.trace.Timings.TimedRegions parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static cosmos.trace.Timings.TimedRegions parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static cosmos.trace.Timings.TimedRegions parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static cosmos.trace.Timings.TimedRegions parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static cosmos.trace.Timings.TimedRegions parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static cosmos.trace.Timings.TimedRegions parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static cosmos.trace.Timings.TimedRegions parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static cosmos.trace.Timings.TimedRegions parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(cosmos.trace.Timings.TimedRegions prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code cosmos.trace.TimedRegions}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements cosmos.trace.Timings.TimedRegionsOrBuilder {
@@ -654,18 +866,21 @@ public final class Timings {
           getDescriptor() {
         return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_fieldAccessorTable;
+        return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                cosmos.trace.Timings.TimedRegions.class, cosmos.trace.Timings.TimedRegions.Builder.class);
       }
-      
+
       // Construct using cosmos.trace.Timings.TimedRegions.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -677,7 +892,7 @@ public final class Timings {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         if (regionBuilder_ == null) {
@@ -688,20 +903,20 @@ public final class Timings {
         }
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return cosmos.trace.Timings.TimedRegions.getDescriptor();
+        return cosmos.trace.Timings.internal_static_cosmos_trace_TimedRegions_descriptor;
       }
-      
+
       public cosmos.trace.Timings.TimedRegions getDefaultInstanceForType() {
         return cosmos.trace.Timings.TimedRegions.getDefaultInstance();
       }
-      
+
       public cosmos.trace.Timings.TimedRegions build() {
         cosmos.trace.Timings.TimedRegions result = buildPartial();
         if (!result.isInitialized()) {
@@ -709,17 +924,7 @@ public final class Timings {
         }
         return result;
       }
-      
-      private cosmos.trace.Timings.TimedRegions buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        cosmos.trace.Timings.TimedRegions result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public cosmos.trace.Timings.TimedRegions buildPartial() {
         cosmos.trace.Timings.TimedRegions result = new cosmos.trace.Timings.TimedRegions(this);
         int from_bitField0_ = bitField0_;
@@ -735,7 +940,7 @@ public final class Timings {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof cosmos.trace.Timings.TimedRegions) {
           return mergeFrom((cosmos.trace.Timings.TimedRegions)other);
@@ -744,7 +949,7 @@ public final class Timings {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(cosmos.trace.Timings.TimedRegions other) {
         if (other == cosmos.trace.Timings.TimedRegions.getDefaultInstance()) return this;
         if (regionBuilder_ == null) {
@@ -776,7 +981,7 @@ public final class Timings {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         for (int i = 0; i < getRegionCount(); i++) {
           if (!getRegion(i).isInitialized()) {
@@ -786,42 +991,26 @@ public final class Timings {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              cosmos.trace.Timings.TimedRegions.TimedRegion.Builder subBuilder = cosmos.trace.Timings.TimedRegions.TimedRegion.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addRegion(subBuilder.buildPartial());
-              break;
-            }
+        cosmos.trace.Timings.TimedRegions parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (cosmos.trace.Timings.TimedRegions) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
+
       // repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;
       private java.util.List<cosmos.trace.Timings.TimedRegions.TimedRegion> region_ =
         java.util.Collections.emptyList();
@@ -831,10 +1020,13 @@ public final class Timings {
           bitField0_ |= 0x00000001;
          }
       }
-      
+
       private com.google.protobuf.RepeatedFieldBuilder<
           cosmos.trace.Timings.TimedRegions.TimedRegion, cosmos.trace.Timings.TimedRegions.TimedRegion.Builder, cosmos.trace.Timings.TimedRegions.TimedRegionOrBuilder> regionBuilder_;
-      
+
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public java.util.List<cosmos.trace.Timings.TimedRegions.TimedRegion> getRegionList() {
         if (regionBuilder_ == null) {
           return java.util.Collections.unmodifiableList(region_);
@@ -842,6 +1034,9 @@ public final class Timings {
           return regionBuilder_.getMessageList();
         }
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public int getRegionCount() {
         if (regionBuilder_ == null) {
           return region_.size();
@@ -849,6 +1044,9 @@ public final class Timings {
           return regionBuilder_.getCount();
         }
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public cosmos.trace.Timings.TimedRegions.TimedRegion getRegion(int index) {
         if (regionBuilder_ == null) {
           return region_.get(index);
@@ -856,6 +1054,9 @@ public final class Timings {
           return regionBuilder_.getMessage(index);
         }
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public Builder setRegion(
           int index, cosmos.trace.Timings.TimedRegions.TimedRegion value) {
         if (regionBuilder_ == null) {
@@ -870,6 +1071,9 @@ public final class Timings {
         }
         return this;
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public Builder setRegion(
           int index, cosmos.trace.Timings.TimedRegions.TimedRegion.Builder builderForValue) {
         if (regionBuilder_ == null) {
@@ -881,6 +1085,9 @@ public final class Timings {
         }
         return this;
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public Builder addRegion(cosmos.trace.Timings.TimedRegions.TimedRegion value) {
         if (regionBuilder_ == null) {
           if (value == null) {
@@ -894,6 +1101,9 @@ public final class Timings {
         }
         return this;
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public Builder addRegion(
           int index, cosmos.trace.Timings.TimedRegions.TimedRegion value) {
         if (regionBuilder_ == null) {
@@ -908,6 +1118,9 @@ public final class Timings {
         }
         return this;
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public Builder addRegion(
           cosmos.trace.Timings.TimedRegions.TimedRegion.Builder builderForValue) {
         if (regionBuilder_ == null) {
@@ -919,6 +1132,9 @@ public final class Timings {
         }
         return this;
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public Builder addRegion(
           int index, cosmos.trace.Timings.TimedRegions.TimedRegion.Builder builderForValue) {
         if (regionBuilder_ == null) {
@@ -930,6 +1146,9 @@ public final class Timings {
         }
         return this;
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public Builder addAllRegion(
           java.lang.Iterable<? extends cosmos.trace.Timings.TimedRegions.TimedRegion> values) {
         if (regionBuilder_ == null) {
@@ -941,6 +1160,9 @@ public final class Timings {
         }
         return this;
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public Builder clearRegion() {
         if (regionBuilder_ == null) {
           region_ = java.util.Collections.emptyList();
@@ -951,6 +1173,9 @@ public final class Timings {
         }
         return this;
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public Builder removeRegion(int index) {
         if (regionBuilder_ == null) {
           ensureRegionIsMutable();
@@ -961,10 +1186,16 @@ public final class Timings {
         }
         return this;
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public cosmos.trace.Timings.TimedRegions.TimedRegion.Builder getRegionBuilder(
           int index) {
         return getRegionFieldBuilder().getBuilder(index);
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public cosmos.trace.Timings.TimedRegions.TimedRegionOrBuilder getRegionOrBuilder(
           int index) {
         if (regionBuilder_ == null) {
@@ -972,6 +1203,9 @@ public final class Timings {
           return regionBuilder_.getMessageOrBuilder(index);
         }
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public java.util.List<? extends cosmos.trace.Timings.TimedRegions.TimedRegionOrBuilder> 
            getRegionOrBuilderList() {
         if (regionBuilder_ != null) {
@@ -980,15 +1214,24 @@ public final class Timings {
           return java.util.Collections.unmodifiableList(region_);
         }
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public cosmos.trace.Timings.TimedRegions.TimedRegion.Builder addRegionBuilder() {
         return getRegionFieldBuilder().addBuilder(
             cosmos.trace.Timings.TimedRegions.TimedRegion.getDefaultInstance());
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public cosmos.trace.Timings.TimedRegions.TimedRegion.Builder addRegionBuilder(
           int index) {
         return getRegionFieldBuilder().addBuilder(
             index, cosmos.trace.Timings.TimedRegions.TimedRegion.getDefaultInstance());
       }
+      /**
+       * <code>repeated .cosmos.trace.TimedRegions.TimedRegion region = 1;</code>
+       */
       public java.util.List<cosmos.trace.Timings.TimedRegions.TimedRegion.Builder> 
            getRegionBuilderList() {
         return getRegionFieldBuilder().getBuilderList();
@@ -1007,18 +1250,18 @@ public final class Timings {
         }
         return regionBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:cosmos.trace.TimedRegions)
     }
-    
+
     static {
       defaultInstance = new TimedRegions(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:cosmos.trace.TimedRegions)
   }
-  
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_cosmos_trace_TimedRegions_descriptor;
   private static
@@ -1029,7 +1272,7 @@ public final class Timings {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_cosmos_trace_TimedRegions_TimedRegion_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -1054,17 +1297,13 @@ public final class Timings {
           internal_static_cosmos_trace_TimedRegions_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_cosmos_trace_TimedRegions_descriptor,
-              new java.lang.String[] { "Region", },
-              cosmos.trace.Timings.TimedRegions.class,
-              cosmos.trace.Timings.TimedRegions.Builder.class);
+              new java.lang.String[] { "Region", });
           internal_static_cosmos_trace_TimedRegions_TimedRegion_descriptor =
             internal_static_cosmos_trace_TimedRegions_descriptor.getNestedTypes().get(0);
           internal_static_cosmos_trace_TimedRegions_TimedRegion_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_cosmos_trace_TimedRegions_TimedRegion_descriptor,
-              new java.lang.String[] { "Description", "Duration", },
-              cosmos.trace.Timings.TimedRegions.TimedRegion.class,
-              cosmos.trace.Timings.TimedRegions.TimedRegion.Builder.class);
+              new java.lang.String[] { "Description", "Duration", });
           return null;
         }
       };
@@ -1073,6 +1312,6 @@ public final class Timings {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }
