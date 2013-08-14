@@ -312,7 +312,7 @@ public class CosmosImpl implements Cosmos {
     checkNotNull(columnsToIndex);
     
     Stopwatch sw = id.tracer().startTiming("Cosmos:index");
-
+    
     try {
       State s = SortingMetadata.getState(id);
       
@@ -465,6 +465,7 @@ public class CosmosImpl implements Cosmos {
       State s = SortingMetadata.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+        sw.stop();
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
@@ -472,7 +473,8 @@ public class CosmosImpl implements Cosmos {
       bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
       bs.fetchColumnFamily(Defaults.DOCID_FIELD_NAME_TEXT);
       
-      return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id));
+      // Handles stoping the stopwatch
+      return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id), sw);
     } catch (TableNotFoundException e) {
       // In the exceptional case, stop the timer
       sw.stop();
@@ -504,17 +506,34 @@ public class CosmosImpl implements Cosmos {
     checkNotNull(column);
     checkNotNull(value);
     
-    State s = SortingMetadata.getState(id);
+    Stopwatch sw = id.tracer().startTiming("Cosmos:fetchWithColumnValue");
     
-    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+    try {
+      State s = SortingMetadata.getState(id);
+      
+      if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+        sw.stop();
+        throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+      }
+      
+      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+      bs.setRanges(Collections.singleton(Range.exact(id.uuid() + Defaults.NULL_BYTE_STR + value)));
+      bs.fetchColumnFamily(new Text(column.column()));
+      
+      return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id), sw);
+    } catch (TableNotFoundException e) {
+      // In the exceptional case, stop the timer
+      sw.stop();
+      throw e;
+    } catch (UnexpectedStateException e) {
+      // In the exceptional case, stop the timer
+      sw.stop();
+      throw e;
+    } catch (RuntimeException e) {
+      // In the exceptional case, stop the timer
+      sw.stop();
+      throw e;
     }
-    
-    BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
-    bs.setRanges(Collections.singleton(Range.exact(id.uuid() + Defaults.NULL_BYTE_STR + value)));
-    bs.fetchColumnFamily(new Text(column.column()));
-    
-    return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id));
   }
   
   @Override
@@ -539,34 +558,54 @@ public class CosmosImpl implements Cosmos {
     checkNotNull(id);
     checkNotNull(ordering);
     
-    State s = SortingMetadata.getState(id);
+    Stopwatch sw = id.tracer().startTiming("Cosmos:fetchWithIndex");
     
-    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
-    }
-    
-    Index.define(ordering.column());
-    
-    if (!id.columnsToIndex().contains(ordering)) {
-      log.error("{} is not indexed by {}", ordering, id);
-      throw new UnindexedColumnException();
-    }
-    
-    Scanner scanner = id.connector().createScanner(id.dataTable(), id.auths());
-    scanner.setRange(Range.prefix(id.uuid()));
-    scanner.fetchColumnFamily(new Text(ordering.column().column()));
-    scanner.setBatchSize(200);
-    
-    // Filter on cq-prefix to only look at the ordering we want
-    IteratorSetting filter = new IteratorSetting(50, "cqFilter", OrderFilter.class);
-    filter.addOption(OrderFilter.PREFIX, Order.direction(ordering.order()));
-    scanner.addScanIterator(filter);
-    
-    // If the client has told us they don't want duplicate records, lets not give them duplicate records
-    if (duplicateUidsAllowed) {
-      return CloseableIterable.transform(scanner, new IndexToMultimapQueryResult(this, id));
-    } else {
-      return CloseableIterable.filterAndTransform(scanner, new DedupingPredicate(), new IndexToMultimapQueryResult(this, id));
+    try {
+      State s = SortingMetadata.getState(id);
+      
+      if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+        sw.stop();
+        throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+      }
+      
+      Index.define(ordering.column());
+      
+      if (!id.columnsToIndex().contains(ordering)) {
+        log.error("{} is not indexed by {}", ordering, id);
+        
+        sw.stop();
+        
+        throw new UnindexedColumnException();
+      }
+      
+      Scanner scanner = id.connector().createScanner(id.dataTable(), id.auths());
+      scanner.setRange(Range.prefix(id.uuid()));
+      scanner.fetchColumnFamily(new Text(ordering.column().column()));
+      scanner.setBatchSize(200);
+      
+      // Filter on cq-prefix to only look at the ordering we want
+      IteratorSetting filter = new IteratorSetting(50, "cqFilter", OrderFilter.class);
+      filter.addOption(OrderFilter.PREFIX, Order.direction(ordering.order()));
+      scanner.addScanIterator(filter);
+      
+      // If the client has told us they don't want duplicate records, lets not give them duplicate records
+      if (duplicateUidsAllowed) {
+        return CloseableIterable.transform(scanner, new IndexToMultimapQueryResult(this, id), sw);
+      } else {
+        return CloseableIterable.filterAndTransform(scanner, new DedupingPredicate(), new IndexToMultimapQueryResult(this, id), sw);
+      }
+    } catch (TableNotFoundException e) {
+      // In the exceptional case, stop the timer
+      sw.stop();
+      throw e;
+    } catch (UnexpectedStateException e) {
+      // In the exceptional case, stop the timer
+      sw.stop();
+      throw e;
+    } catch (RuntimeException e) {
+      // In the exceptional case, stop the timer
+      sw.stop();
+      throw e;
     }
   }
   
@@ -586,29 +625,46 @@ public class CosmosImpl implements Cosmos {
       UnindexedColumnException {
     checkNotNull(id);
     
-    State s = SortingMetadata.getState(id);
+    Stopwatch sw = id.tracer().startTiming("Cosmos:groupResults"); 
     
-    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+    try {
+      State s = SortingMetadata.getState(id);
+      
+      if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+        sw.stop();
+        throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+      }
+      
+      checkNotNull(column);
+      
+      Text colf = new Text(column.column());
+      
+      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+      bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
+      bs.fetchColumnFamily(colf);
+      
+      // Filter on cq-prefix to only look at the ordering we want
+      IteratorSetting filter = new IteratorSetting(50, "cqFilter", OrderFilter.class);
+      filter.addOption(OrderFilter.PREFIX, Order.FORWARD);
+      bs.addScanIterator(filter);
+      
+      IteratorSetting cfg = new IteratorSetting(60, GroupByRowSuffixIterator.class);
+      bs.addScanIterator(cfg);
+      
+      return CloseableIterable.transform(bs, new GroupByFunction(), sw);
+    } catch (TableNotFoundException e) {
+      // In the exceptional case, stop the timer
+      sw.stop();
+      throw e;
+    } catch (UnexpectedStateException e) {
+      // In the exceptional case, stop the timer
+      sw.stop();
+      throw e;
+    } catch (RuntimeException e) {
+      // In the exceptional case, stop the timer
+      sw.stop();
+      throw e;
     }
-    
-    checkNotNull(column);
-    
-    Text colf = new Text(column.column());
-    
-    BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
-    bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
-    bs.fetchColumnFamily(colf);
-    
-    // Filter on cq-prefix to only look at the ordering we want
-    IteratorSetting filter = new IteratorSetting(50, "cqFilter", OrderFilter.class);
-    filter.addOption(OrderFilter.PREFIX, Order.FORWARD);
-    bs.addScanIterator(filter);
-    
-    IteratorSetting cfg = new IteratorSetting(60, GroupByRowSuffixIterator.class);
-    bs.addScanIterator(cfg);
-    
-    return CloseableIterable.transform(bs, new GroupByFunction());
   }
   
   @Override
@@ -625,6 +681,8 @@ public class CosmosImpl implements Cosmos {
   public MultimapQueryResult contents(SortableResult id, String docId) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     checkNotNull(docId);
+    
+    // Omit tracing here just due to sheer magnitude of these calls.
     
     State s = SortingMetadata.getState(id);
     
@@ -653,34 +711,40 @@ public class CosmosImpl implements Cosmos {
   public void delete(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
-    State s = SortingMetadata.getState(id);
+    Stopwatch sw = id.tracer().startTiming("Cosmos:delete");
     
-    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
-    }
-    
-    final State desiredState = State.DELETING;
-    
-    log.debug("Changing state for {} from {} to {}", new Object[] {id, s, desiredState});
-    
-    SortingMetadata.setState(id, desiredState);
-    
-    // Delete of the Keys
-    BatchDeleter bd = null;
     try {
-      bd = id.connector().createBatchDeleter(id.dataTable(), id.auths(), 4, new BatchWriterConfig());
-      bd.setRanges(Collections.singleton(Range.prefix(id.uuid())));
+      State s = SortingMetadata.getState(id);
       
-      bd.delete();
-    } finally {
-      if (null != bd) {
-        bd.close();
+      if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+        throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
+      
+      final State desiredState = State.DELETING;
+      
+      log.debug("Changing state for {} from {} to {}", new Object[] {id, s, desiredState});
+      
+      SortingMetadata.setState(id, desiredState);
+      
+      // Delete of the Keys
+      BatchDeleter bd = null;
+      try {
+        bd = id.connector().createBatchDeleter(id.dataTable(), id.auths(), 4, new BatchWriterConfig());
+        bd.setRanges(Collections.singleton(Range.prefix(id.uuid())));
+        
+        bd.delete();
+      } finally {
+        if (null != bd) {
+          bd.close();
+        }
+      }
+      
+      log.debug("Removing state for {}", id);
+      
+      SortingMetadata.remove(id);
+    } finally {
+      sw.stop();
     }
-    
-    log.debug("Removing state for {}", id);
-    
-    SortingMetadata.remove(id);
   }
   
   protected Mutation getDocumentPrefix(SortableResult id, QueryResult<?> queryResult, String suffix, Order order) {
