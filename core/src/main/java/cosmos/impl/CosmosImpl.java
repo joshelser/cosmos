@@ -55,6 +55,7 @@ import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 
@@ -134,26 +135,37 @@ public class CosmosImpl implements Cosmos {
   public void register(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
-    State s = SortingMetadata.getState(id);
+    Stopwatch sw = id.tracer().startTiming("Cosmos:register");
     
-    if (!State.UNKNOWN.equals(s)) {
-      UnexpectedStateException e = unexpectedState(id, State.UNKNOWN, s);
-      log.error(e.getMessage());
-      throw e;
+    try {
+      State s = SortingMetadata.getState(id);
+      
+      if (!State.UNKNOWN.equals(s)) {
+        UnexpectedStateException e = unexpectedState(id, State.UNKNOWN, s);
+        log.error(e.getMessage());
+        throw e;
+      }
+      
+      State targetState = State.LOADING;
+      
+      log.debug("Setting state for {} from {} to {}", new Object[] {id, s, targetState});
+      
+      SortingMetadata.setState(id, targetState);
+    } finally {
+      sw.stop();
     }
-    
-    State targetState = State.LOADING;
-    
-    log.debug("Setting state for {} from {} to {}", new Object[] {id, s, targetState});
-    
-    SortingMetadata.setState(id, targetState);
   }
   
   @Override
   public void addResult(SortableResult id, QueryResult<?> queryResult) throws Exception {
     checkNotNull(queryResult);
     
-    addResults(id, Single.<QueryResult<?>> create(queryResult));
+    Stopwatch sw = id.tracer().startTiming("Cosmos:addResult");
+    try {
+      addResults(id, Single.<QueryResult<?>> create(queryResult));
+    } finally {
+      sw.stop();
+    }
   }
   
   @Override
@@ -161,39 +173,44 @@ public class CosmosImpl implements Cosmos {
     checkNotNull(id);
     checkNotNull(queryResults);
     
-    State s = SortingMetadata.getState(id);
-    
-    if (!State.LOADING.equals(s)) {
-      UnexpectedStateException e = unexpectedState(id, State.LOADING, s);
-      log.error(e.getMessage());
-      throw e;
-    }
-    
-    InterProcessMutex lock = getMutex(id);
-    
-    // TODO We don't need to lock on multiple calls to addResults; however, we need to lock over adding the
-    // new records to make sure a call to index() doesn't come in while we're processing a stale set of Columns to index
-    boolean locked = false;
-    int count = 1;
-    
-    if (id.lockOnUpdates()) {
-      while (!locked && count < 4) {
-        if (locked = lock.acquire(10, TimeUnit.SECONDS)) {
-          try {
-            performAdd(id, queryResults);
-          } finally {
-            // Don't hog the lock
-            lock.release();
-          }
-        } else {
-          count++;
-          log.warn("addResults() on {} could not acquire lock after {} seconds. Attempting acquire #{}", new Object[] {id.uuid(), LOCK_SECS, count});
-        }
-        
-        throw new IllegalStateException("Could not acquire lock during index() after " + count + " attempts");
+    Stopwatch sw = id.tracer().startTiming("Cosmos:addResults");
+    try {
+      State s = SortingMetadata.getState(id);
+      
+      if (!State.LOADING.equals(s)) {
+        UnexpectedStateException e = unexpectedState(id, State.LOADING, s);
+        log.error(e.getMessage());
+        throw e;
       }
-    } else {
-      performAdd(id, queryResults);
+      
+      InterProcessMutex lock = getMutex(id);
+      
+      // TODO We don't need to lock on multiple calls to addResults; however, we need to lock over adding the
+      // new records to make sure a call to index() doesn't come in while we're processing a stale set of Columns to index
+      boolean locked = false;
+      int count = 1;
+      
+      if (id.lockOnUpdates()) {
+        while (!locked && count < 4) {
+          if (locked = lock.acquire(10, TimeUnit.SECONDS)) {
+            try {
+              performAdd(id, queryResults);
+            } finally {
+              // Don't hog the lock
+              lock.release();
+            }
+          } else {
+            count++;
+            log.warn("addResults() on {} could not acquire lock after {} seconds. Attempting acquire #{}", new Object[] {id.uuid(), LOCK_SECS, count});
+          }
+          
+          throw new IllegalStateException("Could not acquire lock during index() after " + count + " attempts");
+        }
+      } else {
+        performAdd(id, queryResults);
+      }
+    } finally {
+      sw.stop();
     }
   }
   
@@ -270,17 +287,23 @@ public class CosmosImpl implements Cosmos {
   public void finalize(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
-    State s = SortingMetadata.getState(id);
+    Stopwatch sw = id.tracer().startTiming("Cosmos:finalize");
     
-    if (!State.LOADING.equals(s)) {
-      throw unexpectedState(id, State.LOADING, s);
+    try {
+      State s = SortingMetadata.getState(id);
+      
+      if (!State.LOADING.equals(s)) {
+        throw unexpectedState(id, State.LOADING, s);
+      }
+      
+      final State desiredState = State.LOADED;
+      
+      log.debug("Changing state for {} from {} to {}", new Object[] {id, s, desiredState});
+      
+      SortingMetadata.setState(id, desiredState);
+    } finally {
+      sw.stop();
     }
-    
-    final State desiredState = State.LOADED;
-    
-    log.debug("Changing state for {} from {} to {}", new Object[] {id, s, desiredState});
-    
-    SortingMetadata.setState(id, desiredState);
   }
   
   @Override
@@ -288,38 +311,44 @@ public class CosmosImpl implements Cosmos {
     checkNotNull(id);
     checkNotNull(columnsToIndex);
     
-    State s = SortingMetadata.getState(id);
-    
-    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
-    }
-    
-    InterProcessMutex lock = getMutex(id);
-    
-    boolean locked = false;
-    int count = 1;
-    
-    // Only perform locking when the client requests it
-    if (id.lockOnUpdates) {
-      while (!locked && count < 4) {
-        if (locked = lock.acquire(10, TimeUnit.SECONDS)) {
-          try {
-            performUpdate(id, columnsToIndex);
+    Stopwatch sw = id.tracer().startTiming("Cosmos:index");
+
+    try {
+      State s = SortingMetadata.getState(id);
+      
+      if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+        throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+      }
+      
+      InterProcessMutex lock = getMutex(id);
+      
+      boolean locked = false;
+      int count = 1;
+      
+      // Only perform locking when the client requests it
+      if (id.lockOnUpdates) {
+        while (!locked && count < 4) {
+          if (locked = lock.acquire(10, TimeUnit.SECONDS)) {
+            try {
+              performUpdate(id, columnsToIndex);
+              
+            } finally {
+              lock.release();
+            }
             
-          } finally {
-            lock.release();
+            return;
+          } else {
+            count++;
+            log.warn("index() on {} could not acquire lock after {} seconds. Attempting acquire #{}", new Object[] {id.uuid(), LOCK_SECS, count});
           }
           
-          return;
-        } else {
-          count++;
-          log.warn("index() on {} could not acquire lock after {} seconds. Attempting acquire #{}", new Object[] {id.uuid(), LOCK_SECS, count});
+          throw new IllegalStateException("Could not acquire lock during index() after " + count + " attempts");
         }
-        
-        throw new IllegalStateException("Could not acquire lock during index() after " + count + " attempts");
+      } else {
+        performUpdate(id, columnsToIndex);
       }
-    } else {
-      performUpdate(id, columnsToIndex);
+    } finally {
+      sw.stop();
     }
   }
   
@@ -411,30 +440,52 @@ public class CosmosImpl implements Cosmos {
   public Iterable<Column> columns(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     
-    State s = SortingMetadata.getState(id);
+    Stopwatch sw = id.tracer().startTiming("Cosmos:columns");
     
-    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+    try {
+      State s = SortingMetadata.getState(id);
+      
+      if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+        throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+      }
+      
+      return SortingMetadata.columns(id);
+    } finally {
+      sw.stop();
     }
-    
-    return SortingMetadata.columns(id);
   }
   
   @Override
   public CloseableIterable<MultimapQueryResult> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     
-    State s = SortingMetadata.getState(id);
+    Stopwatch sw = id.tracer().startTiming("Cosmos:fetch");
     
-    if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-      throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+    try {
+      State s = SortingMetadata.getState(id);
+      
+      if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+        throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
+      }
+      
+      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+      bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
+      bs.fetchColumnFamily(Defaults.DOCID_FIELD_NAME_TEXT);
+      
+      return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id));
+    } catch (TableNotFoundException e) {
+      // In the exceptional case, stop the timer
+      sw.stop();
+      throw e;
+    } catch (UnexpectedStateException e) {
+      // In the exceptional case, stop the timer
+      sw.stop();
+      throw e;
+    } catch (RuntimeException e) {
+      // In the exceptional case, stop the timer
+      sw.stop();
+      throw e;
     }
-    
-    BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
-    bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
-    bs.fetchColumnFamily(Defaults.DOCID_FIELD_NAME_TEXT);
-    
-    return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id));
   }
   
   @Override
