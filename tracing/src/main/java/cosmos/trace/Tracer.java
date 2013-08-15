@@ -99,10 +99,11 @@ public class Tracer {
       builder.addRegion(region); 
     }
     
+    byte[] serializedBytes = builder.build().toByteArray();
     recordMutation.put(UUID.getBytes(), new byte[0], builder.build().toByteArray());
     
     Mutation timeMutation = new Mutation(revLongLex.encode(begin));
-    timeMutation.put(TIME.getBytes(), this.uuid.getBytes(), longLex.encode(duration));
+    timeMutation.put(TIME.getBytes(), this.uuid.getBytes(), serializedBytes);
     
     return Arrays.asList(recordMutation, timeMutation);
   }

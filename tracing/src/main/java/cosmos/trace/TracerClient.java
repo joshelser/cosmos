@@ -108,6 +108,8 @@ public class TracerClient {
   
   public Iterable<TimedRegions> since(long timeInMillis) {
     Preconditions.checkArgument(System.currentTimeMillis() > timeInMillis, "Cannot find traces in the future");
+    Preconditions.checkArgument(0 < timeInMillis, "Must have a positive begin");
+    
     Scanner scanner;
     
     LongLexicoder longLex = new LongLexicoder();
@@ -137,13 +139,16 @@ public class TracerClient {
   
   public Iterable<TimedRegions> between(Long start, Long end) {
     Preconditions.checkArgument(System.currentTimeMillis() > start, "Cannot find traces in the future");
+    Preconditions.checkArgument(0 < start, "Must have a positive begin");
+    Preconditions.checkArgument(start <= end, "Start must be less than end");
+    
     Scanner scanner;
     
     LongLexicoder longLex = new LongLexicoder();
     ReverseLexicoder<Long> revLongLex = new ReverseLexicoder<Long>(longLex);
     
-    Text encodedStart = null == start ? new Text(revLongLex.encode(start)) : null;
-    Text encodedEnd = null == start ? new Text(revLongLex.encode(end)) : null;
+    Text encodedStart = null != start ? new Text(revLongLex.encode(start)) : null;
+    Text encodedEnd = null != end ? new Text(revLongLex.encode(end)) : null;
     
     try {
       scanner = connector.createScanner(AccumuloTraceStore.TABLE_NAME, new Authorizations());
@@ -154,7 +159,7 @@ public class TracerClient {
     
     scanner.fetchColumnFamily(new Text(Tracer.TIME));
     
-    // The table is reverse sorted by time, so flip the units on the Range
+    // Since the start and end are also reverse encoded, we use them as normal
     scanner.setRange(new Range(encodedEnd, false, encodedStart, false));
     
     return Iterables.transform(scanner, new DeserializeTimedRegions());
