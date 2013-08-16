@@ -16,18 +16,12 @@
  */
 package cosmos.trace;
 
+import java.util.Date;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.apache.accumulo.core.client.Connector;
-import org.apache.accumulo.core.client.lexicoder.LongLexicoder;
-import org.apache.accumulo.core.client.lexicoder.ReverseLexicoder;
 import org.apache.accumulo.core.client.mock.MockInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
-import org.apache.accumulo.core.data.Key;
-import org.apache.accumulo.core.data.Value;
-import org.apache.accumulo.core.security.Authorizations;
-import org.apache.hadoop.io.Text;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -136,14 +130,23 @@ public class TracerClientTest {
     Assert.assertEquals(1, trs.getRegionCount());
     Assert.assertEquals("t2", trs.getRegion(0).getDescription());
     
+    // Ensure equivalency using dates or longs
+    Assert.assertEquals(regions, Lists.newArrayList(tc.between(new Date(19), new Date(21))));
+    
     regions = Lists.newArrayList(tc.between(21l, 23l));
     Assert.assertEquals(0, regions.size());
+    // Ensure equivalency using dates or longs
+    Assert.assertEquals(regions, Lists.newArrayList(tc.between(new Date(21), new Date(23))));
 
     regions = Lists.newArrayList(tc.between(13l, 18l));
     Assert.assertEquals(0, regions.size());
+    // Ensure equivalency using dates or longs
+    Assert.assertEquals(regions, Lists.newArrayList(tc.between(new Date(13), new Date(18))));
 
     regions = Lists.newArrayList(tc.between(2l, 4l));
     Assert.assertEquals(0, regions.size());
+    // Ensure equivalency using dates or longs
+    Assert.assertEquals(regions, Lists.newArrayList(tc.between(new Date(2), new Date(4))));
     
     regions = Lists.newArrayList(tc.between(8l, 12l));
     
@@ -152,6 +155,9 @@ public class TracerClientTest {
     trs = regions.get(0);
     Assert.assertEquals(1, trs.getRegionCount());
     Assert.assertEquals("t1", trs.getRegion(0).getDescription());
+
+    // Ensure equivalency using dates or longs
+    Assert.assertEquals(regions, Lists.newArrayList(tc.between(new Date(8), new Date(12))));
     
     regions = Lists.newArrayList(tc.between(8l, 22l));
     
@@ -164,6 +170,9 @@ public class TracerClientTest {
     trs = regions.get(1);
     Assert.assertEquals(1, trs.getRegionCount());
     Assert.assertEquals("t1", trs.getRegion(0).getDescription());
+
+    // Ensure equivalency using dates or longs
+    Assert.assertEquals(regions, Lists.newArrayList(tc.between(new Date(8), new Date(22))));
   }
   
 }

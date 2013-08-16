@@ -44,11 +44,11 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
+import cosmos.IntegrationTests;
 import cosmos.results.Column;
 import cosmos.results.QueryResult;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
-import cosmos.util.IntegrationTests;
 
 /**
  * 
