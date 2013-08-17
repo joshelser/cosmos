@@ -77,7 +77,7 @@
         <artifactId>accumulo-minicluster</artifactId>
         <version>${version.accumulo}</version>
       </dependency>
-      <dependency>
+       <dependency>
         <groupId>org.apache.zookeeper</groupId>
         <artifactId>zookeeper</artifactId>
         <version>3.4.5</version>
@@ -148,6 +148,29 @@
         <artifactId>curator-test</artifactId>
         <version>2.0.1-incubating</version>
       </dependency>
+     <dependency>
+        <groupId>net.hydromatic</groupId>
+        <artifactId>optiq</artifactId>
+        <version>0.4.9</version>
+      </dependency>
+     <dependency>
+        <groupId>net.hydromatic</groupId>
+        <artifactId>linq4j</artifactId>
+        <version>0.1.8</version>
+      </dependency>
+     <dependency>
+<groupId>eigenbase</groupId>
+  <artifactId>eigenbase-properties</artifactId>
+  <version>1.1.2</version>
+     </dependency>
+     
+     <dependency>
+        <groupId>sqlline</groupId>
+        <artifactId>sqlline</artifactId>
+        <version>1.1.4</version>
+      </dependency>
+
+
     </dependencies>
   </dependencyManagement>
   <build>

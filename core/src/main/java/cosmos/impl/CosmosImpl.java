@@ -79,7 +79,7 @@ import cosmos.results.impl.MultimapQueryResult;
 import cosmos.util.IndexHelper;
 import cosmos.util.Single;
 
-public class CosmosImpl implements Cosmos {
+public class CosmosImpl implements Cosmos{
   private static final Logger log = LoggerFactory.getLogger(CosmosImpl.class);
   
   public static final long LOCK_SECS = 10;
@@ -713,6 +713,7 @@ public class CosmosImpl implements Cosmos {
     
     Stopwatch sw = id.tracer().startTiming("Cosmos:delete");
     
+
     try {
       State s = SortingMetadata.getState(id);
       
@@ -788,5 +789,6 @@ public class CosmosImpl implements Cosmos {
   protected final InterProcessMutex getMutex(SortableResult id) {
     return new InterProcessMutex(curator, Defaults.CURATOR_PREFIX + id.uuid());
   }
+
   
 }
