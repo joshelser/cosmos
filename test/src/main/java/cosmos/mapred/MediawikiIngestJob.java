@@ -25,6 +25,7 @@ import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -43,19 +44,32 @@ public class MediawikiIngestJob extends Configured implements Tool {
       return 1;
     }
     
+    
+    
     String inputFiles = args[0];
     
-    Job job = new Job(getConf(), "Mediawiki Ingest");
+    Configuration conf = getConf();
+    System.out.println( "path " + conf.get("fs.default.name") );
+    conf.addResource(new Path("/opt/hadoop/conf/hdfs-site.xml"));
+    conf.addResource(new Path("/opt/hadoop/conf/core-site.xml"));
+    
+    conf.addResource(new Path("/opt/hadoop/conf/mapred-site.xml"));
+    
+    System.out.println( "path " + conf.get("fs.default.name") );
+    //System.exit(1);
+    Job job = new Job(conf, "Mediawiki Ingest");
+    
+    
     
     job.setJarByClass(MediawikiIngestJob.class);
     
-    Configuration conf = job.getConfiguration();
+    
     
     String tablename = "sortswiki";
     String zookeepers = "localhost:2181";
-    String instanceName = "accumulo1.5";
-    String user = "mediawiki";
-    PasswordToken passwd = new PasswordToken("password");    
+    String instanceName = "accumulo";
+    String user = "root";
+    PasswordToken passwd = new PasswordToken("secret");    
     
     //conf.set("io.file.buffer.size", Integer.toString(64*1024*1024));
     FileInputFormat.setInputPaths(job, inputFiles);

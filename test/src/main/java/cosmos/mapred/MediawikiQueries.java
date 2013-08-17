@@ -130,8 +130,8 @@ public class MediawikiQueries {
   protected final Cosmos sorts;
   
   public MediawikiQueries() throws Exception {
-    ZooKeeperInstance zk = new ZooKeeperInstance("accumulo1.5", "localhost");
-    this.con = zk.getConnector("mediawiki", new PasswordToken("password"));
+    ZooKeeperInstance zk = new ZooKeeperInstance("accumulo", "localhost");
+    this.con = zk.getConnector("root", new PasswordToken("secret"));
     
     this.sorts = new CosmosImpl("localhost");
   }
@@ -203,6 +203,7 @@ public class MediawikiQueries {
       Random r = new Random();
       
       // Run a bunch of queries
+      
       for (int count = 0; count < 30; count++) {
         long resultCount;
         String name;
@@ -245,11 +246,12 @@ public class MediawikiQueries {
           name = "groupByContributorID";
         }
       }
-      
+      System.out.println(Thread.currentThread().getName() + ": not deleting " + id );
       // Delete the results
       sw = new Stopwatch();
       
       sw.start();
+      
       this.sorts.delete(id);
       sw.stop();
       
@@ -434,6 +436,7 @@ public class MediawikiQueries {
         try {
           (new MediawikiQueries()).run(numQueries);
         } catch (Exception e) {
+        	e.printStackTrace();
           throw new RuntimeException(e);
         }
       }
@@ -472,9 +475,10 @@ public class MediawikiQueries {
       bw.close();
     }
     
+
     ExecutorService runner = Executors.newFixedThreadPool(3);
     for (int i = 0; i < 3; i++) {
-      runner.execute(runQueries(200));
+      runner.execute(runQueries(5));
     }
     
     runner.shutdown();

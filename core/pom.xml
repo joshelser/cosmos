@@ -50,6 +50,22 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
+       <dependency>
+        <groupId>net.hydromatic</groupId>
+        <artifactId>optiq</artifactId>
+        <version>0.4.9</version>
+      </dependency>
+     <dependency>
+        <groupId>net.hydromatic</groupId>
+        <artifactId>linq4j</artifactId>
+        <version>0.1.8</version>
+      </dependency>
+     <dependency>
+<groupId>eigenbase</groupId>
+  <artifactId>eigenbase-properties</artifactId>
+  <version>1.1.2</version>
+     </dependency>
+     
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
