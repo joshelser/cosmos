@@ -2,14 +2,14 @@ package cosmos.util.sql;
 
 import net.hydromatic.optiq.jdbc.DriverVersion;
 
-class AccumuloJdbcDriverVersion extends DriverVersion {
+public class AccumuloJdbcDriverVersion extends DriverVersion {
 	  /** Creates an OptiqDriverVersion. */
-	AccumuloJdbcDriverVersion() {
+	public AccumuloJdbcDriverVersion() {
 	    super(
-	        "Optiq JDBC Driver for Splunk",
-	        "0.2",
-	        "Optiq-Splunk",
-	        "0.2",
+	        "Optiq JDBC Driver for Accumulo",
+	        "0.1",
+	        "Optiq-Accumulo",
+	        "0.1",
 	        true,
 	        0,
 	        1,

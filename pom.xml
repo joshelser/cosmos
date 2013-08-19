@@ -7,6 +7,18 @@
   <version>0.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Cosmos</name>
+  <repositories>
+<repository>
+      <id>pentaho</id>
+      <name>Pentaho Repository</name>
+      <url>http://repository.pentaho.org/artifactory/repo</url>
+    </repository>
+    <repository>
+      <id>conjars</id>
+      <name>Concurrent Conjars repository</name>
+      <url>http://conjars.org/repo</url>
+    </repository>  
+</repositories>
   <modules>
     <module>core</module>
     <module>test</module>

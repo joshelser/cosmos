@@ -13,6 +13,7 @@ import net.hydromatic.optiq.impl.TableInSchemaImpl;
 import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 import net.hydromatic.optiq.impl.java.MapSchema;
 
+import org.apache.log4j.Logger;
 import org.eigenbase.reltype.RelDataType;
 import org.eigenbase.reltype.RelDataTypeFactory;
 import org.eigenbase.reltype.RelDataTypeFactory.FieldInfoBuilder;
@@ -25,17 +26,9 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 
 	private Class<? extends AccumuloTable<?>> clazz = null;
 
+	private static final Logger log = Logger.getLogger(AccumuloSchema.class);
 	/**
-	 * Creates a MONGO schema.
-	 * 
-	 * @param parentSchema
-	 *            Parent schema
-	 * @param name
-	 *            Name of schema
-	 * @param host
-	 *            Mongo host, e.g. "localhost"
-	 * @param database
-	 *            Mongo database name, e.g. "foodmart"
+	 * Accumulo schema constructor
 	 */
 	public AccumuloSchema(Schema parentSchema, String name, String host,
 			String database, Expression expression, T schemaDefiner,
@@ -44,26 +37,23 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 		meataData = schemaDefiner;
 		this.clazz = clazz;
 
-		System.out.println("table is " + meataData.getDataTable() + " name is "
-				+ name);
-
 	}
 
+	/**
+	 * Returns the table associated with the class
+	 */
 	public AccumuloTable getTable(String name) {
-		System.out.println("Getting table " + name);
 		return (AccumuloTable) tableMap.get(name).getTable(Class.class);
 	}
 	
 	@Override
 	public <E> Table<E> getTable(String name, Class<E> elementType) {
-		System.out.println("Getting table " + name);
 		return (AccumuloTable) tableMap.get(name).getTable(Class.class);
 	}
 
 
 	@Override
 	protected Collection<TableInSchema> initialTables() {
-		System.out.println("table2 is " + meataData.getDataTable());
 		final List<TableInSchema> list = new ArrayList<TableInSchema>();
 
 		FieldInfoBuilder builder = new RelDataTypeFactory.FieldInfoBuilder();
@@ -88,28 +78,20 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 			return list;
 
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e);
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e);
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e);
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e);
 		}
 		return null;
 
 	}
 
 }
-
-// End MongoSchema.java

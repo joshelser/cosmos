@@ -15,11 +15,6 @@ public class AccumuloIterables<T> implements Iterable<T> {
 	public AccumuloIterables(Iterator<T> uter) {
 		kvIter = uter;
 		
-		System.out.println("your results====");
-		while(kvIter.hasNext())
-		{
-			System.out.println(kvIter.next());
-		}
 	}
 
 	@Override

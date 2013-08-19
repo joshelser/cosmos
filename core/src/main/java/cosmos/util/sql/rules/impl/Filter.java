@@ -17,7 +17,12 @@ import cosmos.util.sql.AccumuloTable;
 import cosmos.util.sql.call.CallIfc;
 import cosmos.util.sql.call.OperationVisitor;
 
-
+/**
+ * Filter rule
+ * 
+ * @author phrocker
+ *
+ */
 public class Filter extends FilterRelBase implements AccumuloRel {
 
 	private AccumuloTable accumuloAccessor;
@@ -49,7 +54,6 @@ public class Filter extends FilterRelBase implements AccumuloRel {
 		
 		OperationVisitor visitor = new OperationVisitor(getChild());
 		CallIfc operation = getCondition().accept(visitor);
-		System.out.println("buf " + operation.getClass());
 		
 		cosmos.util.sql.call.impl.Filter filter = new cosmos.util.sql.call.impl.Filter();
 		filter.addChild(operation);
@@ -57,15 +61,6 @@ public class Filter extends FilterRelBase implements AccumuloRel {
 		implementor.table = accumuloAccessor; 
 
 		return 1;
-		// final int inputId = implementor.im(this, 0, getChild());
-		// final ObjectNode filter = implementor.mapper.createObjectNode();
-		/*
-		 * E.g. { op: "filter", expr: "donuts.ppu < 1.00" }
-		 * 
-		 * filter.put("op", "filter"); filter.put("input", inputId);
-		 * filter.put("expr", DrillOptiq.toDrill(getChild(),
-		 * getCondition())); return implementor.add(filter);
-		 */
 	}
 
 }

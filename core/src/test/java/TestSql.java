@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,16 +9,45 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import org.apache.accumulo.minicluster.MiniAccumuloCluster;
+import org.apache.accumulo.minicluster.MiniAccumuloConfig;
 import org.eigenbase.util.SaffronProperties;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import com.google.common.io.Files;
 
 import cosmos.util.sql.AccumuloDriver;
 
+
 public class TestSql {
 
-	public static final String SPLUNK_URL = "https://localhost:8089";
-	  public static final String SPLUNK_USER = "admin";
-	  public static final String SPLUNK_PASSWORD = "changeme";
+	
+	 protected static File tmp = Files.createTempDir();
+	  protected static MiniAccumuloCluster mac;
+	  protected static MiniAccumuloConfig macConfig;
+	  
+	  @BeforeClass
+	  public static void setup() throws IOException, InterruptedException {
+	    macConfig = new MiniAccumuloConfig(tmp, "root");
+	    mac = new MiniAccumuloCluster(macConfig);
+	    
+	    mac.start();
+	    
+	    // Do this now so we don't forget later (or get an exception)
+	    tmp.deleteOnExit();
+	  }
+	  
+	  @AfterClass
+	  public static void teardown() throws IOException, InterruptedException {
+	    mac.stop();
+	  }
+	
+	public static final String JDBC_URL = "https://localhost:8089";
+	  public static final String USER = "admin";
+	  public static final String PASSWORD = "changeme";
 	private void loadDriverClass() {
 		try {
 			Class.forName(AccumuloDriver.class.getCanonicalName());
@@ -43,15 +74,21 @@ public class TestSql {
 	}
 
 	@Test
+	public void test()
+	{
+		// replace test until I can stop this test from relying on my local store
+	}
+	@Ignore
+	@Test
 	public void testVanityDriver() throws SQLException {
 		loadDriverClass();
 	    Connection connection = null;
 	    Statement statement = null;
 	    try {
 	      Properties info = new Properties();
-	      info.put("url", SPLUNK_URL);
-	      info.put("user", SPLUNK_USER);
-	      info.put("password", SPLUNK_PASSWORD);
+	      info.put("url", JDBC_URL);
+	      info.put("user", USER);
+	      info.put("password", PASSWORD);
 	      connection = DriverManager.getConnection("jdbc:splunk://localhost", info);
 	      statement = connection.createStatement();
 	      final ResultSet resultSet =
@@ -73,6 +110,7 @@ public class TestSql {
 	    }
 	}
 	
+	@Ignore
 	@Test
 	public void testVanityDriver2() throws SQLException {
 		loadDriverClass();
@@ -80,9 +118,9 @@ public class TestSql {
 	    Statement statement = null;
 	    try {
 	      Properties info = new Properties();
-	      info.put("url", SPLUNK_URL);
-	      info.put("user", SPLUNK_USER);
-	      info.put("password", SPLUNK_PASSWORD);
+	      info.put("url", JDBC_URL);
+	      info.put("user", USER);
+	      info.put("password", PASSWORD);
 	      connection = DriverManager.getConnection("jdbc:splunk://localhost", info);
 	      statement = connection.createStatement();
 	      final ResultSet resultSet =

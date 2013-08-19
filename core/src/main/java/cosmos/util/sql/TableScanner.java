@@ -24,6 +24,11 @@ import cosmos.util.sql.enumerable.FieldPacker;
 import cosmos.util.sql.impl.CosmosTable;
 import cosmos.util.sql.rules.PushDownRule;
 
+/**
+ * Enables the rules to scan a given accumulo table.
+ * @author phrocker
+ *
+ */
 public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 	final CosmosTable resultTable;
 
@@ -57,9 +62,6 @@ public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 	
 	@Override
 	public void register(RelOptPlanner planner) {
-		System.out.println("registering mon");
-	//	planner.addRule(new AccumuloFilter(resultTable,new AccumuloProjection(resultTable)));
-		//planner.addRule(new AccumuloProjection(resultTable,new AccumuloFilter(resultTable)));
 		planner.addRule(new FieldPacker(this));
 		planner.addRule(EnumerableExpression.ARRAY_INSTANCE);
 		
@@ -122,8 +124,10 @@ public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 
 	@Override
 	public int implement(Implementor implementor) {
-		System.out.println("Visiting");
 		implementor.table = resultTable;
+		/**
+		 * @TODO: woops, need to fix this
+		 */
 		implementor.add(IMPLEMENTOR_TYPE.SELECT, new Field(selectedFields.get(0)));
 		
 		return 0;
@@ -131,4 +135,3 @@ public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 
 }
 
-// ResultTableAccessRelationaship

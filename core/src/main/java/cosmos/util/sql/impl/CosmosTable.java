@@ -31,6 +31,11 @@ import cosmos.util.sql.TableScanner;
 import cosmos.util.sql.SchemaDefiner;
 import cosmos.util.sql.call.Field;
 
+/**
+ * Cosmos table representation.
+ * @author phrocker
+ *
+ */
 public class CosmosTable extends AccumuloTable<Entry<Key, Value>> {
 
 	protected JavaTypeFactory javaFactory;
@@ -44,36 +49,22 @@ public class CosmosTable extends AccumuloTable<Entry<Key, Value>> {
 			RelDataType rowType) {
 
 		super(meataSchema, metadata.getDataTable(), typeFactory);
-		System.out.println("new table");
+
 		javaFactory = typeFactory;
 
 		this.metadata =  metadata;
 
 		this.rowType = rowType;
-		initialize();
 	}
 
-	protected void initialize() {
-
-		Set<Index> indexedColumns = metadata.getIndexColumns();
-
-		for (Index index : indexedColumns) {
-			System.out.println(index.column().toString());
-		}
-
-
-	}
 
 	@Override
 	public RelDataType getRowType() {
-		System.out.println("ha");
 		return rowType;
 	}
 
 	@Override
 	public RelNode toRel(ToRelContext context, RelOptTable relOptTable) {
-		System.out.println("ha sads s " + relOptTable.getRowType().getFieldNames());
-
 		return new TableScanner(context.getCluster(), context
 				.getCluster().traitSetOf(AccumuloRel.CONVENTION), relOptTable,
 				this, relOptTable.getRowType()

@@ -25,15 +25,27 @@ import cosmos.util.sql.impl.functions.FieldLimiter;
 
 public class CosmosSql implements SchemaDefiner<MultimapQueryResult>{
 	
-	
+	/**
+	 * Sortable result set reference.
+	 */
 	protected SortableResult sort;
+	
+	/**
+	 * Main cosmos reference
+	 */
 	protected Cosmos cosmos;
+	
 	
 	protected CloseableIterable<MultimapQueryResult> iter;
 	
+	/**
+	 * Iterator reference
+	 */
 	protected Iterator<MultimapQueryResult> baseIter;
 	
-
+	/**
+	 * Constructor
+	 */
 	public CosmosSql(SortableResult results, Cosmos cosmosImpl) throws MutationsRejectedException, TableNotFoundException, UnexpectedStateException
 	{
 		this.sort = results;
@@ -90,7 +102,6 @@ public class CosmosSql implements SchemaDefiner<MultimapQueryResult>{
 		}
 		baseIter = Iterators.transform(baseIter,new FieldLimiter(Lists.newArrayList(limitField)));
 		
-		// TODO Auto-generated method stub
 		return new AccumuloIterables<MultimapQueryResult>(baseIter  );
 	}
 	

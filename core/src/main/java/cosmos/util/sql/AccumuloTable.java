@@ -27,10 +27,9 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 	
 
 	protected AccumuloIterables<T> resultSet;
+	
 	protected SelectQuery query;
 	
-
-
 	public AccumuloTable(final AccumuloSchema<? extends SchemaDefiner> schema, final String tableName, JavaTypeFactory typeFactory) {
 		this.schema = schema;
 		this.tableName = tableName;
@@ -42,8 +41,7 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 	
 	@Override
 	public Expression getExpression() {
-		System.out.println("expr " + getElementType() + " " + tableName);
-		
+	
 		return Expressions.convert_(
 		        Expressions.call(
 		            schema.getExpression(),
@@ -57,7 +55,6 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 
 	@Override
 	public QueryProvider getProvider() {
-		System.out.println("dsg");
 		return schema.getQueryProvider();
 	}
 
@@ -65,13 +62,11 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 
 	@Override
 	public Iterator<T> iterator() {
-		System.out.println("hasd");
 		return Linq4j.enumeratorIterator(enumerator());
 	}
 
 	@Override
 	public DataContext getDataContext() {
-		System.out.println("dsg");
 		return schema;
 	}
 
@@ -86,9 +81,6 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 	protected void select(SelectQuery query)
 	{
 		this.query = query;
-		
-		
-		
 		
 	}
 	

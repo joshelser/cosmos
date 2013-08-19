@@ -14,6 +14,13 @@ import cosmos.util.sql.impl.CosmosTable;
 import cosmos.util.sql.rules.impl.Filter;
 import cosmos.util.sql.rules.impl.Projection;
 
+/**
+ * Initially the rule were separate; however, since 
+ * they can be handled in a single class we simply use this class
+ * to push the rules down the optimizer
+ * @author phrocker
+ *
+ */
 public class PushDownRule extends RuleBase {
 
 	CosmosTable accumuloAccessor;
@@ -30,9 +37,7 @@ public class PushDownRule extends RuleBase {
 		
 		RelNode node = call.getRels()[0];
 		
-		System.out.println(node.getClass() + " size of rule " + call.getRelList().size());
 		if (node instanceof ProjectRel) {
-			System.out.println("project");
 			final ProjectRel project = (ProjectRel) node;
 			final RelNode input = call.getRels()[1];
 			final RelTraitSet traits = project.getTraitSet().plus(
@@ -42,7 +47,6 @@ public class PushDownRule extends RuleBase {
 					convertedInput, project.getProjects(), project.getRowType(),accumuloAccessor));
 
 		} else if (node instanceof FilterRel ) {
-			System.out.println("filter");
 			final FilterRel filter = (FilterRel)node;
 			final RelNode input = call.getRels()[1];
 			final RelTraitSet traits = filter.getTraitSet().plus(
@@ -53,7 +57,7 @@ public class PushDownRule extends RuleBase {
 		}
 		else
 		{
-			System.out.println("shit");
+
 		}
 
 	}

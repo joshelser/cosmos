@@ -20,6 +20,11 @@ import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
 import cosmos.util.sql.call.Field;
 
+/**
+ * Function, which limits fields from our returned documents.
+ * @author phrocker
+ *
+ */
 public class FieldLimiter implements
 		Function<MultimapQueryResult, MultimapQueryResult> {
 
@@ -39,8 +44,6 @@ public class FieldLimiter implements
 
 	@Override
 	public MultimapQueryResult apply(MultimapQueryResult input) {
-
-		// TODO Auto-generated method stub
 		return new FieldLimitingQueryResult(input, input.docId(),limitingPredicate);
 	}
 
@@ -53,6 +56,12 @@ public class FieldLimiter implements
 		}
 	}
 
+	/**
+	 * Internal predicate that limits portions of a document according
+	 * to the constructed list of fields
+	 * @author phrocker
+	 *
+	 */
 	private class FieldLimitPredicate implements
 			Predicate<Entry<Column, SValue>> {
 

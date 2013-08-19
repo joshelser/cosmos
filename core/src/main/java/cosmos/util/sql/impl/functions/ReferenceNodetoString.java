@@ -13,7 +13,6 @@ public class ReferenceNodetoString implements Function<RexNode,String> {
 	String apply(RexNode exp) {
 		
 		if (exp instanceof RexInputRef) {
-			System.out.println("node " + ((RexInputRef) exp).getIndex());
 			return ((RexInputRef) exp).getName();
 		}
 		else

@@ -1,36 +1,17 @@
-/*
-// Licensed to Julian Hyde under one or more contributor license
-// agreements. See the NOTICE file distributed with this work for
-// additional information regarding copyright ownership.
-//
-// Julian Hyde licenses this file to you under the Apache License,
-// Version 2.0 (the "License"); you may not use this file except in
-// compliance with the License. You may obtain a copy of the License at:
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
- */
 package cosmos.util.sql;
+
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import net.hydromatic.optiq.MutableSchema;
-import net.hydromatic.optiq.Schema;
-import net.hydromatic.optiq.impl.java.MapSchema;
-import net.hydromatic.optiq.impl.jdbc.JdbcSchema;
 import net.hydromatic.optiq.jdbc.DriverVersion;
 import net.hydromatic.optiq.jdbc.OptiqConnection;
 import net.hydromatic.optiq.jdbc.UnregisteredDriver;
@@ -65,28 +46,31 @@ import cosmos.mediawiki.MediawikiPage.Page;
 import cosmos.mediawiki.MediawikiPage.Page.Revision;
 import cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor;
 import cosmos.options.Index;
-import cosmos.options.Order;
 import cosmos.results.Column;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
 import cosmos.util.sql.impl.CosmosTable;
 
 /**
- * JDBC driver for Splunk.
- * 
- * <p>
- * It accepts connect strings that start with "jdbc:splunk:".
- * </p>
+ * JDBC Driver. 
+
+ *
  */
 public class AccumuloDriver extends UnregisteredDriver {
 	public static final ColumnVisibility cv = new ColumnVisibility("en");
 	final Random offsetR = new Random(), cardinalityR = new Random();
-
+	
 	private int recordsReturned;
+	
+	protected SchemaDefiner<?> definer;
 	protected AccumuloDriver() {
 		super();
 	}
-
+	
+	public AccumuloDriver(SchemaDefiner<?> definer)
+	{
+		this.definer = definer;
+	}
 	static {
 		new AccumuloDriver().register();
 	}

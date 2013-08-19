@@ -5,6 +5,11 @@ import cosmos.util.sql.call.Field;
 import cosmos.util.sql.call.impl.Filter;
 import cosmos.util.sql.call.impl.Projection;
 
+/**
+ * @TODO: remove this ugly class
+ * @author phrocker
+ *
+ */
 public class SelectQuery extends Implementor {
 	
 	

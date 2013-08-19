@@ -51,7 +51,6 @@ public class EnumerableRelation extends SingleRel implements EnumerableRel {
 	private static final Function1<String, Expression> TO_LITERAL = new Function1<String, Expression>() {
 		@Override
 		public Expression apply(String a0) {
-			System.out.println("a0 is " + a0);
 			return Expressions.constant(a0);
 		}
 	};
@@ -90,7 +89,6 @@ public class EnumerableRelation extends SingleRel implements EnumerableRel {
 
 		SelectQuery selectQuery = new SelectQuery();
 		
-		System.out.println("Child is " + getChild().getClass());
 		selectQuery.visitChild(0, getChild());
 		
 		

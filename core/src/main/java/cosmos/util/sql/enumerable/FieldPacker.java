@@ -13,6 +13,13 @@ import org.eigenbase.rex.RexProgram;
 
 import cosmos.util.sql.TableScanner;
 
+/**
+ * Creates a reference to the table scanner and provides it
+ * the list of fields that the user wants while we're parsing the 
+ * SQL expression
+ * @author phrocker
+ *
+ */
 public class FieldPacker extends ConverterRule {
 	private TableScanner scanner;
 
@@ -23,12 +30,7 @@ public class FieldPacker extends ConverterRule {
 	}
 
 	public RelNode convert(RelNode rel) {
-		System.out.println("convert");
 		final CalcRel calc = (CalcRel) rel;
-		System.out.println ( calc.getChild().getClass() );
-		
-		
-
 		final RexProgram program = calc.getProgram();
 		
 		RelDataType rowType = program.getOutputRowType();
