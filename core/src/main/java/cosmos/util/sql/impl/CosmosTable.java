@@ -31,6 +31,7 @@ import cosmos.util.sql.TableScanner;
 import cosmos.util.sql.SchemaDefiner;
 import cosmos.util.sql.call.Field;
 
+
 /**
  * Cosmos table representation.
  * @author phrocker
@@ -49,17 +50,18 @@ public class CosmosTable extends AccumuloTable<Entry<Key, Value>> {
 			RelDataType rowType) {
 
 		super(meataSchema, metadata.getDataTable(), typeFactory);
-
 		javaFactory = typeFactory;
 
 		this.metadata =  metadata;
 
 		this.rowType = rowType;
+
 	}
 
 
 	@Override
 	public RelDataType getRowType() {
+
 		return rowType;
 	}
 

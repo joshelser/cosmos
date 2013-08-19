@@ -24,6 +24,7 @@ public class FieldPackerRelation extends EnumerableCalcRel {
 
 	@Override
 	public Result implement(EnumerableRelImplementor implementor, Prefer pref) {
+
 		Result result =  super.implement(implementor, pref);
 	
 		return result;

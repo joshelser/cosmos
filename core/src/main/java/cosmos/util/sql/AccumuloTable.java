@@ -29,7 +29,7 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 	protected AccumuloIterables<T> resultSet;
 	
 	protected SelectQuery query;
-	
+
 	public AccumuloTable(final AccumuloSchema<? extends SchemaDefiner> schema, final String tableName, JavaTypeFactory typeFactory) {
 		this.schema = schema;
 		this.tableName = tableName;
@@ -41,7 +41,6 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 	
 	@Override
 	public Expression getExpression() {
-	
 		return Expressions.convert_(
 		        Expressions.call(
 		            schema.getExpression(),

@@ -10,6 +10,7 @@ public class AccumuloJdbcDriverVersion extends DriverVersion {
 	        "0.1",
 	        "Optiq-Accumulo",
 	        "0.1",
+
 	        true,
 	        0,
 	        1,

@@ -29,6 +29,7 @@ import cosmos.util.sql.rules.PushDownRule;
  * @author phrocker
  *
  */
+
 public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 	final CosmosTable resultTable;
 
@@ -128,6 +129,7 @@ public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 		/**
 		 * @TODO: woops, need to fix this
 		 */
+
 		implementor.add(IMPLEMENTOR_TYPE.SELECT, new Field(selectedFields.get(0)));
 		
 		return 0;

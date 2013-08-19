@@ -20,6 +20,7 @@ import cosmos.util.sql.AccumuloTable;
 import cosmos.util.sql.call.CallIfc;
 import cosmos.util.sql.call.OperationVisitor;
 
+
 /**
  * Projection based rule
  * @author phrocker

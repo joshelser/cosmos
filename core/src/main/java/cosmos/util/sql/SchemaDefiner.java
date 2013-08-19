@@ -11,6 +11,7 @@ import cosmos.options.Index;
  *
  * @param <T>
  */
+
 public interface SchemaDefiner<T> {
 
 	public String getDataTable();

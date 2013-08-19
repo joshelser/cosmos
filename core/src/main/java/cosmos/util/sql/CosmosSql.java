@@ -46,6 +46,7 @@ public class CosmosSql implements SchemaDefiner<MultimapQueryResult>{
 	/**
 	 * Constructor
 	 */
+
 	public CosmosSql(SortableResult results, Cosmos cosmosImpl) throws MutationsRejectedException, TableNotFoundException, UnexpectedStateException
 	{
 		this.sort = results;

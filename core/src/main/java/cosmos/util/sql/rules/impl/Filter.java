@@ -16,7 +16,6 @@ import cosmos.util.sql.AccumuloRel.Implementor.IMPLEMENTOR_TYPE;
 import cosmos.util.sql.AccumuloTable;
 import cosmos.util.sql.call.CallIfc;
 import cosmos.util.sql.call.OperationVisitor;
-
 /**
  * Filter rule
  * 

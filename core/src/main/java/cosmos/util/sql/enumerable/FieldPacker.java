@@ -13,6 +13,7 @@ import org.eigenbase.rex.RexProgram;
 
 import cosmos.util.sql.TableScanner;
 
+
 /**
  * Creates a reference to the table scanner and provides it
  * the list of fields that the user wants while we're parsing the 
@@ -30,7 +31,9 @@ public class FieldPacker extends ConverterRule {
 	}
 
 	public RelNode convert(RelNode rel) {
+
 		final CalcRel calc = (CalcRel) rel;
+
 		final RexProgram program = calc.getProgram();
 		
 		RelDataType rowType = program.getOutputRowType();

@@ -1,3 +1,4 @@
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -11,7 +12,6 @@ import java.util.Properties;
 
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
 import org.apache.accumulo.minicluster.MiniAccumuloConfig;
-import org.eigenbase.util.SaffronProperties;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;

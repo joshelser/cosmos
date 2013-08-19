@@ -36,13 +36,13 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 		super(parentSchema, name, expression);
 		meataData = schemaDefiner;
 		this.clazz = clazz;
-
 	}
 
 	/**
 	 * Returns the table associated with the class
 	 */
 	public AccumuloTable getTable(String name) {
+
 		return (AccumuloTable) tableMap.get(name).getTable(Class.class);
 	}
 	
@@ -95,3 +95,4 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 	}
 
 }
+

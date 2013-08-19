@@ -1,5 +1,5 @@
-package cosmos.util.sql;
 
+package cosmos.util.sql;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -53,13 +53,11 @@ import cosmos.util.sql.impl.CosmosTable;
 
 /**
  * JDBC Driver. 
-
- *
  */
 public class AccumuloDriver extends UnregisteredDriver {
 	public static final ColumnVisibility cv = new ColumnVisibility("en");
 	final Random offsetR = new Random(), cardinalityR = new Random();
-	
+
 	private int recordsReturned;
 	
 	protected SchemaDefiner<?> definer;
@@ -71,6 +69,7 @@ public class AccumuloDriver extends UnregisteredDriver {
 	{
 		this.definer = definer;
 	}
+
 	static {
 		new AccumuloDriver().register();
 	}

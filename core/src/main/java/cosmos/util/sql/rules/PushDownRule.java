@@ -37,6 +37,7 @@ public class PushDownRule extends RuleBase {
 		
 		RelNode node = call.getRels()[0];
 		
+
 		if (node instanceof ProjectRel) {
 			final ProjectRel project = (ProjectRel) node;
 			final RelNode input = call.getRels()[1];
