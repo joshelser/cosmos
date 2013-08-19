@@ -42,7 +42,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import cosmos.trace.Timings.TimedRegions;
-import cosmos.trace.Timings.TimedRegions.TimedRegion;
 
 /**
  * 

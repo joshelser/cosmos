@@ -84,7 +84,6 @@ public class Tracer {
     LongLexicoder longLex = new LongLexicoder();
     ReverseLexicoder<Long> revLongLex = new ReverseLexicoder<Long>(longLex);
     
-    long duration = 0;
     TimedRegions.Builder builder = TimedRegions.newBuilder();
     for (int i = 0; i < this.timings.size(); i++) {
       String description = this.timings.get(i).getKey();
@@ -93,7 +92,6 @@ public class Tracer {
       Preconditions.checkArgument(!timing.isRunning(), "Found a non-stopped Stopwatch for region " + description);
       
       long millis = timing.elapsed(TimeUnit.MILLISECONDS);
-      duration += millis;
       
       TimedRegion region = TimedRegion.newBuilder().setDuration(millis).setDescription(description).build();
       builder.addRegion(region); 
