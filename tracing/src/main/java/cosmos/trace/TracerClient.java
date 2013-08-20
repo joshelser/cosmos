@@ -24,11 +24,16 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 
+import org.apache.accumulo.core.client.AccumuloException;
+import org.apache.accumulo.core.client.AccumuloSecurityException;
 import org.apache.accumulo.core.client.Connector;
+import org.apache.accumulo.core.client.Instance;
 import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.client.TableNotFoundException;
+import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.lexicoder.LongLexicoder;
 import org.apache.accumulo.core.client.lexicoder.ReverseLexicoder;
+import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
@@ -42,7 +47,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import cosmos.trace.Timings.TimedRegions;
-import cosmos.trace.Timings.TimedRegions.TimedRegion;
 
 /**
  * 
@@ -51,6 +55,24 @@ public class TracerClient {
   private static final Logger log = LoggerFactory.getLogger(TracerClient.class);
   
   protected final Connector connector;
+  
+  public TracerClient(String instanceName, String zookeepers, String username, String password) throws AccumuloException, AccumuloSecurityException {
+    checkNotNull(zookeepers);
+    checkNotNull(instanceName);
+    checkNotNull(username);
+    checkNotNull(password);
+    
+    ZooKeeperInstance instance = new ZooKeeperInstance(instanceName, zookeepers);
+    this.connector = instance.getConnector(username, new PasswordToken(password));
+  }
+  
+  public TracerClient(Instance inst, String username, String password) throws AccumuloException, AccumuloSecurityException {
+    checkNotNull(inst);
+    checkNotNull(username);
+    checkNotNull(password);
+    
+    this.connector = inst.getConnector(username, new PasswordToken(password));
+  }
   
   public TracerClient(Connector c) {
     checkNotNull(c);

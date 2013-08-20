@@ -56,6 +56,10 @@ public class Tracer {
   public Stopwatch startTiming(String description) {
     checkNotNull(description);
     
+    if (-1l == begin) {
+      begin = System.currentTimeMillis();
+    }
+    
     Stopwatch sw = new Stopwatch();
     this.timings.add(Maps.immutableEntry(description, sw));
     sw.start();
@@ -63,18 +67,9 @@ public class Tracer {
     return sw;
   }
   
-  public void addTiming(String description, Stopwatch sw) {
-    checkNotNull(description);
-    checkNotNull(sw);
-    
-    if (-1l == begin) {
-      begin = System.currentTimeMillis();
-    }
-    
-    this.timings.add(Maps.immutableEntry(description, sw));
-  }
-  
   public List<Mutation> toMutations() {
+    Preconditions.checkArgument(-1 != begin, "Found `begin` still equal to -1");
+    
     if (this.timings.isEmpty()) {
       return Collections.emptyList();
     }
@@ -84,7 +79,6 @@ public class Tracer {
     LongLexicoder longLex = new LongLexicoder();
     ReverseLexicoder<Long> revLongLex = new ReverseLexicoder<Long>(longLex);
     
-    long duration = 0;
     TimedRegions.Builder builder = TimedRegions.newBuilder();
     for (int i = 0; i < this.timings.size(); i++) {
       String description = this.timings.get(i).getKey();
@@ -93,15 +87,15 @@ public class Tracer {
       Preconditions.checkArgument(!timing.isRunning(), "Found a non-stopped Stopwatch for region " + description);
       
       long millis = timing.elapsed(TimeUnit.MILLISECONDS);
-      duration += millis;
       
       TimedRegion region = TimedRegion.newBuilder().setDuration(millis).setDescription(description).build();
       builder.addRegion(region); 
     }
     
     byte[] serializedBytes = builder.build().toByteArray();
-    recordMutation.put(UUID.getBytes(), new byte[0], builder.build().toByteArray());
+    recordMutation.put(UUID.getBytes(), new byte[0], serializedBytes);
     
+    System.out.println("begin:" + begin);
     Mutation timeMutation = new Mutation(revLongLex.encode(begin));
     timeMutation.put(TIME.getBytes(), this.uuid.getBytes(), serializedBytes);
     

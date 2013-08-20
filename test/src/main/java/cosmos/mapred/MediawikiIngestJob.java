@@ -49,17 +49,13 @@ public class MediawikiIngestJob extends Configured implements Tool {
     
     job.setJarByClass(MediawikiIngestJob.class);
     
-    Configuration conf = job.getConfiguration();
-    
     String tablename = "sortswiki";
     String zookeepers = "localhost:2181";
     String instanceName = "accumulo1.5";
     String user = "mediawiki";
     PasswordToken passwd = new PasswordToken("password");    
     
-    //conf.set("io.file.buffer.size", Integer.toString(64*1024*1024));
     FileInputFormat.setInputPaths(job, inputFiles);
-    //FileInputFormat.setMinInputSplitSize(job, 1024*1024*100);
     
     job.setMapperClass(MediawikiMapper.class);
     job.setNumReduceTasks(0);
@@ -78,20 +74,6 @@ public class MediawikiIngestJob extends Configured implements Tool {
     
     return job.waitForCompletion(true) ? 0 : 1;
   }
-  
-  /*
-  private List<Path> getInputPaths(String pathArg) {
-    Iterable<String> strPaths = Splitter.on(',').split(pathArg);
-    
-    return Lists.newArrayList(Iterables.transform(strPaths, new Function<String,Path>() {
-
-      @Override
-      public Path apply(String input) {
-        return new Path(input);
-      }
-      
-    }));
-  }*/
  
 
   public static void main(String[] args) throws Exception {

@@ -145,7 +145,7 @@ public class MediawikiQueries {
       SortableResult id = SortableResult.create(this.con, this.con.securityOperations().getUserAuthorizations(this.con.whoami()), IdentitySet.<Index> create());
       
       int offset = offsetR.nextInt(MAX_OFFSET);
-      int numRecords = cardinalityR.nextInt(MAX_SIZE);
+      int numRecords = cardinalityR.nextInt(MAX_SIZE) + 1;
       
       BatchScanner bs = this.con.createBatchScanner("sortswiki", new Authorizations(), 4);
       
@@ -203,7 +203,7 @@ public class MediawikiQueries {
       Random r = new Random();
       
       // Run a bunch of queries
-      for (int count = 0; count < 30; count++) {
+      for (int count = 0; count < 5; count++) {
         long resultCount;
         String name;
         int i = r.nextInt(9);
