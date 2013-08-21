@@ -48,6 +48,7 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 	
 	@Override
 	public <E> Table<E> getTable(String name, Class<E> elementType) {
+		System.out.println("Name is " + name + " " + tableMap.get(name));
 		return (AccumuloTable) tableMap.get(name).getTable(Class.class);
 	}
 
@@ -72,6 +73,7 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 					RelDataType.class).newInstance(this, meataData,
 					typeFactory, rowType);
 
+			System.out.println("data table is " +  meataData.getDataTable());
 			list.add(new TableInSchemaImpl(this, meataData.getDataTable(),
 					TableType.TABLE, table));
 

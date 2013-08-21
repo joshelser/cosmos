@@ -1,13 +1,9 @@
 package cosmos.util.sql.impl;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import net.hydromatic.linq4j.Enumerable;
-import net.hydromatic.linq4j.Enumerator;
 import net.hydromatic.linq4j.Linq4j;
 import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 
@@ -18,18 +14,12 @@ import org.eigenbase.relopt.RelOptTable;
 import org.eigenbase.relopt.RelOptTable.ToRelContext;
 import org.eigenbase.reltype.RelDataType;
 
-import com.google.common.collect.Lists;
-
-import cosmos.Cosmos;
-import cosmos.impl.SortableResult;
-import cosmos.options.Index;
-import cosmos.util.sql.AccumuloIterables;
+import cosmos.results.impl.MultimapQueryResult;
 import cosmos.util.sql.AccumuloRel;
 import cosmos.util.sql.AccumuloSchema;
 import cosmos.util.sql.AccumuloTable;
-import cosmos.util.sql.TableScanner;
 import cosmos.util.sql.SchemaDefiner;
-import cosmos.util.sql.call.Field;
+import cosmos.util.sql.TableScanner;
 
 
 /**
@@ -37,7 +27,7 @@ import cosmos.util.sql.call.Field;
  * @author phrocker
  *
  */
-public class CosmosTable extends AccumuloTable<Entry<Key, Value>> {
+public class CosmosTable extends AccumuloTable<MultimapQueryResult> {
 
 	protected JavaTypeFactory javaFactory;
 
@@ -73,15 +63,16 @@ public class CosmosTable extends AccumuloTable<Entry<Key, Value>> {
 						.getFieldNames());
 	}
 
-	@Override
-	public Class getElementType() {
-		return Entry.class;
-	}
-
-	public Enumerable<Entry<Key,Value>> accumulate()
+	public Enumerable<MultimapQueryResult> accumulate()
 	{
 		resultSet = metadata.iterator(query);
 		return Linq4j.asEnumerable(resultSet);
+	}
+
+
+	@Override
+	public Type getElementType() {
+		return MultimapQueryResult.class;
 	}
 	
 	

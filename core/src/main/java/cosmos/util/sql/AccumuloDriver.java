@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.Set;
 
 import net.hydromatic.optiq.MutableSchema;
+import net.hydromatic.optiq.Schema;
 import net.hydromatic.optiq.jdbc.DriverVersion;
 import net.hydromatic.optiq.jdbc.OptiqConnection;
 import net.hydromatic.optiq.jdbc.UnregisteredDriver;
@@ -55,46 +56,30 @@ import cosmos.util.sql.impl.CosmosTable;
  * JDBC Driver. 
  */
 public class AccumuloDriver extends UnregisteredDriver {
-	public static final ColumnVisibility cv = new ColumnVisibility("en");
-	final Random offsetR = new Random(), cardinalityR = new Random();
-
-	private int recordsReturned;
-	
+		
 	protected SchemaDefiner<?> definer;
+	private AccumuloSchema<CosmosSql> schema;
 	protected AccumuloDriver() {
 		super();
 	}
 	
 	public AccumuloDriver(SchemaDefiner<?> definer)
 	{
+		super();
 		this.definer = definer;
+		register();
 	}
 
-	static {
-		new AccumuloDriver().register();
-	}
 
 	protected String getConnectStringPrefix() {
-		return "jdbc:splunk:";
+		return "jdbc:accumulo:";
 	}
 
 	protected DriverVersion createDriverVersion() {
 		return new AccumuloJdbcDriverVersion();
 	}
 
-	public static final Column PAGE_ID = Column.create("PAGE_ID"),
-			REVISION_ID = Column.create("REVISION_ID"),
-			REVISION_TIMESTAMP = Column.create("REVISION_TIMESTAMP"),
-			CONTRIBUTOR_USERNAME = Column.create("CONTRIBUTOR_USERNAME"),
-			CONTRIBUTOR_ID = Column.create("CONTRIBUTOR_ID");
-
-	public static final int MAX_SIZE = 16000;
-	// MAX_OFFSET is a little misleading because the max pageID is 33928886
-	// Don't have contiguous pageIDs
-	public static final int MAX_OFFSET = 11845576 - MAX_SIZE;
-
-	public static final int MAX_ROW = 999999999;
-
+	
 	@Override
 	public Connection connect(String url, Properties info) throws SQLException {
 		Connection connection = super.connect(url, info);
@@ -104,85 +89,14 @@ public class AccumuloDriver extends UnregisteredDriver {
 		final String schemaName = "sorts";
 
 		// optiqConnection.setSchema("");
-
-		ZooKeeperInstance instance = new ZooKeeperInstance("accumulo",
-				"dev01:2181");
 		try {
-			Connector connector = instance.getConnector("root",
-					new PasswordToken("secret"));
-
-			Set<Index> columns = Sets.newHashSet();
-			columns.add(new Index(PAGE_ID));
-			columns.add(new Index(REVISION_ID));
-			columns.add(new Index(REVISION_TIMESTAMP));
-			columns.add(new Index(CONTRIBUTOR_ID));
-
-			AccumuloSchema schema;
-			// /optiqConnection.setSchema("sorts");
-			// rootSchema.getSubSchemaExpression(schemaName, Schema.class)
-
-			SortableResult meataData = new SortableResult(connector, connector
-					.securityOperations().getUserAuthorizations("root"),
-					columns, false);
-
-			int offset = offsetR.nextInt(MAX_OFFSET);
-			int numRecords = cardinalityR.nextInt(MAX_SIZE);
-
-			BatchScanner bs = connector.createBatchScanner("sortswiki",
-					new Authorizations(), 4);
-
-			bs.setRanges(Collections.singleton(new Range(Integer
-					.toString(offset), Integer.toString(MAX_ROW))));
-
-			Iterable<Entry<Key, Value>> inputIterable = Iterables.limit(bs,
-					numRecords);
-
-			
-			recordsReturned = 0;
-			CosmosImpl impl = new CosmosImpl(
-					"localhost");
-			CosmosSql cosmosSql = new CosmosSql(meataData,impl );
+		
 			
 			
-			
-			
-			Function<Entry<Key,Value>,MultimapQueryResult> func = new Function<Entry<Key,Value>,MultimapQueryResult>() {
-		        @Override
-		        public MultimapQueryResult apply(Entry<Key,Value> input) {
-		          Page p;
-		          try {
-		            p = Page.parseFrom(input.getValue().get());
-		          } catch (InvalidProtocolBufferException e) {
-		            throw new RuntimeException(e);
-		          }
-		          return pagesToQueryResult(p);
-		        }
-		      };
-		      
-		      Map<Column,Long> counts = Maps.newHashMap();
-		      ArrayList<MultimapQueryResult> tformSource = Lists.newArrayListWithCapacity(20000);
-		      
-		      Stopwatch sw = new Stopwatch();
-		      Stopwatch tformSw = new Stopwatch();
-		      
-		      for (Entry<Key,Value> input : inputIterable) {
-		        tformSw.start();
-		        
-		        MultimapQueryResult r = func.apply(input);
-		        tformSource.add(r);
-		        
-		        tformSw.stop();
-		        
-		        loadCountsForRecord(counts, r);
-		        recordsReturned++;
-		      }
-		      
-		      sw.start();
-		      impl.addResults(meataData, tformSource);
 
 			schema = new AccumuloSchema<CosmosSql>(rootSchema, "sorts",
 					"sorts", "sorts", rootSchema.getSubSchemaExpression(
-							schemaName, AccumuloSchema.class), cosmosSql,
+							schemaName, AccumuloSchema.class), (CosmosSql) definer,
 					CosmosTable.class);
 
 			schema.initialize();
@@ -198,18 +112,7 @@ public class AccumuloDriver extends UnregisteredDriver {
 
 			// JdbcSchema.create(rootSchema,dataSource,"admin","",schemaName);
 
-		} catch (AccumuloException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (AccumuloSecurityException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (TableNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnexpectedStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -217,43 +120,7 @@ public class AccumuloDriver extends UnregisteredDriver {
 		return optiqConnection;
 	}
 	
-	 public void loadCountsForRecord(Map<Column,Long> counts, MultimapQueryResult r) {
-		  for (Entry<Column,SValue> entry : r.columnValues()) {
-			  Column c = entry.getKey();
-			  if (counts.containsKey(c)) {
-				  counts.put(c, counts.get(c)+1);
-			  } else {
-				  counts.put(c, 1l);
-			  }
-		  }
-	  }
-	 
-	  public static MultimapQueryResult pagesToQueryResult(Page p) {
-		    HashMultimap<Column,SValue> data = HashMultimap.create();
-		    
-		    String pageId = Long.toString(p.getId());
-		    
-		    data.put(PAGE_ID, SValue.create(pageId, cv));
-		    
-		    Revision r = p.getRevision();
-		    if (null != r) {
-		      data.put(REVISION_ID, SValue.create(Long.toString(r.getId()), cv));
-		      data.put(REVISION_TIMESTAMP, SValue.create(r.getTimestamp(), cv));
-		      
-		      Contributor c = r.getContributor();
-		      if (null != c) {
-		        if (null != c.getUsername()) {
-		          data.put(CONTRIBUTOR_USERNAME, SValue.create(c.getUsername(), cv));
-		        }
-		        
-		        if (0l != c.getId()) {
-		          data.put(CONTRIBUTOR_ID, SValue.create(Long.toString(c.getId()), cv));
-		        }
-		      }
-		    }
-		    
-		    return new MultimapQueryResult(data, pageId, cv);
-		  }
+	
 }
 
 // End SplunkDriver.java

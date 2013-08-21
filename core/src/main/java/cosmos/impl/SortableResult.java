@@ -48,7 +48,6 @@ import cosmos.options.Index;
 import cosmos.trace.AccumuloTraceStore;
 import cosmos.trace.Tracer;
 import cosmos.util.IdentitySet;
-import cosmos.util.sql.SchemaDefiner;
 
 
 
