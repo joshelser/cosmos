@@ -15,7 +15,7 @@ import org.eigenbase.reltype.RelDataType;
 import org.eigenbase.rex.RexNode;
 
 import cosmos.util.sql.AccumuloRel;
-import cosmos.util.sql.AccumuloRel.Implementor.IMPLEMENTOR_TYPE;
+import cosmos.util.sql.AccumuloRel.Planner.IMPLEMENTOR_TYPE;
 import cosmos.util.sql.AccumuloTable;
 import cosmos.util.sql.call.CallIfc;
 import cosmos.util.sql.call.OperationVisitor;
@@ -50,9 +50,9 @@ public class Projection extends ProjectRelBase implements AccumuloRel {
 	}
 
 	@Override
-	public int implement(Implementor implementor) {
+	public int implement(Planner implementor) {
 
-		AccumuloRel.Implementor parent = new AccumuloRel.Implementor();
+		AccumuloRel.Planner parent = new AccumuloRel.Planner();
 		
 		parent.visitChild(0, getChild());
 		
@@ -66,7 +66,7 @@ public class Projection extends ProjectRelBase implements AccumuloRel {
 			projections.addChild(projection);
 
 		}
-		implementor.add(IMPLEMENTOR_TYPE.PROJECTION, projections);
+		implementor.add(projections);
 
 		return 1;
 

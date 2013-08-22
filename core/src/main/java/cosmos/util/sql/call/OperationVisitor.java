@@ -31,19 +31,13 @@ public class OperationVisitor extends RexVisitorImpl<CallIfc> {
 		final SqlSyntax syntax = call.getOperator().getSyntax();
 		switch (syntax) {
 		case Binary:
-			buf.append("(");
-
-			System.out.println(syntax.getClass());
-			System.out.println(call.getOperator().getClass());
 			return visitBinary(call);
-			// return call.getOperands().get(1).accept(this).append(")");
 		case Function:
 			buf.append(call.getOperator().getName().toLowerCase()).append("(");
 			for (Ord<RexNode> operand : Ord.zip(call.getOperands())) {
 				buf.append(operand.i > 0 ? ", " : "");
 				operand.e.accept(this);
 			}
-			// return buf.append(")");
 			return null;
 		case Special:
 			switch (call.getKind()) {

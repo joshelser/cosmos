@@ -1,7 +1,8 @@
 package cosmos.util.sql;
 
-import cosmos.util.sql.AccumuloRel.Implementor;
+import cosmos.util.sql.AccumuloRel.Planner;
 import cosmos.util.sql.call.Field;
+import cosmos.util.sql.call.Fields;
 import cosmos.util.sql.call.impl.Filter;
 import cosmos.util.sql.call.impl.Projection;
 
@@ -10,7 +11,7 @@ import cosmos.util.sql.call.impl.Projection;
  * @author phrocker
  *
  */
-public class SelectQuery extends Implementor {
+public class FlatQueryPlanner extends Planner {
 	
 	
 	public Projection getProjection()
@@ -23,9 +24,9 @@ public class SelectQuery extends Implementor {
 		return (Filter) operations.get(IMPLEMENTOR_TYPE.FILTER);
 	}
 	
-	public Field getLimitFields()
+	public Fields getLimitFields()
 	{
-		return (Field) operations.get(IMPLEMENTOR_TYPE.SELECT);
+		return (Fields) operations.get(IMPLEMENTOR_TYPE.FIELD_SELECT);
 	}
 
 }

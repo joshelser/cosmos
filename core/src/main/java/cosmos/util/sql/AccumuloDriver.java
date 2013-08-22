@@ -50,6 +50,7 @@ import cosmos.options.Index;
 import cosmos.results.Column;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.util.sql.impl.CosmosSql;
 import cosmos.util.sql.impl.CosmosTable;
 
 /**

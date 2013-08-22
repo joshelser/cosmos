@@ -2,39 +2,45 @@ package cosmos.util.sql;
 
 import java.util.List;
 
-import org.eigenbase.rel.FilterRel;
-import org.eigenbase.rel.ProjectRel;
 import org.eigenbase.rel.RelNode;
 import org.eigenbase.rel.TableAccessRelBase;
 import org.eigenbase.relopt.RelOptCluster;
 import org.eigenbase.relopt.RelOptCost;
 import org.eigenbase.relopt.RelOptPlanWriter;
 import org.eigenbase.relopt.RelOptPlanner;
-import org.eigenbase.relopt.RelOptRuleOperand;
 import org.eigenbase.relopt.RelOptTable;
 import org.eigenbase.relopt.RelTraitSet;
 import org.eigenbase.reltype.RelDataType;
+import org.eigenbase.reltype.RelDataTypeFactory;
+import org.eigenbase.reltype.RelDataTypeField;
+import org.eigenbase.reltype.RelDataTypeFieldImpl;
 
 import com.google.common.collect.Lists;
 
-import cosmos.util.sql.AccumuloRel.Implementor.IMPLEMENTOR_TYPE;
+import cosmos.util.sql.AccumuloRel.Planner.IMPLEMENTOR_TYPE;
 import cosmos.util.sql.call.Field;
+import cosmos.util.sql.call.Fields;
+import cosmos.util.sql.call.impl.Projection;
 import cosmos.util.sql.enumerable.EnumerableExpression;
 import cosmos.util.sql.enumerable.FieldPacker;
 import cosmos.util.sql.impl.CosmosTable;
-import cosmos.util.sql.rules.PushDownRule;
+import cosmos.util.sql.rules.FilterRule;
+import cosmos.util.sql.rules.OrderByRule;
+import cosmos.util.sql.rules.ProjectRule;
+import cosmos.util.sql.rules.SortRule;
 
 /**
  * Enables the rules to scan a given accumulo table.
+ * 
  * @author phrocker
- *
+ * 
  */
 
 public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 	final CosmosTable resultTable;
 
 	final List<String> fieldList;
-	
+
 	List<String> selectedFields;
 
 	public TableScanner(RelOptCluster cluster, RelTraitSet traitSet,
@@ -56,54 +62,23 @@ public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 		return this;
 	}
 
-	public void setFields(List<String> fields)
-	{
-		selectedFields = Lists.newArrayList( fields );
+	public void setFields(List<String> fields) {
+		selectedFields = Lists.newArrayList(fields);
 	}
-	
+
 	@Override
 	public void register(RelOptPlanner planner) {
 		planner.addRule(new FieldPacker(this));
 		planner.addRule(EnumerableExpression.ARRAY_INSTANCE);
+
+		System.out.println("Result table null?" + (resultTable == null));
+		planner.addRule(new FilterRule(resultTable));
 		
-		
-		
-		planner.addRule(new PushDownRule(resultTable,
-	              new RelOptRuleOperand(
-	                  FilterRel.class,
-	                      new RelOptRuleOperand(TableScanner.class))));
+		planner.addRule(new OrderByRule(resultTable));
+		planner.addRule(new ProjectRule(resultTable));
+		planner.addRule(new SortRule(resultTable));
 		
 
-		
-		planner.addRule(new PushDownRule(resultTable,new RelOptRuleOperand(
-	                  FilterRel.class,
-	                  new RelOptRuleOperand(
-	                      ProjectRel.class,
-	                      new RelOptRuleOperand(TableScanner.class)))));
-		
-		
-
-		
-		planner.addRule(new PushDownRule(resultTable,
-	                  new RelOptRuleOperand(
-	                      ProjectRel.class,
-	                      new RelOptRuleOperand(TableScanner.class))));
-		
-		planner.addRule(new PushDownRule(resultTable,new RelOptRuleOperand(
-	              ProjectRel.class,
-	              new RelOptRuleOperand(
-	                  FilterRel.class,
-	                  new RelOptRuleOperand(
-	                      ProjectRel.class,
-	                      new RelOptRuleOperand(TableScanner.class))))));
-		
-
-		
-
-		
-		
-		
-		
 	}
 
 	@Override
@@ -111,9 +86,6 @@ public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 
 		return rowType != null ? rowType : super.deriveRowType();
 	}
-
-
-
 
 	@Override
 	public RelOptCost computeSelfCost(RelOptPlanner planner) {
@@ -124,16 +96,12 @@ public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 	}
 
 	@Override
-	public int implement(Implementor implementor) {
+	public int implement(Planner implementor) {
 		implementor.table = resultTable;
-		/**
-		 * @TODO: woops, need to fix this
-		 */
 
-		implementor.add(IMPLEMENTOR_TYPE.SELECT, new Field(selectedFields.get(0)));
-		
+		implementor.add(new Fields(selectedFields));
+
 		return 0;
 	}
 
 }
-

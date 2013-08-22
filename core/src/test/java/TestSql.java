@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -59,7 +60,7 @@ import cosmos.results.Column;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
 import cosmos.util.sql.AccumuloDriver;
-import cosmos.util.sql.CosmosSql;
+import cosmos.util.sql.impl.CosmosSql;
 
 
 public class TestSql {
@@ -303,7 +304,8 @@ public class TestSql {
 	      final ResultSet resultSet =
 	          statement.executeQuery(
 	        		  
-	              "select \"PAGE_ID\" from \"sorts\".\"cosmos\"  where \"REVISION_ID\" = '0'");
+	              "select \"PAGE_ID\" from \"sorts\".\"cosmos\"  where \"REVISION_ID\" = '1' group by \"PAGE_ID\" ");
+	      //
 	      
 	      /*
 	       * 
@@ -359,7 +361,21 @@ public class TestSql {
 		    final ResultSetMetaData metaData = resultSet.getMetaData();
 		    final int columnCount = metaData.getColumnCount();
 		    while (resultSet.next()) {
-		    	System.out.println("another result " + resultSet.toString());
+		    	System.out.println("Column count is " + columnCount + " " + metaData.getColumnClassName(1));
+		    	
+		    	for(int i=1; i <= columnCount; i++)
+		    	{
+		    		if (resultSet.getObject(i) instanceof List)
+		    		{
+		    			List<SValue> valueList = (List<SValue>) resultSet.getObject(i);
+		    			for(SValue value : valueList)
+		    			{
+		    				System.out.println("another result v " + value.toString());	
+		    			}
+		    		}
+		    		else
+		    			System.out.println("another result " + resultSet.getObject(i).getClass());
+		    	}
 		      
 		    }
 		  }

@@ -11,8 +11,8 @@ import org.eigenbase.relopt.RelTraitSet;
 import org.eigenbase.rex.RexNode;
 
 import cosmos.util.sql.AccumuloRel;
-import cosmos.util.sql.AccumuloRel.Implementor;
-import cosmos.util.sql.AccumuloRel.Implementor.IMPLEMENTOR_TYPE;
+import cosmos.util.sql.AccumuloRel.Planner;
+import cosmos.util.sql.AccumuloRel.Planner.IMPLEMENTOR_TYPE;
 import cosmos.util.sql.AccumuloTable;
 import cosmos.util.sql.call.CallIfc;
 import cosmos.util.sql.call.OperationVisitor;
@@ -46,17 +46,20 @@ public class Filter extends FilterRelBase implements AccumuloRel {
 	}
 
 	@Override
-	public int implement(Implementor implementor) {
+	public int implement(Planner implementor) {
 
 		
+		
 		implementor.visitChild(0, getChild());
+		
+		System.out.println("filter " + getChild().getDescription());
 		
 		OperationVisitor visitor = new OperationVisitor(getChild());
 		CallIfc operation = getCondition().accept(visitor);
 		
 		cosmos.util.sql.call.impl.Filter filter = new cosmos.util.sql.call.impl.Filter();
 		filter.addChild(operation);
-		implementor.add(IMPLEMENTOR_TYPE.FILTER,filter);
+		implementor.add(filter);
 		implementor.table = accumuloAccessor; 
 
 		return 1;

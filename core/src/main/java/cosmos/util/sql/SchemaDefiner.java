@@ -1,5 +1,6 @@
 package cosmos.util.sql;
 
+import java.util.List;
 import java.util.Set;
 
 import cosmos.options.Index;
@@ -18,5 +19,5 @@ public interface SchemaDefiner<T> {
 	
 	public Set<Index> getIndexColumns();
 
-	public AccumuloIterables<T> iterator(SelectQuery query);
+	public AccumuloIterables<T> iterator(List<String> schemaLayout, AccumuloRel.Planner query);
 }

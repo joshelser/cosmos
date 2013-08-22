@@ -2,6 +2,7 @@ package cosmos.util.sql;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import net.hydromatic.linq4j.AbstractQueryable;
 import net.hydromatic.linq4j.Enumerable;
@@ -15,7 +16,7 @@ import net.hydromatic.optiq.Statistic;
 import net.hydromatic.optiq.Statistics;
 import net.hydromatic.optiq.TranslatableTable;
 import net.hydromatic.optiq.impl.java.JavaTypeFactory;
-import cosmos.util.sql.AccumuloRel.Implementor;
+import cosmos.util.sql.AccumuloRel.Planner;
 
 public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 		TranslatableTable<T> {
@@ -28,7 +29,7 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 
 	protected AccumuloIterables<T> resultSet;
 	
-	protected SelectQuery query;
+	protected FlatQueryPlanner query;
 
 	public AccumuloTable(final AccumuloSchema<? extends SchemaDefiner> schema, final String tableName, JavaTypeFactory typeFactory) {
 		this.schema = schema;
@@ -75,9 +76,9 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 	}
 
 	
-	public abstract Enumerable<T> accumulate();
+	public abstract Enumerable<T> accumulate(List<String> fieldNameList);
 
-	protected void select(SelectQuery query)
+	protected void select(FlatQueryPlanner query)
 	{
 		this.query = query;
 		
@@ -89,11 +90,11 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 		return Linq4j.enumerator(new ArrayList<T>());
 	}
 
-	public void query(Implementor relationalExpression) {
+	public void query(Planner relationalExpression) {
 		
-		if (relationalExpression instanceof SelectQuery)
+		if (relationalExpression instanceof FlatQueryPlanner)
 		{
-			select((SelectQuery)relationalExpression);
+			select((FlatQueryPlanner)relationalExpression);
 		}
 	}
 	

@@ -41,15 +41,15 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 	/**
 	 * Returns the table associated with the class
 	 */
-	public AccumuloTable getTable(String name) {
+	public AccumuloTable<?> getTable(String name) {
 
-		return (AccumuloTable) tableMap.get(name).getTable(Class.class);
+		return (AccumuloTable<?>) tableMap.get(name).getTable(Class.class);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public <E> Table<E> getTable(String name, Class<E> elementType) {
-		System.out.println("Name is " + name + " " + tableMap.get(name));
-		return (AccumuloTable) tableMap.get(name).getTable(Class.class);
+		return  (Table<E>) tableMap.get(name).getTable(Class.class);
 	}
 
 
@@ -66,14 +66,13 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 
 		final RelDataType rowType = typeFactory.createStructType(builder);
 
-		AccumuloTable table;
+		AccumuloTable<?> table;
 		try {
-			table = table = clazz.getConstructor(AccumuloSchema.class,
+			table =  clazz.getConstructor(AccumuloSchema.class,
 					SchemaDefiner.class,JavaTypeFactory.class,
 					RelDataType.class).newInstance(this, meataData,
 					typeFactory, rowType);
 
-			System.out.println("data table is " +  meataData.getDataTable());
 			list.add(new TableInSchemaImpl(this, meataData.getDataTable(),
 					TableType.TABLE, table));
 
