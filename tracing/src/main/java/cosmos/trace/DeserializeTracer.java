@@ -32,24 +32,17 @@ import cosmos.trace.Timings.TimedRegions;
 /**
  * 
  */
-public class DeserializeTimedRegions implements Function<Entry<Key,Value>,TimedRegions>{
-
-  private static final Logger log = LoggerFactory.getLogger(DeserializeTimedRegions.class);
-  private static final DeserializeTimedRegions INSTANCE = new DeserializeTimedRegions();
+public class DeserializeTracer implements Function<Entry<Key,Value>,Tracer> {
+  
+  private static final Logger log = LoggerFactory.getLogger(DeserializeTracer.class);
+  private static final DeserializeTracer INSTANCE = new DeserializeTracer();
   
   @Override
-  public TimedRegions apply(Entry<Key,Value> entry) {
-    Preconditions.checkNotNull(entry);
-    
-    try {
-      return TimedRegions.parseFrom(entry.getValue().get());
-    } catch (InvalidProtocolBufferException e) {
-      log.error("Could not decode protobuf for: " + entry.getKey());
-      throw new RuntimeException(e);
-    }
+  public Tracer apply(Entry<Key,Value> entry) {
+    return new Tracer(entry);
   }
   
-  public static TimedRegions deserialize(Entry<Key,Value> entry) {
+  public static Tracer deserialize(Entry<Key,Value> entry) {
     return INSTANCE.apply(entry);
   }
 }

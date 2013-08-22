@@ -23,6 +23,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.accumulo.core.client.ScannerBase;
 import org.apache.accumulo.core.data.Key;
@@ -33,6 +34,8 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 
+import cosmos.trace.Tracer;
+
 /**
  * 
  */
@@ -40,29 +43,35 @@ public class CloseableIterable<T> implements Results<T> {
   
   protected final ScannerBase scanner;
   protected final Iterable<T> iterable;
+  protected final Tracer tracer;
+  protected final String description;
   protected final Stopwatch sw;
   
-  public CloseableIterable(ScannerBase scanner, Iterable<T> iterable, Stopwatch sw) {
+  public CloseableIterable(ScannerBase scanner, Iterable<T> iterable, Tracer t, String desc, Stopwatch sw) {
     checkNotNull(scanner);
     checkNotNull(iterable);
+    checkNotNull(t);
+    checkNotNull(desc);
     checkNotNull(sw);
     
     this.scanner = scanner;
     this.iterable = iterable;
+    this.tracer = t;
+    this.description = desc;
     this.sw = sw;
   }
   
-  public static <T> CloseableIterable<T> create(ScannerBase scanner, Iterable<T> iterable, Stopwatch sw) {
-    return new CloseableIterable<T>(scanner, iterable, sw);
+  public static <T> CloseableIterable<T> create(ScannerBase scanner, Iterable<T> iterable, Tracer t, String desc, Stopwatch sw) {
+    return new CloseableIterable<T>(scanner, iterable, t, desc, sw);
   }
   
-  public static <T> CloseableIterable<T> transform(ScannerBase scanner, Function<Entry<Key,Value>,T> func, Stopwatch sw) {
-    return new CloseableIterable<T>(scanner, Iterables.transform(scanner, func), sw);
+  public static <T> CloseableIterable<T> transform(ScannerBase scanner, Function<Entry<Key,Value>,T> func, Tracer t, String desc, Stopwatch sw) {
+    return new CloseableIterable<T>(scanner, Iterables.transform(scanner, func), t, desc, sw);
   }
   
   public static <T> CloseableIterable<T> filterAndTransform(ScannerBase scanner, Predicate<Entry<Key,Value>> filter, Function<Entry<Key,Value>,T> func,
-      Stopwatch sw) {
-    return new CloseableIterable<T>(scanner, Iterables.transform(Iterables.filter(scanner, filter), func), sw);
+      Tracer t, String desc, Stopwatch sw) {
+    return new CloseableIterable<T>(scanner, Iterables.transform(Iterables.filter(scanner, filter), func), t, desc, sw);
   }
   
   protected ScannerBase source() {
@@ -80,6 +89,7 @@ public class CloseableIterable<T> implements Results<T> {
         
         if (!hasNext && sw.isRunning()) {
           sw.stop();
+          tracer.addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
         }
         
         return hasNext;
@@ -103,6 +113,7 @@ public class CloseableIterable<T> implements Results<T> {
     // Client may close the Iterable before exhausting the records
     if (sw.isRunning()) {
       sw.stop();
+      tracer.addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
     }
     
     scanner.close();

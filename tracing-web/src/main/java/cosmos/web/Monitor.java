@@ -22,10 +22,6 @@ import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.hadoop.conf.Configuration;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.servlet.Context;
 
 /**
  * 
@@ -35,10 +31,6 @@ public class Monitor {
   public static final String ZOOKEEPERS = "zookeepers",
       INSTANCE = "instance", USERNAME = "username", PASSWORD = "password";
   
-  protected Server server;
-  protected ContextHandlerCollection handler;
-  protected Context root;
-  protected SocketConnector sock;
   
   protected static Connector connector;
   

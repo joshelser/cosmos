@@ -26,10 +26,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
-
-import cosmos.trace.Timings.TimedRegions;
 
 /**
  * 
@@ -52,15 +49,13 @@ public class TracerClientTest {
     Tracer t1 = new Tracer("1");
     t1.begin = 10l;
     
-    Stopwatch sw1 = t1.startTiming("t1");
-    
-    sw1.stop();
+    t1.addTiming("t1", 5l);
     
     AccumuloTraceStore.serialize(t1, con);
     
     TracerClient tc = new TracerClient(con);
     
-    List<TimedRegions> regions = Lists.newArrayList(tc.since(11));
+    List<Tracer> regions = Lists.newArrayList(tc.since(11));
     
     Assert.assertEquals(0, regions.size());
     
@@ -76,24 +71,21 @@ public class TracerClientTest {
     Tracer t2 = new Tracer("2");
     t2.begin = 20l;
     
-    Stopwatch sw1 = t1.startTiming("t1");
-    Stopwatch sw2 = t2.startTiming("t2");
-    
-    sw1.stop();
-    sw2.stop();
+    t1.addTiming("t1", 5l);
+    t2.addTiming("t2", 5l);
     
     AccumuloTraceStore.serialize(t1, con);
     AccumuloTraceStore.serialize(t2, con);
     
     TracerClient tc = new TracerClient(con);
     
-    List<TimedRegions> regions = Lists.newArrayList(tc.since(11));
+    List<Tracer> regions = Lists.newArrayList(tc.since(11));
     
     Assert.assertEquals(1, regions.size());
     
-    TimedRegions trs = regions.get(0);
-    Assert.assertEquals(1, trs.getRegionCount());
-    Assert.assertEquals("t2", trs.getRegion(0).getDescription());
+    Tracer tracer = regions.get(0);
+    Assert.assertEquals(1, tracer.getTimings().size());
+    Assert.assertEquals("t2", tracer.getTimings().get(0).getDescription());
     
     regions = Lists.newArrayList(tc.since(9));
     
@@ -111,24 +103,21 @@ public class TracerClientTest {
     Tracer t2 = new Tracer("2");
     t2.begin = 20l;
     
-    Stopwatch sw1 = t1.startTiming("t1");
-    Stopwatch sw2 = t2.startTiming("t2");
-    
-    sw1.stop();
-    sw2.stop();
+    t1.addTiming("t1", 5l);
+    t2.addTiming("t2", 5l);
     
     AccumuloTraceStore.serialize(t1, con);
     AccumuloTraceStore.serialize(t2, con);
     
     TracerClient tc = new TracerClient(con);
     
-    List<TimedRegions> regions = Lists.newArrayList(tc.between(19l, 21l));
+    List<Tracer> regions = Lists.newArrayList(tc.between(19l, 21l));
     
     Assert.assertEquals(1, regions.size());
     
-    TimedRegions trs = regions.get(0);
-    Assert.assertEquals(1, trs.getRegionCount());
-    Assert.assertEquals("t2", trs.getRegion(0).getDescription());
+    Tracer tracer = regions.get(0);
+    Assert.assertEquals(1, tracer.getTimings().size());
+    Assert.assertEquals("t2", tracer.getTimings().get(0).getDescription());
     
     // Ensure equivalency using dates or longs
     Assert.assertEquals(regions, Lists.newArrayList(tc.between(new Date(19), new Date(21))));
@@ -152,9 +141,9 @@ public class TracerClientTest {
     
     Assert.assertEquals(1, regions.size());
     
-    trs = regions.get(0);
-    Assert.assertEquals(1, trs.getRegionCount());
-    Assert.assertEquals("t1", trs.getRegion(0).getDescription());
+    tracer = regions.get(0);
+    Assert.assertEquals(1, tracer.getTimings().size());
+    Assert.assertEquals("t1", tracer.getTimings().get(0).getDescription());
 
     // Ensure equivalency using dates or longs
     Assert.assertEquals(regions, Lists.newArrayList(tc.between(new Date(8), new Date(12))));
@@ -163,13 +152,13 @@ public class TracerClientTest {
     
     Assert.assertEquals(2, regions.size());
     
-    trs = regions.get(0);
-    Assert.assertEquals(1, trs.getRegionCount());
-    Assert.assertEquals("t2", trs.getRegion(0).getDescription());
+    tracer = regions.get(0);
+    Assert.assertEquals(1, tracer.getTimings().size());
+    Assert.assertEquals("t2", tracer.getTimings().get(0).getDescription());
     
-    trs = regions.get(1);
-    Assert.assertEquals(1, trs.getRegionCount());
-    Assert.assertEquals("t1", trs.getRegion(0).getDescription());
+    tracer = regions.get(1);
+    Assert.assertEquals(1, tracer.getTimings().size());
+    Assert.assertEquals("t1", tracer.getTimings().get(0).getDescription());
 
     // Ensure equivalency using dates or longs
     Assert.assertEquals(regions, Lists.newArrayList(tc.between(new Date(8), new Date(22))));

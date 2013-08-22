@@ -82,7 +82,7 @@ public class MediawikiQueries {
   public static final boolean preloadData = false;
   
   public static final String TIMINGS = "[TIMINGS] ";
-  public static final int MAX_SIZE = 16000;
+  public static final int MAX_SIZE = 8000;
   
   // MAX_OFFSET is a little misleading because the max pageID is 33928886
   // Don't have contiguous pageIDs
@@ -473,7 +473,7 @@ public class MediawikiQueries {
     }
     
     ExecutorService runner = Executors.newFixedThreadPool(3);
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
       runner.execute(runQueries(200));
     }
     

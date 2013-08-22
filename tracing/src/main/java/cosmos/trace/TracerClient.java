@@ -46,8 +46,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import cosmos.trace.Timings.TimedRegions;
-
 /**
  * 
  */
@@ -80,7 +78,7 @@ public class TracerClient {
     this.connector = c;
   }
   
-  public TimedRegions getTimings(String uuid) throws NoSuchElementException {
+  public Tracer getTimings(String uuid) throws NoSuchElementException {
     checkNotNull(uuid);
     
     Scanner scanner;
@@ -95,13 +93,13 @@ public class TracerClient {
     
     Iterator<Entry<Key,Value>> iter = scanner.iterator();
     if (iter.hasNext()) {
-      return DeserializeTimedRegions.deserialize(iter.next());
+      return DeserializeTracer.deserialize(iter.next());
     }
     
     throw new NoSuchElementException("No trace found for " + uuid);
   }
   
-  public List<TimedRegions> mostRecentTimings(int numberOfTimings) {
+  public List<Tracer> mostRecentTimings(int numberOfTimings) {
     Scanner scanner;
     
     try {
@@ -114,21 +112,23 @@ public class TracerClient {
     scanner.fetchColumnFamily(new Text(Tracer.TIME));
     scanner.setRange(new Range());
     
-    List<TimedRegions> timings = Lists.newArrayListWithCapacity(numberOfTimings);
-    for (Entry<Key,Value> entry : scanner) {
-      timings.add(DeserializeTimedRegions.deserialize(entry));
+    List<Tracer> tracers = Lists.newArrayListWithCapacity(numberOfTimings);
+    Iterator<Entry<Key,Value>> iter = scanner.iterator();
+    for (int i = 0; iter.hasNext() && i < numberOfTimings; i++) {
+      Entry<Key,Value> entry = iter.next();
+      tracers.add(DeserializeTracer.deserialize(entry));
     }
     
-    return timings;
+    return tracers;
   }
   
-  public Iterable<TimedRegions> since(Date end) {
+  public Iterable<Tracer> since(Date end) {
     checkNotNull(end);
     
     return since(end.getTime());
   }
   
-  public Iterable<TimedRegions> since(long timeInMillis) {
+  public Iterable<Tracer> since(long timeInMillis) {
     Preconditions.checkArgument(System.currentTimeMillis() > timeInMillis, "Cannot find traces in the future");
     Preconditions.checkArgument(0 < timeInMillis, "Must have a positive begin");
     
@@ -149,17 +149,17 @@ public class TracerClient {
     scanner.fetchColumnFamily(new Text(Tracer.TIME));
     scanner.setRange(new Range(null, false, encodedSince, true));
     
-    return Iterables.transform(scanner, new DeserializeTimedRegions());
+    return Iterables.transform(scanner, new DeserializeTracer());
   }
   
-  public Iterable<TimedRegions> between(Date start, Date end) {
+  public Iterable<Tracer> between(Date start, Date end) {
     checkNotNull(start);
     checkNotNull(end);
     
     return between(start.getTime(), end.getTime());
   }
   
-  public Iterable<TimedRegions> between(Long start, Long end) {
+  public Iterable<Tracer> between(Long start, Long end) {
     Preconditions.checkArgument(System.currentTimeMillis() > start, "Cannot find traces in the future");
     Preconditions.checkArgument(0 < start, "Must have a positive begin");
     Preconditions.checkArgument(start <= end, "Start must be less than end");
@@ -184,6 +184,6 @@ public class TracerClient {
     // Since the start and end are also reverse encoded, we use them as normal
     scanner.setRange(new Range(encodedEnd, false, encodedStart, false));
     
-    return Iterables.transform(scanner, new DeserializeTimedRegions());
+    return Iterables.transform(scanner, new DeserializeTracer());
   }
 }
