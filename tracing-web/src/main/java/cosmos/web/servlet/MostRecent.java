@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-import cosmos.trace.Timings.TimedRegions;
 import cosmos.trace.Tracer;
 import cosmos.trace.TracerClient;
 import cosmos.web.reponse.TracerResponse;
@@ -77,7 +76,7 @@ public class MostRecent {
   
   @Path("/recent")
   @GET
-  public List<TracerResponse> recent(@QueryParam("num") @DefaultValue("1") Integer numRecent) {
+  public List<TracerResponse> recent(@QueryParam("num") @DefaultValue("10") Integer numRecent) {
     List<Tracer> timings = tc.mostRecentTimings(numRecent);
     
     return transform(timings);

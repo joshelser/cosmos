@@ -294,7 +294,7 @@
         <artifactId>jetty-maven-plugin</artifactId>
         <version>8.1.12.v20130726</version>
         <configuration>
-            <scanIntervalSeconds>5</scanIntervalSeconds>
+            <!--scanIntervalSeconds>5</scanIntervalSeconds-->
         </configuration>
       </plugin>
     </plugins>
