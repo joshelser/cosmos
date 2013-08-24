@@ -5,7 +5,7 @@ import java.util.Collection;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
-public class ChildVisitor<T extends CallIfc<?>> implements CallIfc<T> {
+public class ChildVisitor<T extends CallIfc> implements CallIfc<T> {
 
 	protected Multimap<String, T> children;
 

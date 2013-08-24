@@ -36,7 +36,6 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 	 */
 	public AccumuloTable<?> getTable(String name) {
 
-		System.out.println("get table for " + name);
 		if (meataData instanceof TableDefiner) {
 			return ((TableDefiner) meataData).getTable(name);
 		} else

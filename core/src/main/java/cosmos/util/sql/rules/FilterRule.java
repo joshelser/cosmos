@@ -18,7 +18,7 @@ public class FilterRule extends PushDownRule {
 
 
 	public FilterRule(CosmosTable resultTable) {
-		super(resultTable,some(FilterRel.class,any(TableScanner.class)));
+		super(resultTable,some(FilterRel.class,any(TableScanner.class)),"FilterShmilter");
 		this.accumuloAccessor = resultTable;
 	}
 	

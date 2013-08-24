@@ -1,17 +1,14 @@
 package cosmos.util.sql.rules;
 
 import net.hydromatic.optiq.rules.java.EnumerableConvention;
-import net.hydromatic.optiq.rules.java.JavaRules.EnumerableAggregateRel;
 
 import org.eigenbase.rel.AggregateRel;
 import org.eigenbase.rel.InvalidRelException;
 import org.eigenbase.rel.RelNode;
 import org.eigenbase.rel.convert.ConverterRule;
 import org.eigenbase.relopt.Convention;
-import org.eigenbase.relopt.RelOptRule;
 import org.eigenbase.relopt.RelTraitSet;
 
-import cosmos.util.sql.AccumuloRel;
 import cosmos.util.sql.enumerable.EnumerableRelation;
 import cosmos.util.sql.impl.CosmosTable;
 import cosmos.util.sql.rules.impl.GroupBy;
@@ -43,7 +40,7 @@ public class GroupByRule extends ConverterRule {
 
 	@Override
 	public RelNode convert(RelNode rel) {
-		assert rel.getTraitSet().contains(AccumuloRel.CONVENTION);
+		
 		if (rel instanceof AggregateRel) {
 			final AggregateRel agg = (AggregateRel) rel;
 			final RelTraitSet traitSet = agg.getTraitSet().replace(

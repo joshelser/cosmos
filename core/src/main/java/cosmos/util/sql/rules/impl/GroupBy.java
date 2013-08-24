@@ -59,21 +59,7 @@ public class GroupBy extends EnumerableAggregateRel implements AccumuloRel {
 	@Override
 	public int implement(Plan implementor) {
 
-		System.out.println("oh group by ");
-		System.exit(1);
-		System.out.println("oh group by ");
-		implementor.visitChild(getChild());
 
-		System.out.println("oh group by ");
-		for (AggregateCall call : getAggCallList()) {
-			System.out.println(call.getName() + " "
-					+ call.getAggregation().getName());
-		}
-		// Grouping grouping = new Grouping();
-
-		// grouping.addChild(Field.class.getSimpleName(), new Field(literal))
-
-		implementor.table = accumuloAccessor;
 
 		return 1;
 	}

@@ -18,7 +18,7 @@ public class ProjectRule extends PushDownRule {
 
 
 	public ProjectRule(CosmosTable resultTable) {
-		super(resultTable,some(SortRel.class, any(TableScanner.class)));
+		super(resultTable,some(SortRel.class, any(TableScanner.class)),"ProjectShmore");
 		this.accumuloAccessor = resultTable;
 	}
 	

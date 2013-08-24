@@ -31,7 +31,6 @@ import cosmos.UnexpectedStateException;
 import cosmos.UnindexedColumnException;
 import cosmos.impl.SortableResult;
 import cosmos.options.Index;
-import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
@@ -52,6 +51,11 @@ import cosmos.util.sql.call.impl.FieldEquality;
 import cosmos.util.sql.call.impl.Filter;
 import cosmos.util.sql.impl.functions.FieldLimiter;
 
+/**
+ * @TODO gut this class. it needs a rework. 
+ * @author marc
+ *
+ */
 public class CosmosSql extends ResultDefiner implements TableDefiner {
 
 	/**
@@ -104,10 +108,10 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 
 		ChildVisitor<? extends CallIfc<?>> query = planner.getChildren();
 
-		Collection<Filter> filters = (Collection<Filter>) query
+		Collection<? extends CallIfc<?>> filters = query
 				.children(Filter.class.getSimpleName());
 
-		Collection<Fields> fields = (Collection<Fields>) query
+		Collection<? extends CallIfc<?>> fields = query
 				.children("selectedFields");
 
 		String table = ((CosmosTable) planner.table).getTable();
@@ -119,8 +123,9 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 			if (aggregatePlan == null) {
 
 				if (res != null) {
-					for (Filter filter : filters) {
-
+					for (CallIfc<?> filterIfc : filters) {
+						Filter filter = (Filter)filterIfc;
+						
 						for (FilterIfc subFilter : filter.getFilters()) {
 							if (subFilter instanceof FieldEquality) {
 								FieldEquality equality = (FieldEquality) subFilter;
@@ -160,7 +165,8 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 
 					List<Field> fieldsUserWants = Lists.newArrayList();
 
-					for (Fields fieldList : fields) {
+					for (CallIfc<?> fiel : fields) {
+						Fields fieldList = (Fields)fiel;
 						fieldsUserWants.addAll(fieldList.getFields());
 					}
 
@@ -180,7 +186,6 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 				while (fieldIter.hasNext()) {
 					
 					String groupByField = fieldIter.next().toString();
-					System.out.println("griup by " +groupByField);
 					returnIter = Iterators.transform(
 							cosmos.groupResults(res,
 									new Column(groupByField))

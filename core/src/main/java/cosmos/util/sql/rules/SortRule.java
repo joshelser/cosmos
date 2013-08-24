@@ -19,7 +19,7 @@ public class SortRule extends PushDownRule {
 
 
 	public SortRule(CosmosTable resultTable) {
-		super(resultTable,some(ProjectRel.class, any(TableScanner.class)));
+		super(resultTable,some(ProjectRel.class, any(TableScanner.class)),"SorterShmorter");
 		this.accumuloAccessor = resultTable;
 	}
 	

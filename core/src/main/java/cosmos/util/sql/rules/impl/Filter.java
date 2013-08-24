@@ -47,8 +47,7 @@ public class Filter extends FilterRelBase implements AccumuloRel {
 		CallIfc operation = getCondition().accept(visitor);
 
 		cosmos.util.sql.call.impl.Filter filter = new cosmos.util.sql.call.impl.Filter();
-		System.out.println("filter " + getChild().getDescription() + " "
-				+ operation.getClass());
+
 		filter.addChild(operation.getClass().getSimpleName(),
 				operation);
 		implementor

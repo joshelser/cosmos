@@ -1,7 +1,7 @@
 package cosmos.util.sql.call;
 
 
-public class Literal extends ChildVisitor {
+public class Literal extends ChildVisitor<Literal> {
 
 	private String literal;
 
@@ -10,7 +10,7 @@ public class Literal extends ChildVisitor {
 	}
 
 	@Override
-	public CallIfc addChild(String id, CallIfc operation) {
+	public CallIfc addChild(String id, Literal operation) {
 		throw new IllegalArgumentException();
 	}
 

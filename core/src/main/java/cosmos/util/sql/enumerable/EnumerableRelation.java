@@ -101,8 +101,7 @@ public class EnumerableRelation extends SingleRel implements EnumerableRel {
 		for (RelDataTypeField field : super.deriveRowType().getFieldList()) {
 			String name = field.getName();
 			int index = super.deriveRowType().getFieldOrdinal(name);
-			System.out.println("Adding " + name + " " + index + " colun");
-
+			
 			builder.add(new RelDataTypeFieldImpl(name, index, getCluster()
 					.getTypeFactory().createJavaType(List.class)));
 		}
@@ -125,7 +124,6 @@ public class EnumerableRelation extends SingleRel implements EnumerableRel {
 		final PhysType physType = PhysTypeImpl.of(implementor.getTypeFactory(),
 				getReturnType(), pref.prefer(JavaRowFormat.CUSTOM));
 
-		System.out.println("return type is " + physType.getRowType().getFieldOrdinal("PAGE_ID"));
 		
 		final List<String> fieldNameList = getRowType().getFieldNames();
 

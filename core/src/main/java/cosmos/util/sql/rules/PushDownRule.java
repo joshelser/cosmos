@@ -30,9 +30,9 @@ public class PushDownRule extends RuleBase {
 
 	CosmosTable accumuloAccessor;
 
-	public PushDownRule(CosmosTable resultTable, RelOptRuleOperand operand) {
+	public PushDownRule(CosmosTable resultTable, RelOptRuleOperand operand, String name) {
 		super(operand, PushDownRule.class.getSimpleName()
-				+ UUID.randomUUID().toString());
+				+ name);
 		this.accumuloAccessor = resultTable;
 	}
 
@@ -40,8 +40,6 @@ public class PushDownRule extends RuleBase {
 	public void onMatch(RelOptRuleCall call) {
 
 		RelNode node = call.rel(0);
-
-		System.out.println(node.getClass());
 
 		if (node instanceof ProjectRel) {
 			final ProjectRel project = (ProjectRel) node;
@@ -56,7 +54,7 @@ public class PushDownRule extends RuleBase {
 		} else if (node instanceof FilterRel) {
 			final FilterRel filter = (FilterRel) node;
 
-			System.out.println(filter.getCondition().getKind().toString());
+			
 			final RelNode input = call.rel(1);
 			final RelTraitSet traits = filter.getTraitSet().plus(
 					AccumuloRel.CONVENTION);
@@ -66,7 +64,7 @@ public class PushDownRule extends RuleBase {
 
 		} else if (node instanceof SortRel) {
 
-			System.out.println("sort");
+
 			final SortRel sort = (SortRel) node;
 
 			final RelNode input = call.rel(1);
@@ -80,7 +78,7 @@ public class PushDownRule extends RuleBase {
 
 			final AggregateRel aggy = (AggregateRel) node;
 			final RelNode input = call.rel(1);
-			System.out.println("agg " + (aggy == null) + " " + (input == null));
+			
 			final RelTraitSet traits = aggy.getTraitSet().plus(
 					AccumuloRel.CONVENTION);
 
