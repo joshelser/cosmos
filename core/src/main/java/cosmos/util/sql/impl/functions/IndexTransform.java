@@ -5,7 +5,6 @@ import java.util.Map.Entry;
 import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 
 import org.eigenbase.reltype.RelDataType;
-import org.eigenbase.reltype.RelDataTypeFactoryImpl;
 import org.eigenbase.sql.type.SqlTypeName;
 
 import com.google.common.base.Function;

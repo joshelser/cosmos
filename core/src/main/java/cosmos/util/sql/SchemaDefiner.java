@@ -6,6 +6,7 @@ import java.util.Set;
 import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 
 import cosmos.options.Index;
+import cosmos.util.sql.AccumuloRel.Plan;
 
 /**
  * Interface that defines an interface that enables us funcionality in defining
@@ -25,5 +26,5 @@ public interface SchemaDefiner<T> {
 	public Set<Index> getIndexColumns(String table);
 
 	public AccumuloIterables<T> iterator(List<String> schemaLayout,
-			AccumuloRel.Plan query);
+			AccumuloRel.Plan query, Plan aggregatePlan);
 }

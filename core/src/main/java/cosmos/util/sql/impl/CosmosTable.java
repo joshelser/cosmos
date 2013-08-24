@@ -78,11 +78,12 @@ public class CosmosTable extends ResultTable {
 	{
 		Plan query = plans.poll();
 		
-		System.out.println("accumulo? " + (query ==null));
+		Plan aggregatePlan = aggregationPlans.poll();
 		
 		Preconditions.checkNotNull(query);
 		
-		resultSet = (AccumuloIterables<Object[]>) metadata.iterator(fieldNames,query);
+		
+		resultSet = (AccumuloIterables<Object[]>) metadata.iterator(fieldNames,query,aggregatePlan);
 		
 		return Linq4j.asEnumerable(resultSet);
 	}

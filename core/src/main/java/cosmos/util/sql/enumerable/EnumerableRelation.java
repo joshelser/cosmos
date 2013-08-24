@@ -46,6 +46,7 @@ import org.eigenbase.reltype.RelDataTypeFieldImpl;
 
 import cosmos.util.sql.AccumuloRel;
 import cosmos.util.sql.AccumuloRel.Plan;
+import cosmos.util.sql.rules.impl.GroupBy;
 
 public class EnumerableRelation extends SingleRel implements EnumerableRel {
 

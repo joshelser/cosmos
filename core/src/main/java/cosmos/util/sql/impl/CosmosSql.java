@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +24,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import cosmos.Cosmos;
 import cosmos.UnexpectedStateException;
@@ -59,7 +61,7 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 
 	protected Iterable<MultimapQueryResult> iter;
 
-	protected Collection<CloseableIterable<MultimapQueryResult>> plannedParentHood;
+	protected Collection<Iterable<MultimapQueryResult>> plannedParentHood;
 
 	/**
 	 * Iterator reference
@@ -95,7 +97,9 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 
 	@Override
 	public AccumuloIterables<Object[]> iterator(List<String> schemaLayout,
-			AccumuloRel.Plan planner) {
+			AccumuloRel.Plan planner, AccumuloRel.Plan aggregatePlan) {
+		
+		
 		Iterator<Object[]> returnIter = Iterators.emptyIterator();
 
 		ChildVisitor<? extends CallIfc<?>> query = planner.getChildren();
@@ -112,62 +116,86 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 		try {
 			res = cosmos.fetch(table);
 
-			if (res != null) {
-				for (Filter filter : filters) {
+			if (aggregatePlan == null) {
 
-					for (FilterIfc subFilter : filter.getFilters()) {
-						if (subFilter instanceof FieldEquality) {
-							FieldEquality equality = (FieldEquality) subFilter;
+				if (res != null) {
+					for (Filter filter : filters) {
 
-							for (Pair<Field, Literal> entry : equality
-									.getChildren()) {
+						for (FilterIfc subFilter : filter.getFilters()) {
+							if (subFilter instanceof FieldEquality) {
+								FieldEquality equality = (FieldEquality) subFilter;
 
-								cosmos.util.sql.call.Field field = (Field) entry
-										.first();
-								cosmos.util.sql.call.Literal literal = (Literal) entry
-										.second();
+								for (Pair<Field, Literal> entry : equality
+										.getChildren()) {
 
-								try {
-									plannedParentHood.add(cosmos.fetch(res,
-											new Column(field.toString()),
-											literal.toString()));
+									cosmos.util.sql.call.Field field = (Field) entry
+											.first();
+									cosmos.util.sql.call.Literal literal = (Literal) entry
+											.second();
 
-								} catch (TableNotFoundException e) {
-									log.error(e);
-								} catch (UnexpectedStateException e) {
-									log.error(e);
-								} catch (UnindexedColumnException e) {
-									log.error(e);
+									try {
+										plannedParentHood.add(cosmos.fetch(res,
+												new Column(field.toString()),
+												literal.toString()));
+
+									} catch (TableNotFoundException e) {
+										log.error(e);
+									} catch (UnexpectedStateException e) {
+										log.error(e);
+									} catch (UnindexedColumnException e) {
+										log.error(e);
+									}
 								}
 							}
 						}
 					}
+
+					for (Iterable<MultimapQueryResult> subIter : plannedParentHood) {
+						if (iter == null) {
+							iter = subIter;
+						} else {
+							iter = Iterables.concat(iter, subIter);
+						}
+					}
+
+					List<Field> fieldsUserWants = Lists.newArrayList();
+
+					for (Fields fieldList : fields) {
+						fieldsUserWants.addAll(fieldList.getFields());
+					}
+
+					baseIter = iter.iterator();
+					baseIter = Iterators.transform(baseIter, new FieldLimiter(
+							fieldsUserWants));
+
+					returnIter = Iterators.transform(baseIter,
+							new DocumentExpansion(schemaLayout));
+				}
+			} else {
+				ChildVisitor<? extends CallIfc<?>> aggregates = aggregatePlan
+						.getChildren();
+				Collection<Field> groupByFields = (Collection<Field>) aggregates
+						.children("groupBy");
+				Iterator<Field> fieldIter = groupByFields.iterator();
+				while (fieldIter.hasNext()) {
+					
+					String groupByField = fieldIter.next().toString();
+					System.out.println("griup by " +groupByField);
+					returnIter = Iterators.transform(
+							cosmos.groupResults(res,
+									new Column(groupByField))
+									.iterator(), new GroupByResultFuckit());
 				}
 
-				for (CloseableIterable<MultimapQueryResult> subIter : plannedParentHood) {
-					if (iter == null) {
-						iter = subIter;
-					} else {
-						iter = Iterables.concat(iter, subIter);
-					}
-				}
 			}
+
 		} catch (UnexpectedStateException e1) {
 			log.error(e1);
+		} catch (TableNotFoundException e) {
+			log.error(e);
+		} catch (UnindexedColumnException e) {
+			log.error(e);
 		}
-
-		List<Field> fieldsUserWants = Lists.newArrayList();
-
-		for (Fields fieldList : fields) {
-			fieldsUserWants.addAll(fieldList.getFields());
-		}
-
-		baseIter = iter.iterator();
-		baseIter = Iterators.transform(baseIter, new FieldLimiter(
-				fieldsUserWants));
-
-		returnIter = Iterators.transform(baseIter, new DocumentExpansion(
-				schemaLayout));
 
 		return new AccumuloIterables<Object[]>(returnIter);
 	}
@@ -186,17 +214,38 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 
 			for (int i = 0; i < fields.size(); i++) {
 				String field = fields.get(i);
-				Collection<SValue> values = document.get(new Column(field));
+				Column col = new Column(field);
+				Collection<SValue> values = document.get(col);
 				if (values != null) {
 
-					List<SValue> columns = Lists.newArrayList();
-					columns.addAll(values);
+					List<Entry<Column, SValue>> columns = Lists.newArrayList();
+					for (SValue value : values) {
+						columns.add(Maps.immutableEntry(col, value));
+					}
 					results[i] = columns;// values.iterator().next().value();
 
 				} else {
 					results[i] = new ArrayList<SValue>();
 				}
 			}
+			return results;
+
+		}
+
+	}
+
+	class GroupByResultFuckit implements
+			Function<Entry<SValue, Long>, Object[]> {
+
+		public GroupByResultFuckit() {
+		}
+
+		public Object[] apply(Entry<SValue, Long> result) {
+
+			Object[] results = new Object[2];
+			results[0] = result.getKey();
+			results[1] = result.getValue();
+
 			return results;
 
 		}

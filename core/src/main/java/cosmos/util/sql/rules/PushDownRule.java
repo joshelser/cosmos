@@ -85,9 +85,14 @@ public class PushDownRule extends RuleBase {
 					AccumuloRel.CONVENTION);
 
 			final RelNode convertedInput = convert(input, traits);
-			call.transformTo(new GroupBy(aggy.getCluster(), traits,
-					convertedInput, aggy.getGroupSet(), aggy
-							.getAggCallList(), accumuloAccessor));
+			try {
+				call.transformTo(new GroupBy(aggy.getCluster(), traits,
+						convertedInput, aggy.getGroupSet(), aggy
+								.getAggCallList(), accumuloAccessor));
+			} catch (InvalidRelException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else {
 
 		}

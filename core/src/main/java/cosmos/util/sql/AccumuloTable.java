@@ -1,6 +1,7 @@
 package cosmos.util.sql;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
@@ -18,9 +19,11 @@ import net.hydromatic.optiq.Statistics;
 import net.hydromatic.optiq.TranslatableTable;
 import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Queues;
 
 import cosmos.util.sql.AccumuloRel.Plan;
+import cosmos.util.sql.call.Fields;
 
 public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 		TranslatableTable<T> {
@@ -33,6 +36,8 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 
 	protected AccumuloIterables<T> resultSet;
 
+	protected Queue<Plan> aggregationPlans;
+
 	protected Queue<Plan> plans;
 
 	public AccumuloTable(
@@ -41,6 +46,7 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 		this.schema = schema;
 		this.tableName = tableName;
 		plans = Queues.newPriorityQueue();
+		aggregationPlans = Queues.newPriorityQueue();
 		resultSet = new AccumuloIterables<T>();
 
 	}
@@ -73,10 +79,12 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements
 		return Statistics.UNKNOWN;
 	}
 
+	public boolean groupBy(Plan plan) {
+		return aggregationPlans.add(plan);
+	}
+
 	public boolean enqueue(Plan plan) {
-		boolean value = plans.add(plan);
-		System.out.println(" null plan ? " + (plan == null) + " " + value);
-		return value;
+		return plans.add(plan);
 	}
 
 	public abstract Enumerable<T> accumulate(List<String> fieldNameList);
