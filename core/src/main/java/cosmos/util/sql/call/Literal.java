@@ -10,7 +10,7 @@ public class Literal extends ChildVisitor {
 	}
 
 	@Override
-	public CallIfc addChild(CallIfc operation) {
+	public CallIfc addChild(String id, CallIfc operation) {
 		throw new IllegalArgumentException();
 	}
 

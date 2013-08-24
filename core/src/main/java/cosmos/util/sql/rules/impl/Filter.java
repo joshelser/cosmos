@@ -11,33 +11,26 @@ import org.eigenbase.relopt.RelTraitSet;
 import org.eigenbase.rex.RexNode;
 
 import cosmos.util.sql.AccumuloRel;
-import cosmos.util.sql.AccumuloRel.Planner;
-import cosmos.util.sql.AccumuloRel.Planner.IMPLEMENTOR_TYPE;
 import cosmos.util.sql.AccumuloTable;
 import cosmos.util.sql.call.CallIfc;
 import cosmos.util.sql.call.OperationVisitor;
-/**
- * Filter rule
- * 
- * @author phrocker
- *
- */
+
 public class Filter extends FilterRelBase implements AccumuloRel {
 
-	private AccumuloTable accumuloAccessor;
+	private AccumuloTable<?> accumuloAccessor;
 
-	public Filter(RelOptCluster cluster, RelTraitSet traits,
-			RelNode child, RexNode condition, AccumuloTable accumuloAccessor) {
+	public Filter(RelOptCluster cluster, RelTraitSet traits, RelNode child,
+			RexNode condition, AccumuloTable<?> accumuloAccessor) {
 		super(cluster, traits, child, condition);
-		
+
 		assert getConvention() == CONVENTION;
 		this.accumuloAccessor = accumuloAccessor;
 	}
 
 	@Override
 	public RelNode copy(RelTraitSet traitSet, List<RelNode> inputs) {
-		return new Filter(getCluster(), traitSet, sole(inputs),
-				getCondition(),accumuloAccessor);
+		return new Filter(getCluster(), traitSet, sole(inputs), getCondition(),
+				accumuloAccessor);
 	}
 
 	@Override
@@ -46,21 +39,21 @@ public class Filter extends FilterRelBase implements AccumuloRel {
 	}
 
 	@Override
-	public int implement(Planner implementor) {
+	public int implement(Plan implementor) {
 
-		
-		
-		implementor.visitChild(0, getChild());
-		
-		System.out.println("filter " + getChild().getDescription());
-		
+		implementor.visitChild(getChild());
+
 		OperationVisitor visitor = new OperationVisitor(getChild());
 		CallIfc operation = getCondition().accept(visitor);
-		
+
 		cosmos.util.sql.call.impl.Filter filter = new cosmos.util.sql.call.impl.Filter();
-		filter.addChild(operation);
-		implementor.add(filter);
-		implementor.table = accumuloAccessor; 
+		System.out.println("filter " + getChild().getDescription() + " "
+				+ operation.getClass());
+		filter.addChild(operation.getClass().getSimpleName(),
+				operation);
+		implementor
+				.add(filter.getClass().getSimpleName(), filter);
+		implementor.table = accumuloAccessor;
 
 		return 1;
 	}

@@ -11,21 +11,15 @@ import org.eigenbase.relopt.RelOptPlanner;
 import org.eigenbase.relopt.RelOptTable;
 import org.eigenbase.relopt.RelTraitSet;
 import org.eigenbase.reltype.RelDataType;
-import org.eigenbase.reltype.RelDataTypeFactory;
-import org.eigenbase.reltype.RelDataTypeField;
-import org.eigenbase.reltype.RelDataTypeFieldImpl;
 
 import com.google.common.collect.Lists;
 
-import cosmos.util.sql.AccumuloRel.Planner.IMPLEMENTOR_TYPE;
-import cosmos.util.sql.call.Field;
 import cosmos.util.sql.call.Fields;
-import cosmos.util.sql.call.impl.Projection;
 import cosmos.util.sql.enumerable.EnumerableExpression;
 import cosmos.util.sql.enumerable.FieldPacker;
 import cosmos.util.sql.impl.CosmosTable;
 import cosmos.util.sql.rules.FilterRule;
-import cosmos.util.sql.rules.OrderByRule;
+import cosmos.util.sql.rules.GroupByRule;
 import cosmos.util.sql.rules.ProjectRule;
 import cosmos.util.sql.rules.SortRule;
 
@@ -68,16 +62,17 @@ public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 
 	@Override
 	public void register(RelOptPlanner planner) {
+		/**
+		 * Build the rules.
+		 */
 		planner.addRule(new FieldPacker(this));
 		planner.addRule(EnumerableExpression.ARRAY_INSTANCE);
 
-		System.out.println("Result table null?" + (resultTable == null));
 		planner.addRule(new FilterRule(resultTable));
-		
-		planner.addRule(new OrderByRule(resultTable));
+
+		planner.addRule(new GroupByRule(resultTable));
 		planner.addRule(new ProjectRule(resultTable));
 		planner.addRule(new SortRule(resultTable));
-		
 
 	}
 
@@ -96,10 +91,10 @@ public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 	}
 
 	@Override
-	public int implement(Planner implementor) {
+	public int implement(Plan implementor) {
 		implementor.table = resultTable;
 
-		implementor.add(new Fields(selectedFields));
+		implementor.add("selectedFields", new Fields(selectedFields));
 
 		return 0;
 	}

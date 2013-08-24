@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -56,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 
@@ -88,10 +90,16 @@ public class CosmosImpl implements Cosmos{
   private final CuratorFramework curator;
   private final ReverseLexicoder<String> revLex = new ReverseLexicoder<String>(new StringLexicoder());
   
+  /**
+   * TODO: store this in accumulo?
+   */
+  protected Map<String,SortableResult> sortableResultMap;
+  
   public CosmosImpl(String zookeepers) {
     RetryPolicy retryPolicy = new ExponentialBackoffRetry(2000, 3);
     curator = CuratorFrameworkFactory.newClient(zookeepers, retryPolicy);
     curator.start();
+    sortableResultMap = Maps.newHashMap();
     
     // TODO http://curator.incubator.apache.org/curator-recipes/shared-reentrant-lock.html
     // "Error handling: ... strongly recommended that you add a ConnectionStateListener and
@@ -136,6 +144,8 @@ public class CosmosImpl implements Cosmos{
     checkNotNull(id);
     
     Stopwatch sw = id.tracer().startTiming("Cosmos:register");
+    
+    sortableResultMap.put(id.uuid(), id);
     
     try {
       State s = SortingMetadata.getState(id);
@@ -520,6 +530,11 @@ public class CosmosImpl implements Cosmos{
       bs.setRanges(Collections.singleton(Range.exact(id.uuid() + Defaults.NULL_BYTE_STR + value)));
       bs.fetchColumnFamily(new Text(column.column()));
       
+      // Filter on cq-prefix to only look at the ordering we want
+      IteratorSetting filter = new IteratorSetting(50, "cqFilter", OrderFilter.class);
+      filter.addOption(OrderFilter.PREFIX, Order.direction(Order.ASCENDING));
+      bs.addScanIterator(filter);
+      
       return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id), sw);
     } catch (TableNotFoundException e) {
       // In the exceptional case, stop the timer
@@ -789,6 +804,12 @@ public class CosmosImpl implements Cosmos{
   protected final InterProcessMutex getMutex(SortableResult id) {
     return new InterProcessMutex(curator, Defaults.CURATOR_PREFIX + id.uuid());
   }
+
+@Override
+public SortableResult fetch(String uuid) throws UnexpectedStateException {
+	
+	return sortableResultMap.get(uuid);
+}
 
   
 }

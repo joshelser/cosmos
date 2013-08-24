@@ -1,4 +1,3 @@
-
 package cosmos.util.sql;
 
 import java.sql.Connection;
@@ -54,23 +53,26 @@ import cosmos.util.sql.impl.CosmosSql;
 import cosmos.util.sql.impl.CosmosTable;
 
 /**
- * JDBC Driver. 
+ * JDBC Driver.
  */
 public class AccumuloDriver extends UnregisteredDriver {
-		
+
+	private static final String ACCUMULO = "accumulo";
 	protected SchemaDefiner<?> definer;
 	private AccumuloSchema<CosmosSql> schema;
-	protected AccumuloDriver() {
+
+	protected String jdbcConnector = null;
+
+	protected AccumuloDriver(String connectorName) {
 		super();
+		jdbcConnector = connectorName;
 	}
-	
-	public AccumuloDriver(SchemaDefiner<?> definer)
-	{
-		super();
+
+	public AccumuloDriver(SchemaDefiner<?> definer) {
+		this(ACCUMULO);
 		this.definer = definer;
 		register();
 	}
-
 
 	protected String getConnectStringPrefix() {
 		return "jdbc:accumulo:";
@@ -80,7 +82,6 @@ public class AccumuloDriver extends UnregisteredDriver {
 		return new AccumuloJdbcDriverVersion();
 	}
 
-	
 	@Override
 	public Connection connect(String url, Properties info) throws SQLException {
 		Connection connection = super.connect(url, info);
@@ -91,14 +92,10 @@ public class AccumuloDriver extends UnregisteredDriver {
 
 		// optiqConnection.setSchema("");
 		try {
-		
-			
-			
-
 			schema = new AccumuloSchema<CosmosSql>(rootSchema, "sorts",
 					"sorts", "sorts", rootSchema.getSubSchemaExpression(
-							schemaName, AccumuloSchema.class), (CosmosSql) definer,
-					CosmosTable.class);
+							schemaName, AccumuloSchema.class),
+					(CosmosSql) definer, CosmosTable.class);
 
 			schema.initialize();
 			rootSchema.addSchema(schemaName, schema);
@@ -113,15 +110,13 @@ public class AccumuloDriver extends UnregisteredDriver {
 
 			// JdbcSchema.create(rootSchema,dataSource,"admin","",schemaName);
 
-
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return optiqConnection;
 	}
-	
-	
+
 }
 
 // End SplunkDriver.java

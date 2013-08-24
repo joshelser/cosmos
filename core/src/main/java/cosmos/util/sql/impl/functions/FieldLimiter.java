@@ -1,18 +1,12 @@
 package cosmos.util.sql.impl.functions;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.accumulo.core.security.ColumnVisibility;
-
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
 import cosmos.results.Column;

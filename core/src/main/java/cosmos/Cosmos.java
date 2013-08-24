@@ -156,6 +156,13 @@ public interface Cosmos {
   public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
+   * Fetches the SortableResult reference per the UUID.
+   * @param uuid UUID to extract.
+   * @return
+   * @throws UnexpectedStateException
+   */
+  public SortableResult fetch(final String uuid) throws UnexpectedStateException;  
+  /**
    * Return counts for unique values in the given column
    * 
    * @param id
@@ -191,6 +198,9 @@ public interface Cosmos {
    * @param id
    */
   public void delete(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException;
+  
+  
+  
   
   /**
    * Cleans up internal resources, such as the Curator/ZooKeeper connection, and should be called by the client

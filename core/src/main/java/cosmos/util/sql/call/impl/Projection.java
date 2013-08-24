@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import cosmos.util.sql.call.CallIfc;
@@ -17,20 +18,20 @@ public class Projection extends ChildVisitor {
 	}
 
 	@Override
-	public CallIfc addChild(CallIfc child) {
+	public CallIfc addChild(String id, CallIfc child) {
 		Preconditions.checkArgument(child instanceof Field);
-		return super.addChild(child);
+		return super.addChild(id, child);
 	}
 
 	public List<Field> getProjections() {
-		return Lists.transform(children, new Function<CallIfc, Field>() {
-			
-			@Override
-			public Field apply(CallIfc child)
-			{
-				return (Field)child;
-			}
+		return Lists.newArrayList(Iterables.transform(children.values(),
+				new Function<CallIfc, Field>() {
 
-		});
+					@Override
+					public Field apply(CallIfc child) {
+						return (Field) child;
+					}
+
+				}));
 	}
 }

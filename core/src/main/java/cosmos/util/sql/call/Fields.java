@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-public class Fields implements CallIfc {
+public class Fields implements CallIfc<Field> {
 
 	protected List<Field> fields;
 
@@ -13,12 +13,12 @@ public class Fields implements CallIfc {
 		fields = Lists.newArrayListWithCapacity(literal.size());
 
 		for (String field : literal) {
-			addChild(new Field(field));
+			addChild(literal.toString(), new Field(field));
 		}
 	}
 
 	@Override
-	public CallIfc addChild(CallIfc child) {
+	public CallIfc<?> addChild(String id, Field child) {
 		if (child instanceof Field) {
 			fields.add((Field) child);
 		}

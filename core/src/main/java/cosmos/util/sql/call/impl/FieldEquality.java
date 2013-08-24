@@ -1,26 +1,27 @@
 package cosmos.util.sql.call.impl;
 
-import cosmos.util.sql.call.BinaryCaller;
+import java.util.Collection;
+
+import cosmos.util.sql.call.ChildVisitor;
 import cosmos.util.sql.call.Field;
 import cosmos.util.sql.call.FilterIfc;
 import cosmos.util.sql.call.Literal;
+import cosmos.util.sql.call.Pair;
 
-public class FieldEquality extends BinaryCaller implements FilterIfc {
+public class FieldEquality extends ChildVisitor<Pair<Field,Literal>> implements FilterIfc {
 
+	
 	public FieldEquality(Field left, Literal right) {
-		super(left, right);
+		Pair<Field,Literal> childPair = new Pair<Field,Literal>(left,right);
+		addChild(childPair.getClass().getSimpleName(),childPair);
+		
+		
 
 	}
 	
-	public Field getField()
+	public Collection<Pair<Field,Literal>> getChildren() 
 	{
-		return (Field) children.get(0);
-	}
-	
-	
-	public Literal getLiteral()
-	{
-		return (Literal) children.get(1);
+		return children.get(Pair.class.getSimpleName());
 	}
 	
 	

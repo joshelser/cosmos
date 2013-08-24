@@ -1,7 +1,8 @@
 package cosmos.util.sql.call;
 
 
-public interface CallIfc {
+@SuppressWarnings("rawtypes")
+public interface CallIfc<T extends CallIfc> {
 
-	public CallIfc addChild(CallIfc child);
+	public CallIfc addChild(String id, T child);
 }

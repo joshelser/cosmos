@@ -196,7 +196,10 @@ public class TestSql {
 	      }
 	      CosmosImpl impl = new CosmosImpl(mac.getZooKeepers());
 		  
-	      cosmosSql = new CosmosSql(meataData,impl );
+	      
+	      cosmosSql = new CosmosSql(impl );
+	      	
+		  impl.register(meataData);
 		  
 	      impl.addResults(meataData, tformSource);
 	      
@@ -304,17 +307,8 @@ public class TestSql {
 	      final ResultSet resultSet =
 	          statement.executeQuery(
 	        		  
-	              "select \"PAGE_ID\" from \"sorts\".\"cosmos\"  where \"REVISION_ID\" = '1' group by \"PAGE_ID\" ");
-	      //
+	              "select \"PAGE_ID\" from \"sorts\".\"" + meataData.uuid() + "\"  where \"REVISION_ID\" = '1' group by \"PAGE_ID\"");
 	      
-	      /*
-	       * 
-            "select * from (\n"
-            + "  select * from \"sales_fact_1997\"\n"
-            + "  union all\n"
-            + "  select * from \"sales_fact_1998\")\n"
-            + "where \"product_id\" = 1"
-	       */
 	      output(resultSet, System.out);
 	    } finally {
 	      close(connection, statement);

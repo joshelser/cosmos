@@ -43,17 +43,11 @@ import org.eigenbase.reltype.RelDataType;
 import org.eigenbase.reltype.RelDataTypeFactory;
 import org.eigenbase.reltype.RelDataTypeField;
 import org.eigenbase.reltype.RelDataTypeFieldImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import cosmos.util.sql.AccumuloRel;
-import cosmos.util.sql.Column;
-import cosmos.util.sql.FlatQueryPlanner;
-
+import cosmos.util.sql.AccumuloRel.Plan;
 
 public class EnumerableRelation extends SingleRel implements EnumerableRel {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(EnumerableRelation.class);
 
 	private static final Function1<String, Expression> TO_LITERAL = new Function1<String, Expression>() {
 		@Override
@@ -63,28 +57,29 @@ public class EnumerableRelation extends SingleRel implements EnumerableRel {
 	};
 
 	private PhysType physType;
-	
+
 	protected JavaTypeFactory factory;
+
+	private Plan selectQuery;
 
 	public EnumerableRelation(RelOptCluster cluster, RelTraitSet traitSet,
 			RelNode input) {
-		
+
 		super(cluster, traitSet, input);
 		factory = (JavaTypeFactory) cluster.getTypeFactory();
 		assert getConvention() instanceof EnumerableConvention;
 		assert input.getConvention() == AccumuloRel.CONVENTION;
 		physType = PhysTypeImpl.of((JavaTypeFactory) cluster.getTypeFactory(),
 				input.getRowType(), JavaRowFormat.ARRAY);
-		
 
 	}
-	
+
 	@Override
 	public RelDataType deriveRowType() {
 
 		return rowType != null ? rowType : super.deriveRowType();
 	}
-	
+
 	public PhysType getPhysType() {
 		return physType;
 	}
@@ -98,54 +93,52 @@ public class EnumerableRelation extends SingleRel implements EnumerableRel {
 	public RelNode copy(RelTraitSet traitSet, List<RelNode> inputs) {
 		return new EnumerableRelation(getCluster(), traitSet, sole(inputs));
 	}
-	
-	  public RelDataType getReturnType() {
-			 
-		    final RelDataTypeFactory.FieldInfoBuilder builder =
-		        new RelDataTypeFactory.FieldInfoBuilder();
-		    for(RelDataTypeField field: super.deriveRowType().getFieldList())
-		    {
-		    	String name = field.getName();
-		    	 int index = super.deriveRowType().getFieldOrdinal(name);
-		    	 System.out.println("Adding " + name + " " + index + " colun");
-		    	
-		      builder.add(new RelDataTypeFieldImpl(name, index,  getCluster().getTypeFactory().createJavaType(List.class)));
-		    }
-		    return getCluster().getTypeFactory().createStructType(builder);
-		  }
+
+	public RelDataType getReturnType() {
+
+		final RelDataTypeFactory.FieldInfoBuilder builder = new RelDataTypeFactory.FieldInfoBuilder();
+		for (RelDataTypeField field : super.deriveRowType().getFieldList()) {
+			String name = field.getName();
+			int index = super.deriveRowType().getFieldOrdinal(name);
+			System.out.println("Adding " + name + " " + index + " colun");
+
+			builder.add(new RelDataTypeFieldImpl(name, index, getCluster()
+					.getTypeFactory().createJavaType(List.class)));
+		}
+		return getCluster().getTypeFactory().createStructType(builder);
+	}
 
 	public Result implement(EnumerableRelImplementor implementor, Prefer pref) {
 
 		final BlockBuilder list = new BlockBuilder();
 
-		FlatQueryPlanner selectQuery = new FlatQueryPlanner();
-		
-		selectQuery.visitChild(0, getChild());
-		
-		
+		selectQuery = new AccumuloRel.Plan();
+
+		selectQuery.visitChild(getChild());
+
 		final Expression table = list.append("table",
 				selectQuery.table.getExpression());
 
-		
-		selectQuery.table.query(selectQuery);
-		
+		selectQuery.table.enqueue(selectQuery);
 
 		final PhysType physType = PhysTypeImpl.of(implementor.getTypeFactory(),
 				getReturnType(), pref.prefer(JavaRowFormat.CUSTOM));
-		//System.out.println(physType.getRowType().toString());
+
+		System.out.println("return type is " + physType.getRowType().getFieldOrdinal("PAGE_ID"));
 		
 		final List<String> fieldNameList = getRowType().getFieldNames();
-		
-		Expression accumuloResults = list.append("enumerable",
-				Expressions.call(table, "accumulate", Expressions.call(Arrays.class, "asList",
-		                Expressions.newArrayInit(String.class, Functions.apply(fieldNameList, TO_LITERAL)))));
 
-		
+		Expression accumuloResults = list.append("enumerable", Expressions
+				.call(table, "accumulate", Expressions.call(
+						Arrays.class,
+						"asList",
+						Expressions.newArrayInit(String.class,
+								Functions.apply(fieldNameList, TO_LITERAL)))));
+
 		list.add(Expressions.return_(null, accumuloResults));
-		
+
 		return implementor.result(physType, list.toBlock());
 
-	
 	}
 
 }

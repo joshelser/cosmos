@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.eigenbase.rel.AggregateRel;
 import org.eigenbase.rel.FilterRel;
+import org.eigenbase.rel.InvalidRelException;
 import org.eigenbase.rel.ProjectRel;
 import org.eigenbase.rel.RelNode;
 import org.eigenbase.rel.SortRel;
@@ -14,6 +15,7 @@ import org.eigenbase.relopt.RelTraitSet;
 import cosmos.util.sql.AccumuloRel;
 import cosmos.util.sql.impl.CosmosTable;
 import cosmos.util.sql.rules.impl.Filter;
+import cosmos.util.sql.rules.impl.GroupBy;
 import cosmos.util.sql.rules.impl.Projection;
 import cosmos.util.sql.rules.impl.Sort;
 
@@ -37,13 +39,13 @@ public class PushDownRule extends RuleBase {
 	@Override
 	public void onMatch(RelOptRuleCall call) {
 
-		RelNode node = call.getRels()[0];
+		RelNode node = call.rel(0);
 
 		System.out.println(node.getClass());
-		
+
 		if (node instanceof ProjectRel) {
 			final ProjectRel project = (ProjectRel) node;
-			final RelNode input = call.getRels()[1];
+			final RelNode input = call.rel(1);
 			final RelTraitSet traits = project.getTraitSet().plus(
 					AccumuloRel.CONVENTION);
 			final RelNode convertedInput = convert(input, traits);
@@ -53,9 +55,9 @@ public class PushDownRule extends RuleBase {
 
 		} else if (node instanceof FilterRel) {
 			final FilterRel filter = (FilterRel) node;
-			
+
 			System.out.println(filter.getCondition().getKind().toString());
-			final RelNode input = call.getRels()[1];
+			final RelNode input = call.rel(1);
 			final RelTraitSet traits = filter.getTraitSet().plus(
 					AccumuloRel.CONVENTION);
 			final RelNode convertedInput = convert(input, traits);
@@ -67,27 +69,25 @@ public class PushDownRule extends RuleBase {
 			System.out.println("sort");
 			final SortRel sort = (SortRel) node;
 
-			final RelNode input = call.getRels()[1];
+			final RelNode input = call.rel(1);
 			final RelTraitSet traits = sort.getTraitSet().plus(
 					AccumuloRel.CONVENTION);
 			final RelNode convertedInput = convert(input, traits);
 			call.transformTo(new Sort(sort.getCluster(), traits,
 					convertedInput, sort.getCollation(), accumuloAccessor));
-					
 
 		} else if (node instanceof AggregateRel) {
 
-			System.out.println("AggregateRel");
-			final AggregateRel sort = (AggregateRel) node;
+			final AggregateRel aggy = (AggregateRel) node;
+			final RelNode input = call.rel(1);
+			System.out.println("agg " + (aggy == null) + " " + (input == null));
+			final RelTraitSet traits = aggy.getTraitSet().plus(
+					AccumuloRel.CONVENTION);
 
-			System.out.println(sort.getDescription());
-			/*
-			call.transformTo(new Sort(sort.getCluster(), traits,
-					convertedInput, sort.getCollation(), accumuloAccessor));
-					*/
-			System.exit(1);
-					
-
+			final RelNode convertedInput = convert(input, traits);
+			call.transformTo(new GroupBy(aggy.getCluster(), traits,
+					convertedInput, aggy.getGroupSet(), aggy
+							.getAggCallList(), accumuloAccessor));
 		} else {
 
 		}

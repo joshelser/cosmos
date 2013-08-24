@@ -30,6 +30,7 @@ public class EnumerableExpression extends ConverterRule {
 
   private EnumerableExpression() {
     super(RelNode.class, AccumuloRel.CONVENTION, EnumerableConvention.INSTANCE, "EnumerableDrillRule");
+    
   }
 
   @Override

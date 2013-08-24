@@ -9,27 +9,27 @@ import com.google.common.collect.Lists;
 
 import cosmos.util.sql.call.CallIfc;
 import cosmos.util.sql.call.ChildVisitor;
-import cosmos.util.sql.call.FilterIfc;
+import cosmos.util.sql.call.Field;
 
-public class Filter extends ChildVisitor {
+public class Grouping extends ChildVisitor {
 
-	public Filter() {
+	public Grouping() {
 
 	}
 
 	@Override
 	public CallIfc addChild(String id, CallIfc child) {
-		Preconditions.checkArgument(child instanceof FilterIfc);
+		Preconditions.checkArgument(child instanceof Field);
 		return super.addChild(id, child);
 	}
 
-	public List<FilterIfc> getFilters() {
+	public List<Field> getProjections() {
 		return Lists.newArrayList(Iterables.transform(children.values(),
-				new Function<CallIfc, FilterIfc>() {
+				new Function<CallIfc, Field>() {
 
 					@Override
-					public FilterIfc apply(CallIfc child) {
-						return (FilterIfc) child;
+					public Field apply(CallIfc child) {
+						return (Field) child;
 					}
 
 				}));

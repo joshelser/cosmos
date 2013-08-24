@@ -17,7 +17,7 @@ import com.google.common.base.Preconditions;
 
 import cosmos.util.sql.call.impl.FieldEquality;
 
-public class OperationVisitor extends RexVisitorImpl<CallIfc> {
+public class OperationVisitor extends RexVisitorImpl<CallIfc<?>> {
 	final StringBuilder buf = new StringBuilder();
 	private final RelNode input;
 
@@ -27,7 +27,7 @@ public class OperationVisitor extends RexVisitorImpl<CallIfc> {
 	}
 
 	@Override
-	public CallIfc visitCall(RexCall call) {
+	public CallIfc<?> visitCall(RexCall call) {
 		final SqlSyntax syntax = call.getOperator().getSyntax();
 		switch (syntax) {
 		case Binary:
@@ -100,7 +100,6 @@ public class OperationVisitor extends RexVisitorImpl<CallIfc> {
 	@Override
 	public CallIfc visitInputRef(RexInputRef inputRef) {
 
-		System.out.println("Input reaf");
 		final int index = inputRef.getIndex();
 		final RelDataTypeField field = input.getRowType().getFieldList()
 				.get(index);

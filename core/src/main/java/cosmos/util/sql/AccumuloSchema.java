@@ -1,24 +1,14 @@
-
 package cosmos.util.sql;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
 import net.hydromatic.linq4j.expressions.Expression;
 import net.hydromatic.optiq.Schema;
 import net.hydromatic.optiq.Table;
-import net.hydromatic.optiq.impl.TableInSchemaImpl;
-import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 import net.hydromatic.optiq.impl.java.MapSchema;
 
 import org.apache.log4j.Logger;
-import org.eigenbase.reltype.RelDataType;
-import org.eigenbase.reltype.RelDataTypeFactory;
-import org.eigenbase.reltype.RelDataTypeFactory.FieldInfoBuilder;
-
-import cosmos.options.Index;
 
 public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 
@@ -27,6 +17,7 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 	private Class<? extends AccumuloTable<?>> clazz = null;
 
 	private static final Logger log = Logger.getLogger(AccumuloSchema.class);
+
 	/**
 	 * Accumulo schema constructor
 	 */
@@ -35,6 +26,8 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 			Class<? extends AccumuloTable<?>> clazz) {
 		super(parentSchema, name, expression);
 		meataData = schemaDefiner;
+		// let's maek a cyclic dependency
+		meataData.register(this);
 		this.clazz = clazz;
 	}
 
@@ -43,57 +36,23 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
 	 */
 	public AccumuloTable<?> getTable(String name) {
 
-		return (AccumuloTable<?>) tableMap.get(name).getTable(Class.class);
+		System.out.println("get table for " + name);
+		if (meataData instanceof TableDefiner) {
+			return ((TableDefiner) meataData).getTable(name);
+		} else
+			return (AccumuloTable<?>) tableMap.get(name).getTable(Class.class);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <E> Table<E> getTable(String name, Class<E> elementType) {
-		return  (Table<E>) tableMap.get(name).getTable(Class.class);
+		return (Table<E>) getTable(name);
 	}
-
 
 	@Override
 	protected Collection<TableInSchema> initialTables() {
-		final List<TableInSchema> list = new ArrayList<TableInSchema>();
-
-		FieldInfoBuilder builder = new RelDataTypeFactory.FieldInfoBuilder();
-
-		for (Index indexField : meataData.getIndexColumns()) {
-			builder.add(indexField.column().column(),
-					typeFactory.createType(indexField.getIndexTyped()));
-		}
-
-		final RelDataType rowType = typeFactory.createStructType(builder);
-
-		AccumuloTable<?> table;
-		try {
-			table =  clazz.getConstructor(AccumuloSchema.class,
-					SchemaDefiner.class,JavaTypeFactory.class,
-					RelDataType.class).newInstance(this, meataData,
-					typeFactory, rowType);
-
-			list.add(new TableInSchemaImpl(this, meataData.getDataTable(),
-					TableType.TABLE, table));
-
-			return list;
-
-		} catch (InstantiationException e) {
-			log.error(e);
-		} catch (IllegalAccessException e) {
-			log.error(e);
-		} catch (IllegalArgumentException e) {
-			log.error(e);
-		} catch (InvocationTargetException e) {
-			log.error(e);
-		} catch (NoSuchMethodException e) {
-			log.error(e);
-		} catch (SecurityException e) {
-			log.error(e);
-		}
-		return null;
+		return Collections.EMPTY_LIST;
 
 	}
 
 }
-

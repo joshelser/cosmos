@@ -1,26 +1,30 @@
 package cosmos.util.sql.call;
 
-import java.util.List;
+import java.util.Collection;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
-public class ChildVisitor implements CallIfc  {
+public class ChildVisitor<T extends CallIfc<?>> implements CallIfc<T> {
 
-	protected List<CallIfc> children;
+	protected Multimap<String, T> children;
 
-
-	public ChildVisitor()
-	{
-		children = Lists.newArrayList();
+	public ChildVisitor() {
+		children = ArrayListMultimap.create();
 	}
-	
+
 	@Override
-	public CallIfc addChild(CallIfc child) {
-		children.add(child);
+	public CallIfc<?> addChild(String id, T child) {
+		children.put(id, child);
 		return this;
 	}
 
-	
-	
-	
+	public Collection<T> children(String id) {
+		return children.get(id);
+	}
+
+	public Collection<String> childrenIds() {
+		return children.keySet();
+	}
+
 }

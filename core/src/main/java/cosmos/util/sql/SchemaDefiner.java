@@ -3,21 +3,27 @@ package cosmos.util.sql;
 import java.util.List;
 import java.util.Set;
 
+import net.hydromatic.optiq.impl.java.JavaTypeFactory;
+
 import cosmos.options.Index;
 
 /**
- * Interface that defines an interface that enables us
- * funcionality in defining our referential schema.
+ * Interface that defines an interface that enables us funcionality in defining
+ * our referential schema.
+ * 
  * @author phrocker
- *
+ * 
  * @param <T>
  */
 
 public interface SchemaDefiner<T> {
 
-	public String getDataTable();
-	
-	public Set<Index> getIndexColumns();
+	public void register(AccumuloSchema<?> parentSchema);
 
-	public AccumuloIterables<T> iterator(List<String> schemaLayout, AccumuloRel.Planner query);
+	public String getDataTable();
+
+	public Set<Index> getIndexColumns(String table);
+
+	public AccumuloIterables<T> iterator(List<String> schemaLayout,
+			AccumuloRel.Plan query);
 }

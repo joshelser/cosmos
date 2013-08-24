@@ -12,9 +12,12 @@ import org.eigenbase.relopt.RelOptTable;
 import org.eigenbase.relopt.RelOptTable.ToRelContext;
 import org.eigenbase.reltype.RelDataType;
 
+import com.google.common.base.Preconditions;
+
 import cosmos.results.impl.MultimapQueryResult;
 import cosmos.util.sql.AccumuloIterables;
 import cosmos.util.sql.AccumuloRel;
+import cosmos.util.sql.AccumuloRel.Plan;
 import cosmos.util.sql.AccumuloSchema;
 import cosmos.util.sql.ResultTable;
 import cosmos.util.sql.SchemaDefiner;
@@ -34,16 +37,22 @@ public class CosmosTable extends ResultTable {
 
 	private SchemaDefiner<?> metadata;
 
+	protected String table;
+	
+	
+
 	public CosmosTable(AccumuloSchema<? extends SchemaDefiner<?>> meataSchema,
 			SchemaDefiner<?> metadata, JavaTypeFactory typeFactory,
-			RelDataType rowType) {
+			RelDataType rowType, String table) {
 
-		super(meataSchema, metadata.getDataTable(), typeFactory);
+		super(meataSchema, table, typeFactory);
 		javaFactory = typeFactory;
 
 		this.metadata =  metadata;
 
 		this.rowType = rowType;
+		
+		this.table = table;
 
 	}
 
@@ -56,6 +65,8 @@ public class CosmosTable extends ResultTable {
 
 	@Override
 	public RelNode toRel(ToRelContext context, RelOptTable relOptTable) {
+		
+		
 		return new TableScanner(context.getCluster(), context
 				.getCluster().traitSetOf(AccumuloRel.CONVENTION), relOptTable,
 				this, relOptTable.getRowType()
@@ -65,8 +76,14 @@ public class CosmosTable extends ResultTable {
 	@SuppressWarnings("unchecked")
 	public Enumerable<Object[]> accumulate(List<String> fieldNames)
 	{
-		System.out.println("field names is " + fieldNames);
+		Plan query = plans.poll();
+		
+		System.out.println("accumulo? " + (query ==null));
+		
+		Preconditions.checkNotNull(query);
+		
 		resultSet = (AccumuloIterables<Object[]>) metadata.iterator(fieldNames,query);
+		
 		return Linq4j.asEnumerable(resultSet);
 	}
 
@@ -75,8 +92,11 @@ public class CosmosTable extends ResultTable {
 	public Type getElementType() {
 		return MultimapQueryResult.class;
 	}
-	
-	
+
+	public String getTable()
+	{
+		return table;
+	}
 	
 
 }

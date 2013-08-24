@@ -1,16 +1,11 @@
 package cosmos.util.sql;
 
-import java.util.Map;
-
 import org.eigenbase.rel.RelNode;
 import org.eigenbase.relopt.Convention;
 
-import com.google.common.collect.Maps;
-
 import cosmos.util.sql.call.CallIfc;
-import cosmos.util.sql.call.Fields;
-import cosmos.util.sql.call.impl.Filter;
-import cosmos.util.sql.call.impl.Projection;
+import cosmos.util.sql.call.ChildVisitor;
+
 public interface AccumuloRel extends RelNode {
 	/**
 	 * Calling convention for relational expressions that are "implemented" by
@@ -18,42 +13,35 @@ public interface AccumuloRel extends RelNode {
 	 */
 	Convention CONVENTION = new Convention.Impl("COSMOS", AccumuloRel.class);
 
-	int implement(Planner implementor);
+	int implement(Plan implementor);
 
-	class Planner {
-		public enum IMPLEMENTOR_TYPE {
-			PROJECTION, FIELD_SELECT, FILTER, OTHER;
+	class Plan {
+
+		protected ChildVisitor<CallIfc<?>> operations;
+
+		public AccumuloTable<?> table;
+
+		public Plan() {
+			operations = new ChildVisitor<CallIfc<?>>();
 		}
-
-		final protected Map<IMPLEMENTOR_TYPE, CallIfc> operations = Maps
-				.newHashMap();
-
-		public AccumuloTable table;
 
 		/**
 		 * Convenience method
 		 * 
 		 * @param operation
 		 */
-		public void add(CallIfc operation) {
+		public void add(String id, CallIfc<?> operation) {
 
-			if (operation instanceof Fields) {
-				operations.put(IMPLEMENTOR_TYPE.FIELD_SELECT, operation);
-			}
-			else if (operation instanceof Filter)
-			{
-				operations.put(IMPLEMENTOR_TYPE.FILTER,operation);
-			}
-			else if (operation instanceof Projection)
-			{
-				operations.put(IMPLEMENTOR_TYPE.PROJECTION,operation);
-			}
+			operations.addChild(id, operation);
 		}
 
-		public void visitChild(int ordinal, RelNode input) {
-			assert ordinal == 0;
+		public void visitChild(RelNode input) {
 			((AccumuloRel) input).implement(this);
 
+		}
+
+		public ChildVisitor<CallIfc<?>> getChildren() {
+			return operations;
 		}
 	}
 }

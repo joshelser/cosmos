@@ -15,25 +15,25 @@ import org.eigenbase.reltype.RelDataType;
 import org.eigenbase.rex.RexNode;
 
 import cosmos.util.sql.AccumuloRel;
-import cosmos.util.sql.AccumuloRel.Planner.IMPLEMENTOR_TYPE;
 import cosmos.util.sql.AccumuloTable;
 import cosmos.util.sql.call.CallIfc;
 import cosmos.util.sql.call.OperationVisitor;
 
-
 /**
  * Projection based rule
+ * 
  * @author phrocker
- *
+ * 
  */
 public class Projection extends ProjectRelBase implements AccumuloRel {
 
-	private AccumuloTable accumuloAccessor;
+	private AccumuloTable<?> accumuloAccessor;
 
-	public Projection(RelOptCluster cluster, RelTraitSet traits,
-			RelNode child, List<RexNode> exps, RelDataType rowType, AccumuloTable accumuloAccessor) {
-		super(cluster, traits, child, exps, rowType, Flags.Boxed,
-				Collections.<RelCollation> emptyList());
+	public Projection(RelOptCluster cluster, RelTraitSet traits, RelNode child,
+			List<RexNode> exps, RelDataType rowType,
+			AccumuloTable<?> accumuloAccessor) {
+		super(cluster, traits, child, exps, rowType, Flags.Boxed, Collections
+				.<RelCollation> emptyList());
 		assert getConvention() == CONVENTION;
 		this.accumuloAccessor = accumuloAccessor;
 	}
@@ -41,7 +41,7 @@ public class Projection extends ProjectRelBase implements AccumuloRel {
 	@Override
 	public RelNode copy(RelTraitSet traitSet, List<RelNode> inputs) {
 		return new Projection(getCluster(), traitSet, sole(inputs),
-				new ArrayList<RexNode>(exps), rowType,accumuloAccessor);
+				new ArrayList<RexNode>(exps), rowType, accumuloAccessor);
 	}
 
 	@Override
@@ -50,12 +50,10 @@ public class Projection extends ProjectRelBase implements AccumuloRel {
 	}
 
 	@Override
-	public int implement(Planner implementor) {
+	public int implement(Plan implementor) {
 
-		AccumuloRel.Planner parent = new AccumuloRel.Planner();
-		
-		parent.visitChild(0, getChild());
-		
+		implementor.visitChild(getChild());
+
 		implementor.table = accumuloAccessor;
 
 		OperationVisitor visitor = new OperationVisitor(getChild());
@@ -63,10 +61,11 @@ public class Projection extends ProjectRelBase implements AccumuloRel {
 		cosmos.util.sql.call.impl.Projection projections = new cosmos.util.sql.call.impl.Projection();
 		for (RexNode node : exps) {
 			CallIfc projection = node.accept(visitor);
-			projections.addChild(projection);
+			projections.addChild(projection.getClass().getSimpleName(),
+					projection);
 
 		}
-		implementor.add(projections);
+		implementor.add(projections.getClass().getSimpleName(), projections);
 
 		return 1;
 
