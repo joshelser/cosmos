@@ -1,7 +1,6 @@
 package cosmos.util.sql.rules;
 
-import java.util.UUID;
-
+import org.apache.log4j.Logger;
 import org.eigenbase.rel.AggregateRel;
 import org.eigenbase.rel.FilterRel;
 import org.eigenbase.rel.InvalidRelException;
@@ -17,7 +16,7 @@ import cosmos.util.sql.impl.CosmosTable;
 import cosmos.util.sql.rules.impl.Filter;
 import cosmos.util.sql.rules.impl.GroupBy;
 import cosmos.util.sql.rules.impl.Projection;
-import cosmos.util.sql.rules.impl.Sort;
+import cosmos.util.sql.rules.impl.EnumerableSort;
 
 /**
  * Initially the rule were separate; however, since they can be handled in a
@@ -29,6 +28,8 @@ import cosmos.util.sql.rules.impl.Sort;
 public class PushDownRule extends RuleBase {
 
 	CosmosTable accumuloAccessor;
+	
+	private static final Logger log = Logger.getLogger(PushDownRule.class);
 
 	public PushDownRule(CosmosTable resultTable, RelOptRuleOperand operand, String name) {
 		super(operand, PushDownRule.class.getSimpleName()
@@ -62,19 +63,7 @@ public class PushDownRule extends RuleBase {
 			call.transformTo(new Filter(filter.getCluster(), traits,
 					convertedInput, filter.getCondition(), accumuloAccessor));
 
-		} else if (node instanceof SortRel) {
-
-
-			final SortRel sort = (SortRel) node;
-
-			final RelNode input = call.rel(1);
-			final RelTraitSet traits = sort.getTraitSet().plus(
-					AccumuloRel.CONVENTION);
-			final RelNode convertedInput = convert(input, traits);
-			call.transformTo(new Sort(sort.getCluster(), traits,
-					convertedInput, sort.getCollation(), accumuloAccessor));
-
-		} else if (node instanceof AggregateRel) {
+		}  else if (node instanceof AggregateRel) {
 
 			final AggregateRel aggy = (AggregateRel) node;
 			final RelNode input = call.rel(1);
@@ -88,8 +77,7 @@ public class PushDownRule extends RuleBase {
 						convertedInput, aggy.getGroupSet(), aggy
 								.getAggCallList(), accumuloAccessor));
 			} catch (InvalidRelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e);
 			}
 		} else {
 

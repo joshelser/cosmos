@@ -68,18 +68,18 @@ public class AccumuloDriver extends UnregisteredDriver {
 		jdbcConnector = connectorName;
 	}
 
-	public AccumuloDriver(SchemaDefiner<?> definer) {
-		this(ACCUMULO);
+	public AccumuloDriver(SchemaDefiner<?> definer, String connectorPrefix) {
+		this(connectorPrefix);
 		this.definer = definer;
 		register();
 	}
 
 	protected String getConnectStringPrefix() {
-		return "jdbc:accumulo:";
+		return "jdbc:accumulo:"+ jdbcConnector;
 	}
 
 	protected DriverVersion createDriverVersion() {
-		return new AccumuloJdbcDriverVersion();
+		return new AccumuloJdbcDriverVersion(jdbcConnector);
 	}
 
 	@Override

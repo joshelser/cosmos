@@ -36,7 +36,6 @@ public interface AccumuloRel extends RelNode {
 		}
 
 		public void visitChild(RelNode input) {
-			System.out.println("rel " +  input.getClass());
 			((AccumuloRel) input).implement(this);
 
 		}

@@ -87,6 +87,8 @@ public class GroupBy extends EnumerableAggregateRel implements AccumuloRel {
 		accumuloAccessor.groupBy(aggregatePlan);
 		
 		
+		
+		
 		final Result result = implementor.visitChild(this, 0, child, pref);
 		
 

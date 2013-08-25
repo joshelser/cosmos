@@ -186,7 +186,8 @@ public class TestSql {
 		impl.register(meataData);
 
 		impl.addResults(meataData, tformSource);
-
+/*
+ * 
 		BatchScanner scanner = connector.createBatchScanner("cosmos",
 				new Authorizations("en"), 1);
 
@@ -198,8 +199,9 @@ public class TestSql {
 			System.out.println(iter.next().getKey());
 
 		}
+		*/
 
-		new AccumuloDriver(cosmosSql);
+		new AccumuloDriver(cosmosSql, "cosmos");
 
 	}
 
@@ -286,16 +288,19 @@ public class TestSql {
 			info.put("user", USER);
 			info.put("password", PASSWORD);
 			connection = DriverManager.getConnection(
-					"jdbc:accumulo://localhost", info);
+					"jdbc:accumulo:cosmos//localhost", info);
 			statement = connection.createStatement();
-			System.out.println("executing" + "select \"REVISION_ID\",\"PAGE_ID\" from \"sorts\".\""
+			System.out.println("executing " + "select \"PAGE_ID\" from \"sorts\".\""
 					+ meataData.uuid()
-					+ "\"  group by \"REVISION_ID\",\"PAGE_ID\"");
+					+ "\" limit 2 OFFSET 0");
 			final ResultSet resultSet = statement.executeQuery(
-
-			"select \"REVISION_ID\",\"PAGE_ID\" from \"sorts\".\""
+					"select \"PAGE_ID\" from \"sorts\".\""
+							+ meataData.uuid()
+							+ "\" limit 2 OFFSET 0");
+/*			"select \"REVISION_ID\",\"PAGE_ID\" from \"sorts\".\""
 					+ meataData.uuid()
 					+ "\"  group by \"REVISION_ID\",\"PAGE_ID\"");
+					*/
 
 			output(resultSet, System.out);
 		} finally {
@@ -343,6 +348,11 @@ public class TestSql {
 					+ metaData.getColumnClassName(1));
 
 			for (int i = 1; i <= columnCount; i++) {
+				
+				
+				System.out.println("another result v " + resultSet.getObject("PAGE_ID").toString());
+			}
+				/*
 				if (resultSet.getObject(i) instanceof List) {
 					Entry obj = (Entry) resultSet.getObject(i);
 
@@ -350,12 +360,19 @@ public class TestSql {
 
 				} else
 				{
-					System.out.println("another result "
-							+ resultSet.getObject(i).getClass());
-					System.out.println("another result "
-							+ resultSet.getObject(i).toString());
+					
+					for(Object entry : (Object[])resultSet.getObject(i))
+					{
+						System.out.println(entry.toString() );
+					}
+					
+					
+							
+					
+					
 				}
 			}
+			*/
 
 		}
 	}
@@ -382,7 +399,6 @@ public class TestSql {
 		Revision r = p.getRevision();
 		if (null != r) {
 			data.put(REVISION_ID, SValue.create(Long.toString(r.getId()), cv));
-			System.out.println("We've got " + data.get(REVISION_ID).toString());
 			data.put(REVISION_TIMESTAMP, SValue.create(r.getTimestamp(), cv));
 
 			Contributor c = r.getContributor();

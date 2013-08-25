@@ -52,9 +52,9 @@ import cosmos.util.sql.call.impl.Filter;
 import cosmos.util.sql.impl.functions.FieldLimiter;
 
 /**
- * @TODO gut this class. it needs a rework. 
+ * @TODO gut this class. it needs a rework.
  * @author marc
- *
+ * 
  */
 public class CosmosSql extends ResultDefiner implements TableDefiner {
 
@@ -102,14 +102,13 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 	@Override
 	public AccumuloIterables<Object[]> iterator(List<String> schemaLayout,
 			AccumuloRel.Plan planner, AccumuloRel.Plan aggregatePlan) {
-		
-		
+
 		Iterator<Object[]> returnIter = Iterators.emptyIterator();
 
 		ChildVisitor<? extends CallIfc<?>> query = planner.getChildren();
 
-		Collection<? extends CallIfc<?>> filters = query
-				.children(Filter.class.getSimpleName());
+		Collection<? extends CallIfc<?>> filters = query.children(Filter.class
+				.getSimpleName());
 
 		Collection<? extends CallIfc<?>> fields = query
 				.children("selectedFields");
@@ -123,36 +122,44 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 			if (aggregatePlan == null) {
 
 				if (res != null) {
-					for (CallIfc<?> filterIfc : filters) {
-						Filter filter = (Filter)filterIfc;
-						
-						for (FilterIfc subFilter : filter.getFilters()) {
-							if (subFilter instanceof FieldEquality) {
-								FieldEquality equality = (FieldEquality) subFilter;
+					System.out.println("have a res " + filters.size());
+					if (filters.size() > 0) {
+						for (CallIfc<?> filterIfc : filters) {
+							Filter filter = (Filter) filterIfc;
 
-								for (Pair<Field, Literal> entry : equality
-										.getChildren()) {
+							for (FilterIfc subFilter : filter.getFilters()) {
+								if (subFilter instanceof FieldEquality) {
+									FieldEquality equality = (FieldEquality) subFilter;
 
-									cosmos.util.sql.call.Field field = (Field) entry
-											.first();
-									cosmos.util.sql.call.Literal literal = (Literal) entry
-											.second();
+									for (Pair<Field, Literal> entry : equality
+											.getChildren()) {
 
-									try {
-										plannedParentHood.add(cosmos.fetch(res,
-												new Column(field.toString()),
-												literal.toString()));
+										cosmos.util.sql.call.Field field = (Field) entry
+												.first();
+										cosmos.util.sql.call.Literal literal = (Literal) entry
+												.second();
 
-									} catch (TableNotFoundException e) {
-										log.error(e);
-									} catch (UnexpectedStateException e) {
-										log.error(e);
-									} catch (UnindexedColumnException e) {
-										log.error(e);
+										try {
+											plannedParentHood
+													.add(cosmos
+															.fetch(res,
+																	new Column(
+																			field.toString()),
+																	literal.toString()));
+
+										} catch (TableNotFoundException e) {
+											log.error(e);
+										} catch (UnexpectedStateException e) {
+											log.error(e);
+										} catch (UnindexedColumnException e) {
+											log.error(e);
+										}
 									}
 								}
 							}
 						}
+					} else {
+						plannedParentHood.add(cosmos.fetch(res));
 					}
 
 					for (Iterable<MultimapQueryResult> subIter : plannedParentHood) {
@@ -166,7 +173,7 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 					List<Field> fieldsUserWants = Lists.newArrayList();
 
 					for (CallIfc<?> fiel : fields) {
-						Fields fieldList = (Fields)fiel;
+						Fields fieldList = (Fields) fiel;
 						fieldsUserWants.addAll(fieldList.getFields());
 					}
 
@@ -178,17 +185,17 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 							new DocumentExpansion(schemaLayout));
 				}
 			} else {
+				System.out.println("!have a res");
 				ChildVisitor<? extends CallIfc<?>> aggregates = aggregatePlan
 						.getChildren();
 				Collection<Field> groupByFields = (Collection<Field>) aggregates
 						.children("groupBy");
 				Iterator<Field> fieldIter = groupByFields.iterator();
 				while (fieldIter.hasNext()) {
-					
+
 					String groupByField = fieldIter.next().toString();
 					returnIter = Iterators.transform(
-							cosmos.groupResults(res,
-									new Column(groupByField))
+							cosmos.groupResults(res, new Column(groupByField))
 									.iterator(), new GroupByResultFuckit());
 				}
 

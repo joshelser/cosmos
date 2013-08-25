@@ -21,7 +21,7 @@ import cosmos.util.sql.impl.CosmosTable;
 import cosmos.util.sql.rules.FilterRule;
 import cosmos.util.sql.rules.GroupByRule;
 import cosmos.util.sql.rules.ProjectRule;
-import cosmos.util.sql.rules.SortRule;
+import cosmos.util.sql.rules.LimitRule;
 
 /**
  * Enables the rules to scan a given accumulo table.
@@ -66,13 +66,14 @@ public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 		 * Build the rules.
 		 */
 		planner.addRule(new FieldPacker(this));
+		planner.addRule(new LimitRule(resultTable));
 		planner.addRule(EnumerableExpression.ARRAY_INSTANCE);
 
 		planner.addRule(new FilterRule(resultTable));
 
 		planner.addRule(new GroupByRule(resultTable));
 		planner.addRule(new ProjectRule(resultTable));
-		planner.addRule(new SortRule(resultTable));
+		
 
 	}
 
