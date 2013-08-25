@@ -3,17 +3,22 @@ MOST_RECENT_QUERY_STRING = "?num="
 
 CONTENT_CLICKABLES = {'#most_recent_5':5, '#most_recent_10':10, '#most_recent_15':15};
 
+digits = function(str) {
+    return str.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"); 
+}
+
 render_most_recent = function(js, render_to) {
     html = ''
 
     for (var i = 0; i < js.length; i++) {
+        beginDateTime = new Date(js[i].begin).toLocaleString();
+
         html += '<div>'
-        html += '<p>' + js[i].uuid + '</p>'
-        html += '<p>' + js[i].begin + '</p>'
+        html += '<p><span style="font-weight:bold">' + js[i].uuid + '</span> began at ' + beginDateTime + '</p>'
         html += '<ol>'
         for (var j = 0; j < js[i].regionTimings.length; j++) {
             html += '<li>' + js[i].regionTimings[j].description
-                    + ' = ' + js[i].regionTimings[j].duration
+                    + ' = ' + digits(js[i].regionTimings[j].duration.toString())
                     + 'ms</li>'
         }
         html += '</ol>'
