@@ -16,12 +16,20 @@ render_most_recent = function(js, render_to) {
         html += '<div>'
         html += '<p><span style="font-weight:bold">' + js[i].uuid + '</span> began at ' + beginDateTime + '</p>'
         html += '<ol>'
+        total_duration = 0
         for (var j = 0; j < js[i].regionTimings.length; j++) {
-            html += '<li>' + js[i].regionTimings[j].description
-                    + ' = ' + digits(js[i].regionTimings[j].duration.toString())
-                    + 'ms</li>'
+            desc = js[i].regionTimings[j].description
+            duration = js[i].regionTimings[j].duration
+            total_duration += duration
+
+            html += '<li>' + desc + ' = ' + digits(duration.toString()) + 'ms</li>'
         }
         html += '</ol>'
+
+        if (total_duration > 0) {
+            html += '<p style="padding-left:18px">Total = ' + digits(total_duration.toString()) + 'ms</p>'
+        }
+
     }
 
     render_to.html(html)
