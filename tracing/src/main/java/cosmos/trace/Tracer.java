@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.accumulo.core.client.lexicoder.LongLexicoder;
@@ -32,20 +33,24 @@ import org.apache.accumulo.core.data.Value;
 import org.apache.hadoop.io.Text;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import cosmos.trace.Timings.TimedRegions;
 import cosmos.trace.Timings.TimedRegions.TimedRegion;
+import cosmos.trace.Timings.TimedRegions.TimingMetadata;
 
 /**
  * 
  */
 public class Tracer {
   public static final String UUID = "uuid", TIME = "time";
+  public static final Text UUID_TEXT = new Text(UUID), TIME_TEXT = new Text(TIME);
   
   protected final String uuid;
   protected long begin;
   protected final List<TimedRegion> timings;
+  protected Map<String,String> metadata;
   
   public Tracer(String uuid) {
     checkNotNull(uuid);
@@ -53,6 +58,7 @@ public class Tracer {
     this.uuid = uuid;
     this.begin = System.currentTimeMillis();
     this.timings = Lists.newArrayList();
+    this.metadata = Maps.newHashMap();
   }
   
   public Tracer(Tracer other) {
@@ -61,6 +67,7 @@ public class Tracer {
     this.uuid = other.uuid;
     this.begin = other.begin;
     this.timings = Lists.newArrayList(other.timings);
+    this.metadata = Maps.newHashMap(other.metadata);
   }
   
   public Tracer(String uuid, long begin, List<TimedRegion> timings) {
@@ -71,31 +78,41 @@ public class Tracer {
     this.uuid = uuid;
     this.begin = begin;
     this.timings = timings;
+    this.metadata = Maps.newHashMap();
+  }
+  
+  public Tracer(String uuid, long begin, List<TimedRegion> timings, Map<String,String> metadata) {
+    checkNotNull(uuid);
+    checkNotNull(begin);
+    checkNotNull(timings);
+    checkNotNull(metadata);
+    
+    this.uuid = uuid;
+    this.begin = begin;
+    this.timings = timings;
+    this.metadata = Maps.newHashMap(metadata);
   }
 
   public Tracer(Entry<Key,Value> entry) {
-    this(entry.getKey(), entry.getValue());
+    this(entry.getValue());
   }
   
-  public Tracer(Key timeKey, Value timeValue) {
-    LongLexicoder longLex = new LongLexicoder();
-    ReverseLexicoder<Long> revLongLex = new ReverseLexicoder<Long>(longLex);
+  public Tracer(Value timeValue) {
+    checkNotNull(timeValue);
     
-    Text row = timeKey.getRow();
-    byte[] src = row.getBytes(), dest = new byte[row.getLength()];
-    System.arraycopy(src, 0, dest, 0, row.getLength());
-    
-    checkArgument(null != dest && 0 < dest.length, "Row must not be empty");
-    
-    this.begin = revLongLex.decode(dest);
-    
-    this.uuid = timeKey.getColumnQualifier().toString();
-    
+    TimedRegions regions = null;
     try {
-      TimedRegions regions = TimedRegions.parseFrom(timeValue.get());
-      this.timings = regions.getRegionList();
+      regions = TimedRegions.parseFrom(timeValue.get());  
     } catch (InvalidProtocolBufferException e) {
       throw new RuntimeException(e);
+    }
+    
+    this.uuid = regions.getUuid();
+    this.begin = regions.getBegin();
+    this.timings = regions.getRegionList();
+    this.metadata = Maps.newHashMap();
+    for (TimingMetadata metadata : regions.getMetadataList()) {
+      this.metadata.put(metadata.getName(), metadata.getValue());
     }
   }
   
@@ -134,6 +151,13 @@ public class Tracer {
     
     TimedRegions.Builder builder = TimedRegions.newBuilder();
     builder.addAllRegion(this.timings);
+    
+    builder.setBegin(this.begin);
+    builder.setUuid(this.uuid);
+    
+    for (Entry<String,String> entry : this.metadata.entrySet()) {
+      builder.addMetadata(TimingMetadata.newBuilder().setName(entry.getKey()).setValue(entry.getValue()).build());
+    }
     
     byte[] serializedBytes = builder.build().toByteArray();
     recordMutation.put(UUID.getBytes(), new byte[0], serializedBytes);

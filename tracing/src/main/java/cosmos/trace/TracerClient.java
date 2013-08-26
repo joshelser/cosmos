@@ -88,7 +88,7 @@ public class TracerClient {
       log.error("Couldn't find the traces table {}", AccumuloTraceStore.TABLE_NAME);
       throw new NoSuchElementException("No trace found for " + uuid);
     }
-    scanner.fetchColumnFamily(new Text(Tracer.UUID));
+    scanner.fetchColumnFamily(Tracer.UUID_TEXT);
     scanner.setRange(Range.exact(uuid));
     
     Iterator<Entry<Key,Value>> iter = scanner.iterator();
@@ -109,7 +109,7 @@ public class TracerClient {
       throw new RuntimeException(e);
     }
     
-    scanner.fetchColumnFamily(new Text(Tracer.TIME));
+    scanner.fetchColumnFamily(Tracer.TIME_TEXT);
     scanner.setRange(new Range());
     
     List<Tracer> tracers = Lists.newArrayListWithCapacity(numberOfTimings);
@@ -146,7 +146,7 @@ public class TracerClient {
       throw new RuntimeException(e);
     }
     
-    scanner.fetchColumnFamily(new Text(Tracer.TIME));
+    scanner.fetchColumnFamily(Tracer.TIME_TEXT);
     scanner.setRange(new Range(null, false, encodedSince, true));
     
     return Iterables.transform(scanner, new DeserializeTracer());
@@ -179,7 +179,7 @@ public class TracerClient {
       throw new RuntimeException(e);
     }
     
-    scanner.fetchColumnFamily(new Text(Tracer.TIME));
+    scanner.fetchColumnFamily(Tracer.TIME_TEXT);
     
     // Since the start and end are also reverse encoded, we use them as normal
     scanner.setRange(new Range(encodedEnd, false, encodedStart, false));

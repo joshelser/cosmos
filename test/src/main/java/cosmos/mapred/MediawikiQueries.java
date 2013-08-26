@@ -201,9 +201,10 @@ public class MediawikiQueries {
       bs.close();
       
       Random r = new Random();
+      int max = r.nextInt(10) + 1;
       
       // Run a bunch of queries
-      for (int count = 0; count < 5; count++) {
+      for (int count = 0; count < max; count++) {
         long resultCount;
         String name;
         int i = r.nextInt(9);

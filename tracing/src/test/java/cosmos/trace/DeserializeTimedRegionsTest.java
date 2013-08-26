@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.Maps;
+import com.google.protobuf.UninitializedMessageException;
 
 import cosmos.trace.Timings.TimedRegions;
 import cosmos.trace.Timings.TimedRegions.TimedRegion;
@@ -39,48 +40,36 @@ import cosmos.trace.Timings.TimedRegions.TimedRegion;
 public class DeserializeTimedRegionsTest {
   
   protected DeserializeTracer func;
-  protected Key k;
   
   @Before
   public void setup() {
     func = new DeserializeTracer();
-    LongLexicoder lex = new LongLexicoder();
-    ReverseLexicoder<Long> revLex = new ReverseLexicoder<Long>(lex);
-    byte[] row = revLex.encode(1l);
-    k = new Key(new Text(row), new Text(Tracer.TIME), new Text(UUID.randomUUID().toString()));
   }
   
   @Test
   public void simpleDeserialize() {
+    String uuid = "1";
+    long begin = 1l;
     TimedRegion region = TimedRegion.newBuilder().setDescription("desc").setDuration(Long.MAX_VALUE).build();
     
-    Tracer tracer = new Tracer(k.getColumnQualifier().toString(), 1l, Collections.singletonList(region));
+    Tracer tracer = new Tracer(uuid, begin, Collections.singletonList(region));
     
     TimedRegions.Builder regionsBuilder = TimedRegions.newBuilder();
+    regionsBuilder.setBegin(begin).setUuid(uuid);
     regionsBuilder.addRegion(region);
     TimedRegions regions = regionsBuilder.build();
     
     // Manually serialize the protobuf
     Value v = new Value(regions.toByteArray());
     
-    Tracer newTracer = func.apply(Maps.immutableEntry(k, v));
+    Tracer newTracer = func.apply(Maps.immutableEntry(new Key(), v));
     
     Assert.assertEquals(tracer, newTracer);
   }
   
-  @Test()
-  public void emptyValue() {
-    TimedRegions empty = TimedRegions.newBuilder().build();
-    Tracer tracer = func.apply(Maps.immutableEntry(k, new Value(new byte[0])));
-    
-    TimedRegions actual = TimedRegions.newBuilder().addAllRegion(tracer.getTimings()).build();
-    
-    Assert.assertEquals(empty, actual);
-  }
-  
   @Test(expected = RuntimeException.class)
   public void invalidValue() {
-    func.apply(Maps.immutableEntry(k, new Value(new byte[]{0})));
+    func.apply(Maps.immutableEntry(new Key(), new Value(new byte[]{0})));
   }
   
   @Test(expected = RuntimeException.class)
