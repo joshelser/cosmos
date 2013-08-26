@@ -20,12 +20,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
@@ -64,11 +66,15 @@ public class MostRecent {
     }
   }
   
+  protected TracerResponse transform(Tracer t) {
+    return new TracerResponse(t);
+  }
+  
   protected List<TracerResponse> transform(List<Tracer> tracers) {
     List<TracerResponse> tracerResponses = Lists.newArrayListWithExpectedSize(tracers.size());
     
     for (Tracer tracer : tracers) {
-      tracerResponses.add(new TracerResponse(tracer));
+      tracerResponses.add(transform(tracer));
     }
     
     return tracerResponses;
@@ -96,5 +102,18 @@ public class MostRecent {
     List<Tracer> timings = Lists.newArrayList(tc.between(parseDate(start), parseDate(end)));
     
     return transform(timings);
+  }
+  
+  @Path("/timing")
+  @GET
+  public TracerResponse timing(@QueryParam("uuid") String uuid) {
+    Tracer timing = null;
+    try {
+      timing = tc.getTimings(uuid);
+    } catch (NoSuchElementException e) {
+      throw new WebApplicationException(404);
+    }
+    
+    return transform(timing);
   }
 }
