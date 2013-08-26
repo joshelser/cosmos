@@ -1,0 +1,22 @@
+package cosmos.trace;
+
+option java_outer_classname = "Timings";
+option optimize_for = SPEED;
+
+message TimedRegions {
+  required uint64 begin = 1;
+  required string uuid = 2;
+  
+  repeated TimingMetadata metadata = 3;
+  repeated TimedRegion region = 4;
+
+  message TimedRegion {
+    required string description = 1;
+    required uint64 duration = 2;
+  }
+  
+  message TimingMetadata {
+    required string name = 1;
+    required string value = 2;
+  }
+}

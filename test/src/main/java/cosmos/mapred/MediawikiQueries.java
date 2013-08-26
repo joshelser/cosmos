@@ -17,12 +17,13 @@
  *  Copyright 2013 Josh Elser
  *
  */
-package cosmos;
+package cosmos.mapred;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -34,13 +35,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.accumulo.core.client.BatchScanner;
+import org.apache.accumulo.core.client.BatchWriter;
 import org.apache.accumulo.core.client.Connector;
+import org.apache.accumulo.core.client.TableExistsException;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.data.Key;
+import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.core.security.ColumnVisibility;
+import org.apache.hadoop.io.Text;
+import org.mediawiki.xml.export_0.MediaWikiType;
+import org.mediawiki.xml.export_0.PageType;
 
 import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
@@ -51,6 +58,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
 import cosmos.impl.SortableResult;
 import cosmos.mediawiki.MediawikiPage.Page;
@@ -62,14 +70,17 @@ import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.integration.CosmosIntegrationSetup;
 import cosmos.util.IdentitySet;
 
 /**
  * 
  */
 public class MediawikiQueries {
+  public static final boolean preloadData = false;
+  
   public static final String TIMINGS = "[TIMINGS] ";
-  public static final int MAX_SIZE = 16000;
+  public static final int MAX_SIZE = 8000;
   
   // MAX_OFFSET is a little misleading because the max pageID is 33928886
   // Don't have contiguous pageIDs
@@ -132,7 +143,7 @@ public class MediawikiQueries {
       SortableResult id = SortableResult.create(this.con, this.con.securityOperations().getUserAuthorizations(this.con.whoami()), IdentitySet.<Index> create());
       
       int offset = offsetR.nextInt(MAX_OFFSET);
-      int numRecords = cardinalityR.nextInt(MAX_SIZE);
+      int numRecords = cardinalityR.nextInt(MAX_SIZE) + 1;
       
       BatchScanner bs = this.con.createBatchScanner("sortswiki", new Authorizations(), 4);
       
@@ -188,9 +199,10 @@ public class MediawikiQueries {
       bs.close();
       
       Random r = new Random();
+      int max = r.nextInt(10) + 1;
       
       // Run a bunch of queries
-      for (int count = 0; count < 30; count++) {
+      for (int count = 0; count < max; count++) {
         long resultCount;
         String name;
         int i = r.nextInt(9);
@@ -428,8 +440,39 @@ public class MediawikiQueries {
   }
   
   public static void main(String[] args) throws Exception {
+    if (preloadData) {
+      CosmosIntegrationSetup.initializeJaxb();
+      MediawikiQueries queries = new MediawikiQueries();
+      MediawikiMapper mapper = new MediawikiMapper();
+      mapper.setup(null);
+      
+      List<MediaWikiType> results = Lists.newArrayList(CosmosIntegrationSetup.getWiki1(), CosmosIntegrationSetup.getWiki2(), CosmosIntegrationSetup.getWiki3(), CosmosIntegrationSetup.getWiki4(), CosmosIntegrationSetup.getWiki5());
+      
+      try {
+        queries.con.tableOperations().create("sortswiki");
+      } catch (TableExistsException e) {
+        
+      }
+      BatchWriter bw = queries.con.createBatchWriter("sortswiki", 50 * 1024 * 1024l, 2 * 60 * 1000l, 3);
+      int i = 0;
+      for (MediaWikiType wiki : results) {
+        for (PageType pageType : wiki.getPage()) {
+          Page page = mapper.pageTypeToPage(pageType);
+          Value v = new Value(page.toByteArray());
+          
+          Mutation m = new Mutation(Integer.toString(i));
+          m.put(new Text(), new Text(), v);
+          bw.addMutation(m);
+          i++;
+        }
+        bw.flush();
+      }
+      
+      bw.close();
+    }
+    
     ExecutorService runner = Executors.newFixedThreadPool(3);
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
       runner.execute(runQueries(200));
     }
     

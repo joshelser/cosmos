@@ -31,6 +31,7 @@ import org.apache.accumulo.core.client.lexicoder.StringLexicoder;
 import org.apache.accumulo.core.data.Range;
 import org.apache.hadoop.io.Text;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import cosmos.accumulo.GroupByRowSuffixIterator;
@@ -38,7 +39,6 @@ import cosmos.accumulo.OrderFilter;
 import cosmos.impl.GroupByFunction;
 import cosmos.options.Defaults;
 import cosmos.options.Order;
-import cosmos.results.CloseableIterable;
 import cosmos.results.SValue;
 
 
@@ -88,7 +88,7 @@ public class CosmosTest {
     IteratorSetting cfg = new IteratorSetting(60, GroupByRowSuffixIterator.class);
     bs.addScanIterator(cfg);
     
-    CloseableIterable<Entry<SValue,Long>> iter = CloseableIterable.transform(bs, new GroupByFunction());
+    Iterable<Entry<SValue,Long>> iter = Iterables.transform(bs, new GroupByFunction());
     for (Entry<SValue,Long> entry : iter) {
       System.out.println(entry.getKey().value() + "=" + entry.getValue());
     }

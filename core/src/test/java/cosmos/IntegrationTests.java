@@ -17,7 +17,7 @@
  *  Copyright 2013 Josh Elser
  *
  */
-package cosmos.util;
+package cosmos;
 
 /**
  * 

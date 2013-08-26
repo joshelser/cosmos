@@ -31,6 +31,7 @@ import java.util.SortedSet;
 import org.apache.accumulo.core.client.AccumuloException;
 import org.apache.accumulo.core.client.AccumuloSecurityException;
 import org.apache.accumulo.core.client.Connector;
+import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.TableExistsException;
 import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.client.admin.TableOperations;
@@ -45,6 +46,8 @@ import com.google.common.collect.Sets;
 
 import cosmos.options.Defaults;
 import cosmos.options.Index;
+import cosmos.trace.AccumuloTraceStore;
+import cosmos.trace.Tracer;
 import cosmos.util.IdentitySet;
 
 public class SortableResult {
@@ -58,6 +61,7 @@ public class SortableResult {
   protected final boolean lockOnUpdates;
   protected final String dataTable, metadataTable;
   protected final String UUID;
+  protected final Tracer tracer;
   
   protected Set<Index> columnsToIndex;
   
@@ -98,6 +102,9 @@ public class SortableResult {
     splitTable(tops, this.dataTable());
     addLocalityGroups(tops, this.dataTable());
     createIfNotExists(tops, this.metadataTable());
+    
+    this.tracer = new Tracer(uuid());
+    ensureTracingTableExists();
   }
   
   protected void createIfNotExists(TableOperations tops, String tableName) {
@@ -188,6 +195,17 @@ public class SortableResult {
     }
   }
   
+  protected void ensureTracingTableExists() {    
+    try {
+      AccumuloTraceStore.ensureTables(connector());
+    } catch (AccumuloException e) {
+      throw new RuntimeException(e);
+    } catch (AccumuloSecurityException e) {
+      throw new RuntimeException(e);
+    }
+    
+  }
+  
   public Connector connector() {
     return this.connector;
   }
@@ -214,6 +232,20 @@ public class SortableResult {
   
   public String uuid() {
     return this.UUID;
+  }
+  
+  public Tracer tracer() {
+    return this.tracer;
+  }
+  
+  public void sendTraces() {
+    try {
+      AccumuloTraceStore.serialize(tracer(), connector());
+    } catch (MutationsRejectedException e) {
+      log.debug("Could not persist trace information", e);
+    } catch (TableNotFoundException e) {
+      log.debug("Could not persist trace information", e);
+    }
   }
   
   protected void addColumnsToIndex(Collection<Index> columns) {
