@@ -1,3 +1,5 @@
+"!https://travis-ci.org/joshelser/cosmos.png!":https://travis-ci.org/joshelser/cosmos
+
 Cosmos
 ========
 
