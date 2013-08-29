@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.org/joshelser/cosmos.png)](https://travis-ci.org/joshelser/cosmos.png)
-
-Cosmos
+Cosmos [![Build Status](https://travis-ci.org/joshelser/cosmos.png)](https://travis-ci.org/joshelser/cosmos.png)
 ========
 
 Cosmos was driven by the necessity to sort, filter and count large swaths of 
