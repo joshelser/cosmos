@@ -53,7 +53,7 @@ import cosmos.impl.SortableResult;
 import cosmos.options.Defaults;
 import cosmos.results.Column;
 
-public class SortingMetadata {
+public class SortableMetadata {
   public static final Text EMPTY_TEXT = new Text("");
   public static final Text STATE_COLFAM = new Text("state");
   public static final Text COLUMN_COLFAM = new Text("column");

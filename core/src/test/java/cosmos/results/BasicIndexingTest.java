@@ -44,7 +44,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import cosmos.Cosmos;
-import cosmos.SortingMetadata;
+import cosmos.SortableMetadata;
 import cosmos.impl.CosmosImpl;
 import cosmos.impl.SortableResult;
 import cosmos.options.Defaults;
@@ -454,7 +454,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     BatchScanner bs = c.createBatchScanner(id.metadataTable(), id.auths(), 1);
     bs.setRanges(Collections.singleton(Range.exact(id.uuid())));
-    bs.fetchColumnFamily(SortingMetadata.COLUMN_COLFAM);
+    bs.fetchColumnFamily(SortableMetadata.COLUMN_COLFAM);
     
     long count = 0;
     for (Entry<Key,Value> e : bs) {
