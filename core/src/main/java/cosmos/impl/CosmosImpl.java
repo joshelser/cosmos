@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -45,6 +46,7 @@ import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
+import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -56,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 
@@ -221,6 +224,8 @@ public class CosmosImpl implements Cosmos {
   protected void performAdd(SortableResult id, Iterable<? extends QueryResult<?>> queryResults) throws MutationsRejectedException, TableNotFoundException,
       IOException {
     BatchWriter bw = null, metadataBw = null;
+    Map<Column,MutableLong> countsByColumn = Maps.newHashMap();
+    MutableLong numRecords = new MutableLong(0);
     
     try {
       // Add the values of columns to the sortableresult as we want
@@ -234,6 +239,8 @@ public class CosmosImpl implements Cosmos {
       final Set<Column> columnsAlreadyIndexed = Sets.newHashSet();
       
       for (QueryResult<?> result : queryResults) {
+        numRecords.increment();
+        
         bw.addMutation(addDocument(id, result));
         Mutation columnMutation = new Mutation(id.uuid());
         boolean newColumnIndexed = false;
@@ -241,6 +248,12 @@ public class CosmosImpl implements Cosmos {
         for (Entry<Column,SValue> entry : result.columnValues()) {
           final Column c = entry.getKey();
           final SValue v = entry.getValue();
+          
+          if (countsByColumn.containsKey(c)) {
+            countsByColumn.get(c).increment();
+          } else {
+            countsByColumn.put(c, new MutableLong(1));
+          }
           
           if (!columnsAlreadyIndexed.contains(c)) {
             holder.set(c.column());
@@ -281,9 +294,12 @@ public class CosmosImpl implements Cosmos {
       if (null != bw) {
         bw.close();
       }
+      
       if (null != metadataBw) {
         metadataBw.close();
       }
+      
+      SortingMetadata.serializeMetadata(id, countsByColumn, numRecords);
     }
   }
   
@@ -363,6 +379,8 @@ public class CosmosImpl implements Cosmos {
       MutationsRejectedException, IOException {
     final IndexHelper indexHelper = IndexHelper.create(columnsToIndex);
     final int numCols = indexHelper.columnCount();
+    final Map<Column,MutableLong> countsByColumn = Maps.newHashMap();
+    
     CloseableIterable<MultimapQueryResult> results = null;
     BatchWriter bw = null;
     
@@ -390,6 +408,12 @@ public class CosmosImpl implements Cosmos {
               final Collection<Index> indices = indexHelper.indicesForColumn(columnToIndex);
               final Collection<SValue> values = result.get(columnToIndex);
               
+              if (countsByColumn.containsKey(columnToIndex)) {
+                countsByColumn.get(columnToIndex).add(values.size());
+              } else {
+                countsByColumn.put(columnToIndex, new MutableLong(values.size()));
+              }
+              
               addIndicesForRecord(id, result, bw, indices, values);
             }
           }
@@ -403,10 +427,19 @@ public class CosmosImpl implements Cosmos {
               final Collection<Index> indices = indexHelper.indicesForColumn(column);
               final Collection<SValue> values = result.get(column);
               
+              if (countsByColumn.containsKey(column)) {
+                countsByColumn.get(column).add(values.size());
+              } else {
+                countsByColumn.put(column, new MutableLong(values.size()));
+              }
+              
               addIndicesForRecord(id, result, bw, indices, values);
             }
           }
         }
+        
+        // Track any new index entries we wrote
+        SortingMetadata.serializeIndexCounts(id, countsByColumn);
       }
     } finally {
       if (null != bw) {

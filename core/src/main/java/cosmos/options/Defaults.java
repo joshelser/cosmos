@@ -19,6 +19,7 @@
  */
 package cosmos.options;
 
+import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.data.Value;
 import org.apache.hadoop.io.Text;
 
@@ -27,15 +28,22 @@ public abstract class Defaults {
   public static final String DATA_TABLE = "cosmos";
   public static final String METADATA_TABLE = "metacosmos";
   
+  public static final byte[] EMPTY_BYTES = new byte[0];
+  public static final Text EMPTY_TEXT = new Text();
+  public static final Value EMPTY_VALUE = new Value(new byte[0]);
+  
   public static final String NULL_BYTE_STR = "\u0000";
   public static final String EIN_BYTE_STR = "\u0001";
   
   public static final String DOCID_FIELD_NAME = "COSMOS_DOCID";
   public static final Text DOCID_FIELD_NAME_TEXT = new Text(DOCID_FIELD_NAME);
-  public static final Value EMPTY_VALUE = new Value(new byte[0]);
   public static final String CURATOR_PREFIX = "/cosmos/";
   
   public static final String CONTENTS_LG_NAME = "contents";
   public static final String CONTENTS_COLFAM = "CONTENTS";
   public static final Text CONTENTS_COLFAM_TEXT = new Text(CONTENTS_COLFAM);
+  
+  public static final BatchWriterConfig BATCH_WRITER_CONFIG = new BatchWriterConfig();
+  public static final Text COLUMN_COUNT_COLFAM = new Text("cc");
+  public static final Text RECORD_COUNT_COLFAM = new Text("rc");
 }

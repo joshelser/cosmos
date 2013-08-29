@@ -21,8 +21,12 @@ package cosmos;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.accumulo.core.Constants;
@@ -39,11 +43,14 @@ import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.VLongWritable;
+import org.apache.hadoop.io.WritableUtils;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
 import cosmos.impl.SortableResult;
+import cosmos.options.Defaults;
 import cosmos.results.Column;
 
 public class SortingMetadata {
@@ -172,6 +179,96 @@ public class SortingMetadata {
     } finally {
       if (null != bs) {
         bs.close();
+      }
+    }
+  }
+  
+  /**
+   * Persists various metadata about a {@link SortableResult}
+   * @param id
+   * @param countsByColumn
+   * @param recordCount
+   * @throws MutationsRejectedException
+   * @throws TableNotFoundException
+   * @throws IOException
+   */
+  public static void serializeMetadata(SortableResult id, Map<Column,? extends Number> countsByColumn, Number recordCount) throws MutationsRejectedException, TableNotFoundException, IOException {
+    serializeIndexCounts(id, countsByColumn);
+    serializeRecordCount(id, recordCount);
+  }
+  
+  /**
+   * Persists a count by indexed column seen in a {@link SortableResult}
+   * @param id
+   * @param countsByColumn
+   * @param recordCount
+   * @throws TableNotFoundException
+   * @throws IOException
+   * @throws MutationsRejectedException
+   */
+  public static void serializeIndexCounts(SortableResult id, Map<Column,? extends Number> countsByColumn) throws TableNotFoundException, IOException, MutationsRejectedException {
+    checkNotNull(id);
+    checkNotNull(countsByColumn);
+    
+    BatchWriter bw = null;
+    try {
+      bw = id.connector().createBatchWriter(Defaults.METADATA_TABLE, Defaults.BATCH_WRITER_CONFIG);
+      
+      final Mutation m = new Mutation(id.uuid());
+      final Text holder = new Text();
+      final VLongWritable writable = new VLongWritable();
+      
+      for (Entry<Column,? extends Number> entry : countsByColumn.entrySet()) {
+        holder.set(entry.getKey().column());
+        writable.set(entry.getValue().longValue());
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        writable.write(dos);
+        
+        m.put(Defaults.COLUMN_COUNT_COLFAM, holder, new Value(baos.toByteArray()));
+      }
+      
+      bw.addMutation(m);
+    } finally {
+      if (null != bw) {
+        bw.close();
+      }
+    }
+  }
+  
+  /**
+   * Persist the number of records in a {@link SortableResult}
+   * @param id
+   * @param countsByColumn
+   * @param recordCount
+   * @throws TableNotFoundException
+   * @throws IOException
+   * @throws MutationsRejectedException
+   */
+  public static void serializeRecordCount(SortableResult id, Number recordCount) throws TableNotFoundException, IOException, MutationsRejectedException {
+    checkNotNull(id);
+    checkNotNull(recordCount);
+    
+    BatchWriter bw = null;
+    try {
+      bw = id.connector().createBatchWriter(Defaults.METADATA_TABLE, Defaults.BATCH_WRITER_CONFIG);
+      
+      if (0 < recordCount.longValue()) {
+        final Mutation m = new Mutation(id.uuid());
+        final VLongWritable writable = new VLongWritable();
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        writable.write(dos);
+        
+        m.put(Defaults.RECORD_COUNT_COLFAM, Defaults.EMPTY_TEXT, new Value(baos.toByteArray()));
+        
+        bw.addMutation(m);
+      }
+    } finally {
+      if (null != bw) {
+        bw.close();
       }
     }
   }
