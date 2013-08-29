@@ -1,4 +1,4 @@
-"!https://travis-ci.org/joshelser/cosmos.png!":https://travis-ci.org/joshelser/cosmos
+[![Build Status](https://travis-ci.org/joshelser/cosmos.png)](https://travis-ci.org/joshelser/cosmos.png)
 
 Cosmos
 ========
