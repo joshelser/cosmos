@@ -104,6 +104,8 @@ public class SortableResult {
     
     this.tracer = new Tracer(uuid());
     ensureTracingTableExists();
+    
+    // TODO Add VarLen Combiner on cosmos metadata table
   }
   
   protected void createIfNotExists(TableOperations tops, String tableName) {
