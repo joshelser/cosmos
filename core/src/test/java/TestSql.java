@@ -1,3 +1,5 @@
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -186,20 +188,19 @@ public class TestSql {
 		impl.register(meataData);
 
 		impl.addResults(meataData, tformSource);
-/*
- * 
-		BatchScanner scanner = connector.createBatchScanner("cosmos",
-				new Authorizations("en"), 1);
-
-		scanner.setRanges(Collections.singleton(new Range()));
-
-		Iterator<Entry<Key, Value>> iter = scanner.iterator();
-
-		while (iter.hasNext()) {
-			System.out.println(iter.next().getKey());
-
-		}
-		*/
+		/*
+		 * 
+		 * BatchScanner scanner = connector.createBatchScanner("cosmos", new
+		 * Authorizations("en"), 1);
+		 * 
+		 * scanner.setRanges(Collections.singleton(new Range()));
+		 * 
+		 * Iterator<Entry<Key, Value>> iter = scanner.iterator();
+		 * 
+		 * while (iter.hasNext()) { System.out.println(iter.next().getKey());
+		 * 
+		 * }
+		 */
 
 		new AccumuloDriver(cosmosSql, "cosmos");
 
@@ -278,7 +279,7 @@ public class TestSql {
 	}
 
 	@Test
-	public void testVanityDriver() throws SQLException {
+	public void testLimit() throws SQLException {
 		loadDriverClass();
 		Connection connection = null;
 		Statement statement = null;
@@ -290,19 +291,31 @@ public class TestSql {
 			connection = DriverManager.getConnection(
 					"jdbc:accumulo:cosmos//localhost", info);
 			statement = connection.createStatement();
-			System.out.println("executing " + "select \"PAGE_ID\" from \"sorts\".\""
-					+ meataData.uuid()
-					+ "\" limit 2 OFFSET 0");
-			final ResultSet resultSet = statement.executeQuery(
-					"select \"PAGE_ID\" from \"sorts\".\""
-							+ meataData.uuid()
-							+ "\" limit 2 OFFSET 0");
-/*			"select \"REVISION_ID\",\"PAGE_ID\" from \"sorts\".\""
-					+ meataData.uuid()
-					+ "\"  group by \"REVISION_ID\",\"PAGE_ID\"");
-					*/
+			final ResultSet resultSet = statement
+					.executeQuery("select \"PAGE_ID\" from \"sorts\".\""
+							+ meataData.uuid() + "\"  limit 2 OFFSET 0");
+		
+			final ResultSetMetaData metaData = resultSet.getMetaData();
+			final int columnCount = metaData.getColumnCount();
 
-			output(resultSet, System.out);
+			assertEquals(columnCount, 1);
+
+			int resultsFound = 0;
+			while (resultSet.next()) {
+				assertEquals(metaData.getColumnName(1), "PAGE_ID");
+				List<Entry<Column, SValue>> sValues = (List<Entry<Column, SValue>>) resultSet
+						.getObject("PAGE_ID");
+				assertEquals(sValues.size(), 1);
+				SValue onlyValue = sValues.iterator().next().getValue();
+				assertEquals(onlyValue.visibility().toString(), "[en]");
+				
+				assertEquals(onlyValue.value(), Integer.valueOf(resultsFound)
+						.toString());
+				resultsFound++;
+
+			}
+
+			assertEquals(resultsFound, 2);
 		} finally {
 			close(connection, statement);
 		}
@@ -348,31 +361,29 @@ public class TestSql {
 					+ metaData.getColumnClassName(1));
 
 			for (int i = 1; i <= columnCount; i++) {
-				
-				
-				System.out.println("another result v " + resultSet.getObject("PAGE_ID").toString());
-			}
-				/*
-				if (resultSet.getObject(i) instanceof List) {
-					Entry obj = (Entry) resultSet.getObject(i);
 
-					System.out.println("another result v " + obj.getKey().toString() + " " + ((Long)obj.getValue()).toString());
-
-				} else
-				{
-					
-					for(Object entry : (Object[])resultSet.getObject(i))
-					{
-						System.out.println(entry.toString() );
-					}
-					
-					
-							
-					
-					
-				}
+				System.out.println("another result v "
+						+ resultSet.getObject("PAGE_ID").getClass() + " "
+						+ resultSet.getObject("PAGE_ID").toString());
 			}
-			*/
+			/*
+			 * if (resultSet.getObject(i) instanceof List) { Entry obj = (Entry)
+			 * resultSet.getObject(i);
+			 * 
+			 * System.out.println("another result v " + obj.getKey().toString()
+			 * + " " + ((Long)obj.getValue()).toString());
+			 * 
+			 * } else {
+			 * 
+			 * for(Object entry : (Object[])resultSet.getObject(i)) {
+			 * System.out.println(entry.toString() ); }
+			 * 
+			 * 
+			 * 
+			 * 
+			 * 
+			 * } }
+			 */
 
 		}
 	}

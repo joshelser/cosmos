@@ -66,11 +66,8 @@ public class TableScanner extends TableAccessRelBase implements AccumuloRel {
 		 * Build the rules.
 		 */
 		planner.addRule(new FieldPacker(this));
-		planner.addRule(new LimitRule(resultTable));
 		planner.addRule(EnumerableExpression.ARRAY_INSTANCE);
-
 		planner.addRule(new FilterRule(resultTable));
-
 		planner.addRule(new GroupByRule(resultTable));
 		planner.addRule(new ProjectRule(resultTable));
 		
