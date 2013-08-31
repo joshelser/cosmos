@@ -18,8 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -188,19 +191,7 @@ public class TestSql {
 		impl.register(meataData);
 
 		impl.addResults(meataData, tformSource);
-		/*
-		 * 
-		 * BatchScanner scanner = connector.createBatchScanner("cosmos", new
-		 * Authorizations("en"), 1);
-		 * 
-		 * scanner.setRanges(Collections.singleton(new Range()));
-		 * 
-		 * Iterator<Entry<Key, Value>> iter = scanner.iterator();
-		 * 
-		 * while (iter.hasNext()) { System.out.println(iter.next().getKey());
-		 * 
-		 * }
-		 */
+		
 
 		new AccumuloDriver(cosmosSql, "cosmos");
 
@@ -316,6 +307,51 @@ public class TestSql {
 			}
 
 			assertEquals(resultsFound, 2);
+		} finally {
+			close(connection, statement);
+		}
+	}
+	
+
+	@Test
+	public void testNoLimit() throws SQLException {
+		loadDriverClass();
+		Connection connection = null;
+		Statement statement = null;
+		try {
+			Properties info = new Properties();
+			info.put("url", JDBC_URL);
+			info.put("user", USER);
+			info.put("password", PASSWORD);
+			connection = DriverManager.getConnection(
+					"jdbc:accumulo:cosmos//localhost", info);
+			statement = connection.createStatement();
+			final ResultSet resultSet = statement
+					.executeQuery("select \"PAGE_ID\" from \"sorts\".\""
+							+ meataData.uuid() + "\"");
+		
+			final ResultSetMetaData metaData = resultSet.getMetaData();
+			final int columnCount = metaData.getColumnCount();
+
+			assertEquals(columnCount, 1);
+
+			int resultsFound = 0;
+		
+			while (resultSet.next()) {
+				assertEquals(metaData.getColumnName(1), "PAGE_ID");
+				List<Entry<Column, SValue>> sValues = (List<Entry<Column, SValue>>) resultSet
+						.getObject("PAGE_ID");
+				assertEquals(sValues.size(), 1);
+				SValue onlyValue = sValues.iterator().next().getValue();
+				assertEquals(onlyValue.visibility().toString(), "[en]");
+				
+				assertEquals(onlyValue.value(), Integer.valueOf(resultsFound)
+						.toString());
+				resultsFound++;
+
+			}
+
+			assertEquals(resultsFound, 10);
 		} finally {
 			close(connection, statement);
 		}
