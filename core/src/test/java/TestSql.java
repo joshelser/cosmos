@@ -1,3 +1,4 @@
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -13,7 +14,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,7 +22,6 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -42,7 +41,6 @@ import org.apache.accumulo.minicluster.MiniAccumuloConfig;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.base.Function;
@@ -72,7 +70,7 @@ public class TestSql {
 	protected static MiniAccumuloCluster mac;
 	protected static MiniAccumuloConfig macConfig;
 	private static ZooKeeperInstance instance;
-	private static SortableResult meataData;
+	private SortableResult meataData;
 	private static CosmosSql cosmosSql;
 
 	public static final ColumnVisibility cv = new ColumnVisibility("en");
@@ -80,6 +78,7 @@ public class TestSql {
 	static final Random cardinalityR = new Random();
 
 	private static int recordsReturned;
+	private static Connector connector;
 
 	public static final Column PAGE_ID = Column.create("PAGE_ID"),
 			REVISION_ID = Column.create("REVISION_ID"),
@@ -93,6 +92,10 @@ public class TestSql {
 	public static final int MAX_OFFSET = 11845576 - MAX_SIZE;
 
 	public static final int MAX_ROW = 999999999;
+	
+	private static Set<Index> columns = null;
+	
+	private static CosmosImpl impl;
 
 	@BeforeClass
 	public static void setup() throws Exception {
@@ -108,28 +111,65 @@ public class TestSql {
 		instance = new ZooKeeperInstance(mac.getInstanceName(),
 				mac.getZooKeepers());
 
-		Connector connector = instance.getConnector("root",
+		connector = instance.getConnector("root",
 				ByteBuffer.wrap(macConfig.getRootPassword().getBytes()));
 
 		connector.securityOperations().changeUserAuthorizations("root",
 				new Authorizations("en"));
 
-		if (connector.tableOperations().exists("sorts")) {
-			connector.tableOperations().delete("sorts");
+
+
+		
+
+		int offset = offsetR.nextInt(MAX_OFFSET);
+	
+
+		columns = Sets.newHashSet();
+		columns.add(new Index(PAGE_ID));
+		columns.add(new Index(REVISION_ID));
+		columns.add(new Index(REVISION_TIMESTAMP));
+		columns.add(new Index(CONTRIBUTOR_ID));
+
+		
+		impl = new CosmosImpl(mac.getZooKeepers());
+
+		cosmosSql = new CosmosSql(impl);
+
+
+		
+
+		new AccumuloDriver(cosmosSql, "cosmos");
+
+	}
+
+	@AfterClass
+	public static void teardown() throws IOException, InterruptedException {
+		mac.stop();
+	}
+
+	@Before
+	public void setupVariables() throws Exception {
+		
+		if (!connector.tableOperations().exists("sorts")) {
+		//	connector.tableOperations().delete("sorts");
+			connector.tableOperations().create("sorts");
+			
+		}
+		
+		if (connector.tableOperations().exists("sortswiki")) {
 			connector.tableOperations().delete("sortswiki");
 		}
 
-		connector.tableOperations().create("sorts");
+		
 		connector.tableOperations().create("sortswiki");
-
-		Collection<Page> pages = buildPages(10);
-
+		
 		BatchWriterConfig bwConfig = new BatchWriterConfig();
 		bwConfig.setMaxLatency(1000L, TimeUnit.MILLISECONDS);
 		bwConfig.setMaxMemory(1024L);
 		bwConfig.setMaxWriteThreads(1);
 		BatchWriter writer = connector.createBatchWriter("sortswiki", bwConfig);
 
+		Collection<Page> pages = buildPages(10);
 		for (Page page : pages) {
 			Mutation m = new Mutation(UUID.randomUUID().toString());
 			m.put("cf", "cq", new Value(page.toByteArray()));
@@ -137,24 +177,15 @@ public class TestSql {
 		}
 
 		writer.close();
-
-		int offset = offsetR.nextInt(MAX_OFFSET);
+		
+		
 		int numRecords = cardinalityR.nextInt(MAX_SIZE);
 
 		BatchScanner bs = connector.createBatchScanner("sortswiki",
 				new Authorizations(), 4);
 
 		bs.setRanges(Collections.singleton(new Range()));
-
-		Iterable<Entry<Key, Value>> inputIterable = Iterables.limit(bs,
-				numRecords);
-
-		Set<Index> columns = Sets.newHashSet();
-		columns.add(new Index(PAGE_ID));
-		columns.add(new Index(REVISION_ID));
-		columns.add(new Index(REVISION_TIMESTAMP));
-		columns.add(new Index(CONTRIBUTOR_ID));
-
+		
 		meataData = new SortableResult(connector, connector
 				.securityOperations().getUserAuthorizations("root"), columns,
 				false);
@@ -175,7 +206,8 @@ public class TestSql {
 		Map<Column, Long> counts = Maps.newHashMap();
 		ArrayList<MultimapQueryResult> tformSource = Lists
 				.newArrayListWithCapacity(20000);
-
+		Iterable<Entry<Key, Value>> inputIterable = Iterables.limit(bs,
+				numRecords);
 		for (Entry<Key, Value> input : inputIterable) {
 
 			MultimapQueryResult r = func.apply(input);
@@ -184,27 +216,14 @@ public class TestSql {
 			loadCountsForRecord(counts, r);
 			recordsReturned++;
 		}
-		CosmosImpl impl = new CosmosImpl(mac.getZooKeepers());
-
-		cosmosSql = new CosmosSql(impl);
-
-		impl.register(meataData);
-
-		impl.addResults(meataData, tformSource);
+		
 		
 
-		new AccumuloDriver(cosmosSql, "cosmos");
+	
+		impl.register(meataData);
+		
 
-	}
-
-	@AfterClass
-	public static void teardown() throws IOException, InterruptedException {
-		mac.stop();
-	}
-
-	@Before
-	public void setupVariables() throws Exception {
-
+		impl.addResults(meataData, tformSource);
 	}
 
 	protected static Collection<Page> buildPages(int pageCount)
@@ -285,7 +304,6 @@ public class TestSql {
 			final ResultSet resultSet = statement
 					.executeQuery("select \"PAGE_ID\" from \"sorts\".\""
 							+ meataData.uuid() + "\"  limit 2 OFFSET 0");
-		
 			final ResultSetMetaData metaData = resultSet.getMetaData();
 			final int columnCount = metaData.getColumnCount();
 
@@ -329,14 +347,20 @@ public class TestSql {
 			final ResultSet resultSet = statement
 					.executeQuery("select \"PAGE_ID\" from \"sorts\".\""
 							+ meataData.uuid() + "\"");
-		
+
 			final ResultSetMetaData metaData = resultSet.getMetaData();
 			final int columnCount = metaData.getColumnCount();
 
 			assertEquals(columnCount, 1);
 
 			int resultsFound = 0;
-		
+			SortedSet<String> sets = Sets.newTreeSet();
+			for(int i=0; i < 10; i++)
+			{
+				sets.add(Integer.valueOf(i).toString());	
+			}
+			Queue<String> values = Lists.newLinkedList(sets);
+			
 			while (resultSet.next()) {
 				assertEquals(metaData.getColumnName(1), "PAGE_ID");
 				List<Entry<Column, SValue>> sValues = (List<Entry<Column, SValue>>) resultSet
@@ -344,85 +368,19 @@ public class TestSql {
 				assertEquals(sValues.size(), 1);
 				SValue onlyValue = sValues.iterator().next().getValue();
 				assertEquals(onlyValue.visibility().toString(), "[en]");
-				
-				assertEquals(onlyValue.value(), Integer.valueOf(resultsFound)
-						.toString());
+				values.remove(onlyValue.value());
 				resultsFound++;
 
 			}
 
 			assertEquals(resultsFound, 10);
+			assertEquals(values.size(), 0);
 		} finally {
 			close(connection, statement);
 		}
 	}
 
-	@Ignore
-	@Test
-	public void testVanityDriver2() throws SQLException {
-		loadDriverClass();
-		Connection connection = null;
-		Statement statement = null;
-		try {
-			Properties info = new Properties();
-			info.put("url", JDBC_URL);
-			info.put("user", USER);
-			info.put("password", PASSWORD);
-			connection = DriverManager.getConnection(
-					"jdbc:accumulo://localhost", info);
-			statement = connection.createStatement();
-			final ResultSet resultSet = statement
-					.executeQuery(
 
-					"select \"tart\" from \"sorts\".\"sorts\" where \"tart\" = 'asdfs'");
-
-			/*
-			 * 
-			 * "select * from (\n" + "  select * from \"sales_fact_1997\"\n" +
-			 * "  union all\n" + "  select * from \"sales_fact_1998\")\n" +
-			 * "where \"product_id\" = 1"
-			 */
-			output(resultSet, System.out);
-		} finally {
-			close(connection, statement);
-		}
-	}
-
-	private void output(ResultSet resultSet, PrintStream out)
-			throws SQLException {
-		final ResultSetMetaData metaData = resultSet.getMetaData();
-		final int columnCount = metaData.getColumnCount();
-		while (resultSet.next()) {
-			System.out.println("Column count is " + columnCount + " "
-					+ metaData.getColumnClassName(1));
-
-			for (int i = 1; i <= columnCount; i++) {
-
-				System.out.println("another result v "
-						+ resultSet.getObject("PAGE_ID").getClass() + " "
-						+ resultSet.getObject("PAGE_ID").toString());
-			}
-			/*
-			 * if (resultSet.getObject(i) instanceof List) { Entry obj = (Entry)
-			 * resultSet.getObject(i);
-			 * 
-			 * System.out.println("another result v " + obj.getKey().toString()
-			 * + " " + ((Long)obj.getValue()).toString());
-			 * 
-			 * } else {
-			 * 
-			 * for(Object entry : (Object[])resultSet.getObject(i)) {
-			 * System.out.println(entry.toString() ); }
-			 * 
-			 * 
-			 * 
-			 * 
-			 * 
-			 * } }
-			 */
-
-		}
-	}
 
 	public static void loadCountsForRecord(Map<Column, Long> counts,
 			MultimapQueryResult r) {

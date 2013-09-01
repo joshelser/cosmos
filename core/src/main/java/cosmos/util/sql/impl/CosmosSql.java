@@ -103,6 +103,8 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 	public AccumuloIterables<Object[]> iterator(List<String> schemaLayout,
 			AccumuloRel.Plan planner, AccumuloRel.Plan aggregatePlan) {
 
+		plannedParentHood= Lists.newArrayList();
+		iter = Collections.emptyList();
 		Iterator<Object[]> returnIter = Iterators.emptyIterator();
 
 		ChildVisitor<? extends CallIfc<?>> query = planner.getChildren();
@@ -117,12 +119,11 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 
 		SortableResult res;
 		try {
+			
 			res = cosmos.fetch(table);
-
 			if (aggregatePlan == null) {
 
 				if (res != null) {
-					System.out.println("have a res " + filters.size());
 					if (filters.size() > 0) {
 						for (CallIfc<?> filterIfc : filters) {
 							Filter filter = (Filter) filterIfc;
@@ -185,7 +186,6 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 							new DocumentExpansion(schemaLayout));
 				}
 			} else {
-				System.out.println("!have a res");
 				ChildVisitor<? extends CallIfc<?>> aggregates = aggregatePlan
 						.getChildren();
 				Collection<Field> groupByFields = (Collection<Field>) aggregates
