@@ -29,6 +29,7 @@ public abstract class Defaults {
   
   public static final String NULL_BYTE_STR = "\u0000";
   public static final String EIN_BYTE_STR = "\u0001";
+  public static final Character COMMA = ',';
   
   public static final String DOCID_FIELD_NAME = "COSMOS_DOCID";
   public static final Text DOCID_FIELD_NAME_TEXT = new Text(DOCID_FIELD_NAME);

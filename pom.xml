@@ -11,6 +11,7 @@
     <module>test</module>
     <module>tracing</module>
     <module>tracing-web</module>
+    <module>example-building-permits</module>
   </modules>
   <!-- Keep Maven from complaining about platform-dependent builds -->
   <properties>
