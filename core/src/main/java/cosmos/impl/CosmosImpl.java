@@ -444,9 +444,10 @@ public class CosmosImpl implements Cosmos {
   }
   
   @Override
-  public Iterable<Column> columns(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
+  public CloseableIterable<Column> columns(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     
+    final String description = "Cosmos:columns";
     Stopwatch sw = new Stopwatch().start();
     
     try {
@@ -457,10 +458,15 @@ public class CosmosImpl implements Cosmos {
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
-      return SortingMetadata.columns(id);
-    } finally {
+      return SortingMetadata.columns(id, description, sw);
+    } catch (TableNotFoundException e) {
       sw.stop();
-      id.tracer().addTiming("Cosmos:columns", sw.elapsed(TimeUnit.MILLISECONDS));
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
+      throw e;
+    } catch (UnexpectedStateException e) {
+      sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
+      throw e;
     }
   }
   

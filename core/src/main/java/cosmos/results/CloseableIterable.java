@@ -46,6 +46,7 @@ public class CloseableIterable<T> implements Results<T> {
   protected final Tracer tracer;
   protected final String description;
   protected final Stopwatch sw;
+  protected boolean closed = false;
   
   public CloseableIterable(ScannerBase scanner, Iterable<T> iterable, Tracer t, String desc, Stopwatch sw) {
     checkNotNull(scanner);
@@ -90,6 +91,12 @@ public class CloseableIterable<T> implements Results<T> {
         if (!hasNext && sw.isRunning()) {
           sw.stop();
           tracer.addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
+          
+          // TODO Is there a detriment of auto-closing this here?
+          // It doesn't make sense for more than one client to read off of one ScannerBase
+          // so we likely also don't have to add any synchronization
+          scanner.close();
+          closed = true;
         }
         
         return hasNext;
@@ -116,7 +123,10 @@ public class CloseableIterable<T> implements Results<T> {
       tracer.addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
     }
     
-    scanner.close();
+    if (!closed) {
+      scanner.close();
+      closed = true;
+    }
   }
   
 }
