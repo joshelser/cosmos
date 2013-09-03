@@ -49,8 +49,8 @@ public class LoadBuildingPermits implements Runnable {
     this.csvData = csvData;
     
     // Control how many results from the data set are loaded
-    // this.maxResultsToLoad = MAX_RESULTS;
-    this.maxResultsToLoad = 5000l;
+    this.maxResultsToLoad = MAX_RESULTS;
+    // this.maxResultsToLoad = 50000l;
   }
   
   @Override
