@@ -2,29 +2,22 @@ package cosmos.util.sql.call;
 
 import java.util.Collection;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.hash.Funnel;
 
-public class ChildVisitor<T extends CallIfc> implements CallIfc<T> {
-
-	protected Multimap<String, T> children;
+public abstract class ChildVisitor extends BaseVisitor<ChildVisitor> implements Funnel<ChildVisitor>  {
 
 	public ChildVisitor() {
-		children = ArrayListMultimap.create();
 	}
 
-	@Override
-	public CallIfc<?> addChild(String id, T child) {
-		children.put(id, child);
-		return this;
-	}
-
-	public Collection<T> children(String id) {
-		return children.get(id);
-	}
-
-	public Collection<String> childrenIds() {
-		return children.keySet();
+	public Iterable<?> visit(
+			final Function<ChildVisitor, Iterable<?>> callbackFunction,
+			final Predicate<ChildVisitor> childFilter) {
+		Collection<ChildVisitor> equalities = children.values();
+		return Iterables.concat(Iterables.transform(
+				Iterables.filter(equalities, childFilter), callbackFunction));
 	}
 
 }

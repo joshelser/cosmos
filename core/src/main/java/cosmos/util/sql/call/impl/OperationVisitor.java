@@ -1,4 +1,4 @@
-package cosmos.util.sql.call;
+package cosmos.util.sql.call.impl;
 
 import net.hydromatic.linq4j.Ord;
 
@@ -15,9 +15,15 @@ import org.eigenbase.sql.fun.SqlStdOperatorTable;
 
 import com.google.common.base.Preconditions;
 
-import cosmos.util.sql.call.impl.FieldEquality;
+import cosmos.util.sql.call.CallIfc;
+import cosmos.util.sql.call.ChildVisitor;
+import cosmos.util.sql.call.Field;
+import cosmos.util.sql.call.Literal;
+import cosmos.util.sql.call.Pair;
+import cosmos.util.sql.call.impl.operators.AndOperator;
+import cosmos.util.sql.call.impl.operators.OrOperator;
 
-public class OperationVisitor extends RexVisitorImpl<CallIfc<?>> {
+public class OperationVisitor extends RexVisitorImpl<ChildVisitor> {
 	final StringBuilder buf = new StringBuilder();
 	private final RelNode input;
 
@@ -27,7 +33,7 @@ public class OperationVisitor extends RexVisitorImpl<CallIfc<?>> {
 	}
 
 	@Override
-	public CallIfc<?> visitCall(RexCall call) {
+	public ChildVisitor visitCall(RexCall call) {
 		final SqlSyntax syntax = call.getOperator().getSyntax();
 		switch (syntax) {
 		case Binary:
@@ -66,30 +72,31 @@ public class OperationVisitor extends RexVisitorImpl<CallIfc<?>> {
 		}
 	}
 
-	public CallIfc visitBinary(RexCall binarySyntax) {
+	public ChildVisitor visitBinary(RexCall binarySyntax) {
 
-		CallIfc left = binarySyntax.getOperands().get(0).accept(this);
-		CallIfc right = binarySyntax.getOperands().get(1).accept(this);
+		ChildVisitor left = binarySyntax.getOperands().get(0).accept(this);
+		ChildVisitor right = binarySyntax.getOperands().get(1).accept(this);
 
 		SqlOperator operator = binarySyntax.getOperator();
-
+		Operator op = null;
 		switch (operator.getKind()) {
 		case EQUALS:
-
-			return buildEquals(left, right);
-
+			op = new FieldEquality(left, right);
+			break;
+		case AND:
+			op = new AndOperator();
+			break;
+		case OR:
+			op = new OrOperator();
+			break;
 		default:
-			return new Literal(operator.getName());
+			op = new Operator(operator);
+
 		}
+		op.addChild("left", left);
+		op.addChild("right", right);
+		return op;
 
-	}
-
-	private CallIfc buildEquals(CallIfc left, CallIfc right) {
-
-		Preconditions.checkArgument(left instanceof Field);
-		Preconditions.checkArgument(right instanceof Literal);
-
-		return new FieldEquality((Field) left, (Literal) right);
 	}
 
 	@Override
@@ -98,7 +105,7 @@ public class OperationVisitor extends RexVisitorImpl<CallIfc<?>> {
 	}
 
 	@Override
-	public CallIfc visitInputRef(RexInputRef inputRef) {
+	public ChildVisitor visitInputRef(RexInputRef inputRef) {
 
 		final int index = inputRef.getIndex();
 		final RelDataTypeField field = input.getRowType().getFieldList()
@@ -107,8 +114,8 @@ public class OperationVisitor extends RexVisitorImpl<CallIfc<?>> {
 	}
 
 	@Override
-	public CallIfc visitLiteral(RexLiteral literal) {
-		
+	public ChildVisitor visitLiteral(RexLiteral literal) {
+
 		return new Literal(RexLiteral.stringValue(literal));
 	}
 

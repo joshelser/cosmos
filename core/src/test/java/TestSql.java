@@ -289,6 +289,93 @@ public class TestSql {
 	}
 
 	@Test
+	public void testDisjunctionPositive() throws SQLException {
+		loadDriverClass();
+		Connection connection = null;
+		Statement statement = null;
+		try {
+			Properties info = new Properties();
+			info.put("url", JDBC_URL);
+			info.put("user", USER);
+			info.put("password", PASSWORD);
+			connection = DriverManager.getConnection(
+					"jdbc:accumulo:cosmos//localhost", info);
+			statement = connection.createStatement();
+			final ResultSet resultSet = statement
+					.executeQuery("select \"PAGE_ID\" from \"sorts\".\""
+							+ meataData.uuid() + "\"  where PAGE_ID='9' or REVISION_ID='8'");
+			final ResultSetMetaData metaData = resultSet.getMetaData(); 
+			final int columnCount = metaData.getColumnCount();
+
+			assertEquals(columnCount, 1);
+
+			int resultsFound = 0;
+			while (resultSet.next()) {
+				assertEquals(metaData.getColumnName(1), "PAGE_ID");
+				List<Entry<Column, SValue>> sValues = (List<Entry<Column, SValue>>) resultSet
+						.getObject("PAGE_ID");
+				assertEquals(sValues.size(), 1);
+				SValue onlyValue = sValues.iterator().next().getValue();
+				assertEquals(onlyValue.visibility().toString(), "[en]");
+				
+				assertTrue(onlyValue.value().equals(Integer.valueOf(9)
+						.toString()) || onlyValue.value().equals(Integer.valueOf(8)
+								.toString()));
+				resultsFound++;
+
+			}
+
+			assertEquals(resultsFound, 2);
+		} finally {
+			close(connection, statement);
+		}
+	}
+	
+	@Test
+	public void testConjunction() throws SQLException {
+		loadDriverClass();
+		Connection connection = null;
+		Statement statement = null;
+		try {
+			Properties info = new Properties();
+			info.put("url", JDBC_URL);
+			info.put("user", USER);
+			info.put("password", PASSWORD);
+			connection = DriverManager.getConnection(
+					"jdbc:accumulo:cosmos//localhost", info);
+			statement = connection.createStatement();
+			final ResultSet resultSet = statement
+					.executeQuery("select \"PAGE_ID\" from \"sorts\".\""
+							+ meataData.uuid() + "\"  where PAGE_ID='9' and REVISION_ID='9'");
+			final ResultSetMetaData metaData = resultSet.getMetaData(); 
+			final int columnCount = metaData.getColumnCount();
+
+			assertEquals(columnCount, 1);
+
+			int resultsFound = 0;
+			while (resultSet.next()) {
+				assertEquals(metaData.getColumnName(1), "PAGE_ID");
+				List<Entry<Column, SValue>> sValues = (List<Entry<Column, SValue>>) resultSet
+						.getObject("PAGE_ID");
+				assertEquals(sValues.size(), 1);
+				SValue onlyValue = sValues.iterator().next().getValue();
+				assertEquals(onlyValue.visibility().toString(), "[en]");
+				
+				assertEquals(onlyValue.value(), Integer.valueOf(9)
+						.toString());
+				resultsFound++;
+				break;
+
+			}
+
+			assertEquals(resultsFound, 1);
+		} finally {
+			close(connection, statement);
+		}
+	}
+	
+	
+	@Test
 	public void testLimit() throws SQLException {
 		loadDriverClass();
 		Connection connection = null;

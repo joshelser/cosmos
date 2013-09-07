@@ -1,7 +1,8 @@
 package cosmos.util.sql.call;
 
+import com.google.common.hash.PrimitiveSink;
 
-public class Literal extends ChildVisitor<Literal> {
+public class Literal extends ChildVisitor {
 
 	private String literal;
 
@@ -9,15 +10,14 @@ public class Literal extends ChildVisitor<Literal> {
 		this.literal = literal;
 	}
 
-	@Override
-	public CallIfc addChild(String id, Literal operation) {
-		throw new IllegalArgumentException();
-	}
-
 	public String toString() {
 		return literal;
 	}
 
+	@Override
+	public void funnel(ChildVisitor from, PrimitiveSink into) {
+		into.putString(((Literal) from).literal);
 
+	}
 
 }

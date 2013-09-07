@@ -13,7 +13,7 @@ import org.eigenbase.rex.RexNode;
 import cosmos.util.sql.AccumuloRel;
 import cosmos.util.sql.AccumuloTable;
 import cosmos.util.sql.call.CallIfc;
-import cosmos.util.sql.call.OperationVisitor;
+import cosmos.util.sql.call.impl.OperationVisitor;
 
 public class Filter extends FilterRelBase implements AccumuloRel {
 

@@ -8,10 +8,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import cosmos.util.sql.call.CallIfc;
-import cosmos.util.sql.call.ChildVisitor;
+import cosmos.util.sql.call.BaseVisitor;
 import cosmos.util.sql.call.Field;
 
-public class Grouping extends ChildVisitor {
+public class Grouping extends BaseVisitor {
 
 	public Grouping() {
 

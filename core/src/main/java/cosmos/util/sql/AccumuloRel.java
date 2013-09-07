@@ -4,7 +4,7 @@ import org.eigenbase.rel.RelNode;
 import org.eigenbase.relopt.Convention;
 
 import cosmos.util.sql.call.CallIfc;
-import cosmos.util.sql.call.ChildVisitor;
+import cosmos.util.sql.call.BaseVisitor;
 
 public interface AccumuloRel extends RelNode {
 	/**
@@ -17,12 +17,12 @@ public interface AccumuloRel extends RelNode {
 
 	class Plan {
 
-		protected ChildVisitor<CallIfc<?>> operations;
+		protected BaseVisitor<CallIfc<?>> operations;
 
 		public AccumuloTable<?> table;
 
 		public Plan() {
-			operations = new ChildVisitor<CallIfc<?>>();
+			operations = new BaseVisitor<CallIfc<?>>();
 		}
 
 		/**
@@ -40,7 +40,7 @@ public interface AccumuloRel extends RelNode {
 
 		}
 
-		public ChildVisitor<CallIfc<?>> getChildren() {
+		public BaseVisitor<CallIfc<?>> getChildren() {
 			return operations;
 		}
 	}

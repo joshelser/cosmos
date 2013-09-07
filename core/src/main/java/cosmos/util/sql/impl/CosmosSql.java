@@ -41,13 +41,10 @@ import cosmos.util.sql.AccumuloTable;
 import cosmos.util.sql.ResultDefiner;
 import cosmos.util.sql.TableDefiner;
 import cosmos.util.sql.call.CallIfc;
-import cosmos.util.sql.call.ChildVisitor;
+import cosmos.util.sql.call.BaseVisitor;
 import cosmos.util.sql.call.Field;
 import cosmos.util.sql.call.Fields;
-import cosmos.util.sql.call.FilterIfc;
-import cosmos.util.sql.call.Literal;
-import cosmos.util.sql.call.Pair;
-import cosmos.util.sql.call.impl.FieldEquality;
+import cosmos.util.sql.call.ChildVisitor;
 import cosmos.util.sql.call.impl.Filter;
 import cosmos.util.sql.impl.functions.FieldLimiter;
 
@@ -103,11 +100,11 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 	public AccumuloIterables<Object[]> iterator(List<String> schemaLayout,
 			AccumuloRel.Plan planner, AccumuloRel.Plan aggregatePlan) {
 
-		plannedParentHood= Lists.newArrayList();
+		plannedParentHood = Lists.newArrayList();
 		iter = Collections.emptyList();
 		Iterator<Object[]> returnIter = Iterators.emptyIterator();
 
-		ChildVisitor<? extends CallIfc<?>> query = planner.getChildren();
+		BaseVisitor<? extends CallIfc<?>> query = planner.getChildren();
 
 		Collection<? extends CallIfc<?>> filters = query.children(Filter.class
 				.getSimpleName());
@@ -119,7 +116,7 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 
 		SortableResult res;
 		try {
-			
+
 			res = cosmos.fetch(table);
 			if (aggregatePlan == null) {
 
@@ -128,35 +125,10 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 						for (CallIfc<?> filterIfc : filters) {
 							Filter filter = (Filter) filterIfc;
 
-							for (FilterIfc subFilter : filter.getFilters()) {
-								if (subFilter instanceof FieldEquality) {
-									FieldEquality equality = (FieldEquality) subFilter;
+							for (ChildVisitor subFilter : filter.getFilters()) {
+								plannedParentHood.add(buildFilterIterator(
+										filter.getFilters(), res));
 
-									for (Pair<Field, Literal> entry : equality
-											.getChildren()) {
-
-										cosmos.util.sql.call.Field field = (Field) entry
-												.first();
-										cosmos.util.sql.call.Literal literal = (Literal) entry
-												.second();
-
-										try {
-											plannedParentHood
-													.add(cosmos
-															.fetch(res,
-																	new Column(
-																			field.toString()),
-																	literal.toString()));
-
-										} catch (TableNotFoundException e) {
-											log.error(e);
-										} catch (UnexpectedStateException e) {
-											log.error(e);
-										} catch (UnindexedColumnException e) {
-											log.error(e);
-										}
-									}
-								}
 							}
 						}
 					} else {
@@ -186,7 +158,7 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 							new DocumentExpansion(schemaLayout));
 				}
 			} else {
-				ChildVisitor<? extends CallIfc<?>> aggregates = aggregatePlan
+				BaseVisitor<? extends CallIfc<?>> aggregates = aggregatePlan
 						.getChildren();
 				Collection<Field> groupByFields = (Collection<Field>) aggregates
 						.children("groupBy");
@@ -210,6 +182,21 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 		}
 
 		return new AccumuloIterables<Object[]>(returnIter);
+	}
+
+	private Iterable<MultimapQueryResult> buildFilterIterator(
+			List<ChildVisitor> filters, SortableResult res) {
+
+		Iterable<MultimapQueryResult> baseIter = Collections.emptyList();
+		System.out.println("filters size is " + filters.size());
+		Iterable<Iterable<MultimapQueryResult>> ret = Iterables.transform(
+				filters, new LogicVisitor(cosmos, res));
+		for (Iterable<MultimapQueryResult> iterable : ret) {
+			baseIter = Iterables.concat(baseIter, iterable);
+		}
+
+		return baseIter;
+
 	}
 
 	class DocumentExpansion implements Function<MultimapQueryResult, Object[]> {
