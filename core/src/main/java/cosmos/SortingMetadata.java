@@ -40,10 +40,11 @@ import org.apache.accumulo.core.data.Value;
 import org.apache.hadoop.io.Text;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import com.google.common.base.Stopwatch;
 
 import cosmos.impl.CosmosImpl;
 import cosmos.impl.SortableResult;
+import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
 
 public class SortingMetadata {
@@ -145,29 +146,22 @@ public class SortingMetadata {
    * @return
    * @throws TableNotFoundException
    */
-  public static Iterable<Column> columns(SortableResult id) throws TableNotFoundException {
+  public static CloseableIterable<Column> columns(SortableResult id, String description, Stopwatch sw) throws TableNotFoundException {
     checkNotNull(id);
     
-    BatchScanner bs = null;
-    try {
-      bs = id.connector().createBatchScanner(id.metadataTable(), id.auths(), 10);
-      bs.setRanges(Collections.singleton(Range.exact(id.uuid())));
-      bs.fetchColumnFamily(COLUMN_COLFAM);
+    BatchScanner bs = id.connector().createBatchScanner(id.metadataTable(), id.auths(), 10);
+    bs.setRanges(Collections.singleton(Range.exact(id.uuid())));
+    bs.fetchColumnFamily(COLUMN_COLFAM);
+    
+    return CloseableIterable.transform(bs, new Function<Entry<Key,Value>,Column>() {
+      private final Text holder = new Text();
       
-      return Iterables.transform(bs, new Function<Entry<Key,Value>,Column>() {
-        private final Text holder = new Text();
-        
-        @Override
-        public Column apply(Entry<Key,Value> input) {
-          input.getKey().getColumnQualifier(holder);
-          return Column.create(holder.toString());
-        }
-        
-      });
-    } finally {
-      if (null != bs) {
-        bs.close();
+      @Override
+      public Column apply(Entry<Key,Value> input) {
+        input.getKey().getColumnQualifier(holder);
+        return Column.create(holder.toString());
       }
-    }
+      
+    }, id.tracer(), description, sw);
   }
 }
