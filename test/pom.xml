@@ -14,6 +14,7 @@
     <dependency>
       <groupId>cosmos</groupId>
       <artifactId>cosmos-core</artifactId>
+      <classifier>accumulo1.4</classifier>
     </dependency>
     <dependency>
       <groupId>org.apache.accumulo</groupId>

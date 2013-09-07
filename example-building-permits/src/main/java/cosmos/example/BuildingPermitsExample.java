@@ -90,6 +90,7 @@ public class BuildingPermitsExample {
       String password = "password";
       MiniAccumuloConfig config = new MiniAccumuloConfig(f, password);
       config.setNumTservers(2);
+      // config.runGC(true);
       
       mac = new MiniAccumuloCluster(config);
       mac.start();

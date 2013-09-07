@@ -12,6 +12,7 @@
     <dependency>
       <groupId>cosmos</groupId>
       <artifactId>cosmos-core</artifactId>
+      <classifier>accumulo1.4</classifier>
     </dependency>
     <dependency>
       <groupId>net.sf.opencsv</groupId>
