@@ -17,7 +17,8 @@
 package cosmos.example;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
@@ -28,10 +29,12 @@ import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
 import org.apache.accumulo.minicluster.MiniAccumuloConfig;
+import org.apache.hadoop.io.Text;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
@@ -39,6 +42,7 @@ import com.google.common.io.Files;
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
 import cosmos.impl.SortableResult;
+import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
@@ -133,41 +137,72 @@ public class BuildingPermitsExample {
     
     System.out.println("Columns: " + schema);
     
+    Iterator<Column> iter = schema.iterator();
+    while (iter.hasNext()) {
+      Column c = iter.next();
+      // Remove the internal ID field and columns that begin with CONTRACTOR_
+      if (c.equals(LoadBuildingPermits.ID) || c.column().startsWith("CONTRACTOR_")) {
+        iter.remove();
+      }
+    }
+    
+    Map<String,Set<Text>> locGroups = connector.tableOperations().getLocalityGroups(Defaults.DATA_TABLE);
+    for (Column column : schema) {
+      String columnName = column.column();
+      Text textColumnName = new Text(columnName);
+      
+      if (!locGroups.containsKey(columnName)) {
+        locGroups.put(columnName, Sets.newHashSet(textColumnName));
+      }
+    }
+    
+    // Set the locality groups
+    connector.tableOperations().setLocalityGroups(Defaults.DATA_TABLE, locGroups);
+    
+    System.out.println("Starting compaction");
+    
+    connector.tableOperations().compact(Defaults.DATA_TABLE, null, null, true, true);
+    
+    System.out.println("Finished compaction");
+    
     final int numTopValues = 10;
     
     // Walk through each column in the result set
     for (Column c : schema) {
-      // Ignore the internal ID field and the ones that begin with CONTRACTOR_
-      if (!c.equals(LoadBuildingPermits.ID) && !c.column().startsWith("CONTRACTOR_")) {
-        
-        // Get the number of times we've seen each value in a given column
-        CloseableIterable<Entry<SValue,Long>> groupingsInColumn = cosmos.groupResults(id, c);
-        
-        System.out.println(c.column() + ":");
-        
-        // Iterate over the counts, collecting the top N values in each column
-        TreeMap<Long,SValue> topValues = Maps.newTreeMap();
-        
-        for (Entry<SValue,Long> entry : groupingsInColumn) {
-          if (topValues.size() == numTopValues) {
-            Entry<Long,SValue> least = topValues.pollFirstEntry();
-            
-            if (least.getKey() < entry.getValue()) {
-              topValues.put(entry.getValue(), entry.getKey());
-            } else {
-              topValues.put(least.getKey(), least.getValue());
-            }
-          } else if (topValues.size() < numTopValues) {
+      Stopwatch sw = new Stopwatch();
+      sw.start();
+      
+      // Get the number of times we've seen each value in a given column
+      CloseableIterable<Entry<SValue,Long>> groupingsInColumn = cosmos.groupResults(id, c);
+      
+      System.out.println(c.column() + ":");
+      
+      // Iterate over the counts, collecting the top N values in each column
+      TreeMap<Long,SValue> topValues = Maps.newTreeMap();
+      
+      for (Entry<SValue,Long> entry : groupingsInColumn) {
+        if (topValues.size() == numTopValues) {
+          Entry<Long,SValue> least = topValues.pollFirstEntry();
+          
+          if (least.getKey() < entry.getValue()) {
             topValues.put(entry.getValue(), entry.getKey());
+          } else {
+            topValues.put(least.getKey(), least.getValue());
           }
+        } else if (topValues.size() < numTopValues) {
+          topValues.put(entry.getValue(), entry.getKey());
         }
-        
-        for (Entry<Long,SValue> entry : topValues.entrySet()) {
-          System.out.println(entry.getValue().value() + " occurred " + entry.getKey() + " times");
-        }
-        
-        System.out.println();
       }
+      
+      for (Long key: topValues.descendingKeySet()) {
+        System.out.println(topValues.get(key).value() + " occurred " + key + " times");
+      }
+
+      sw.stop();
+      
+      System.out.println("\nTook " + sw.toString() + " to run query.");
+      
+      System.out.println();
     }
     
     // Delete the records we've ingested

@@ -75,7 +75,7 @@ public class LoadBuildingPermits implements Runnable {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-      
+    
     try {
       CSVReader reader = new CSVReader(new FileReader(csvData));
       
@@ -86,7 +86,9 @@ public class LoadBuildingPermits implements Runnable {
       long lineNumber = 0l;
       
       long resultsInserted = 0l;
-      int itemsToBuffer = 1000;
+      int numFlushes = 0;
+      int logUpdateEveryNBuffers = 5;
+      int itemsToBuffer = 10000;
       
       // Buffer 100 results to ammortize the BatchWriter costs underneath
       ArrayList<MultimapQueryResult> cachedResults = Lists.newArrayListWithCapacity(itemsToBuffer + 1);
@@ -124,9 +126,15 @@ public class LoadBuildingPermits implements Runnable {
         if (itemsToBuffer < cachedResults.size()) {
           try {
             cosmos.addResults(this.id, cachedResults);
+            numFlushes++;
           } catch (Exception e) {
             log.error("Problem adding results to cosmos", e);
             throw new RuntimeException(e);
+          }
+          
+          if (0 == numFlushes % logUpdateEveryNBuffers) {
+            log.info("Loaded {} records", itemsToBuffer * logUpdateEveryNBuffers);
+            numFlushes = 0;
           }
           
           resultsInserted += cachedResults.size();
