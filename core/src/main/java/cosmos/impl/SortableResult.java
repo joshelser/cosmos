@@ -45,6 +45,7 @@ import com.google.common.collect.Sets;
 
 import cosmos.options.Defaults;
 import cosmos.options.Index;
+import cosmos.results.Column;
 import cosmos.trace.AccumuloTraceStore;
 import cosmos.trace.Tracer;
 import cosmos.util.IdentitySet;
@@ -187,6 +188,47 @@ public class SortableResult {
     } catch (TableNotFoundException e) {
       log.error("Could not add locality groups to table '{}'", tableName, e);
       throw new RuntimeException(e);
+    }
+    
+    Set<Index> columns = columnsToIndex();
+    if (!(columns instanceof IdentitySet)) {
+      try {
+        Map<String,Set<Text>> localityGroups = tops.getLocalityGroups(tableName);
+        
+        for (Index index: columns) {
+          Column c = index.column();
+          String columnName = c.column();
+          Text textColumnName = new Text(columnName);
+          
+          Set<Text> colfams;
+          if (localityGroups.containsKey(columnName)) {
+            colfams = localityGroups.get(columnName);
+            
+            // We already have the colfam defined
+            if (colfams.contains(textColumnName)) {
+              continue;
+            }
+          } else {
+            colfams = Sets.newHashSet();
+          }
+          
+          colfams.add(textColumnName);
+          
+          localityGroups.put(c.column(), colfams);
+        }
+        
+        tops.setLocalityGroups(tableName, localityGroups);
+        
+      } catch (AccumuloException e) {
+        log.error("Could not add locality groups to table '{}'", tableName, e);
+        throw new RuntimeException(e);
+      } catch (AccumuloSecurityException e) {
+        log.error("Could not add locality groups to table '{}'", tableName, e);
+        throw new RuntimeException(e);
+      } catch (TableNotFoundException e) {
+        log.error("Could not add locality groups to table '{}'", tableName, e);
+        throw new RuntimeException(e);
+      }
     }
   }
   
