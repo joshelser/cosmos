@@ -66,16 +66,29 @@ public class SortableResult {
   protected Set<Index> columnsToIndex;
   
   public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
-    this(connector, auths, columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
+    this(connector, auths, randomUUID().toString(), columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
-  
+
+  public SortableResult(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex) {
+    this(connector, auths, uuid, columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
+  }
+
   public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
-    this(connector, auths, columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
+    this(connector, auths, randomUUID().toString(), columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
   
+  public SortableResult(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+    this(connector, auths, uuid, columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
+  }
+
   public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
+    this(connector, auths, randomUUID().toString(), columnsToIndex, lockOnUpdates, dataTable, metadataTable);
+  }
+  
+  public SortableResult(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
     checkNotNull(connector);
     checkNotNull(auths);
+    checkNotNull(uuid);
     checkNotNull(columnsToIndex);
     checkNotNull(dataTable);
     checkNotNull(metadataTable);
@@ -94,7 +107,7 @@ public class SortableResult {
     this.dataTable = dataTable;
     this.metadataTable = metadataTable;
     
-    this.UUID = randomUUID().toString();
+    this.UUID = uuid;
     
     TableOperations tops = this.connector.tableOperations();
     
@@ -301,13 +314,26 @@ public class SortableResult {
     return new SortableResult(connector, auths, columnsToIndex);
   }
   
+  public static SortableResult create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex) {
+    return new SortableResult(connector, auths, uuid, columnsToIndex);
+  }
+  
   public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
     return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates);
+  }
+  
+  public static SortableResult create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+    return new SortableResult(connector, auths, uuid, columnsToIndex, lockOnUpdates);
   }
   
   public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable,
       String metadataTable) {
     return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
+  }
+  
+  public static SortableResult create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates,
+      String dataTable, String metadataTable) {
+    return new SortableResult(connector, auths, uuid, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
   }
   
 }
