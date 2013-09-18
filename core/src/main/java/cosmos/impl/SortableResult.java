@@ -293,6 +293,27 @@ public class SortableResult {
     }
   }
   
+  /**
+   * Issues a compaction for the range of data contained in this SortableResult
+   * @throws AccumuloSecurityException
+   * @throws TableNotFoundException
+   * @throws AccumuloException
+   */
+  public void consolidate() throws AccumuloSecurityException, TableNotFoundException, AccumuloException {
+    consolidate(true);
+  }
+  
+  /**
+   * Issues a compaction for the range od data contained in this SortableResult, optionally issuing a flush first
+   * @param flush Whether or not to flush the data sitting in memory before compaction
+   * @throws AccumuloSecurityException
+   * @throws TableNotFoundException
+   * @throws AccumuloException
+   */
+  public void consolidate(boolean flush) throws AccumuloSecurityException, TableNotFoundException, AccumuloException {
+    connector().tableOperations().compact(dataTable(), new Text(uuid()), new Text(uuid() + Defaults.EIN_BYTE_STR), flush, true);
+  }
+  
   public Connector connector() {
     return this.connector;
   }
