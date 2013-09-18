@@ -40,6 +40,7 @@ import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 
@@ -210,7 +211,7 @@ public class SortableResult {
         
         for (Index index: columns) {
           Column c = index.column();
-          String columnName = c.column();
+          String columnName = c.name();
           Text textColumnName = new Text(columnName);
           
           Set<Text> colfams;
@@ -227,7 +228,7 @@ public class SortableResult {
           
           colfams.add(textColumnName);
           
-          localityGroups.put(c.column(), colfams);
+          localityGroups.put(c.name(), colfams);
         }
         
         tops.setLocalityGroups(tableName, localityGroups);
@@ -254,6 +255,42 @@ public class SortableResult {
       throw new RuntimeException(e);
     }
     
+  }
+  
+  /**
+   * Given some {@link Index}s, we can assign locality groups to make queries over those columns more efficient, especially
+   * for operations like groupBy.
+   * @param indices
+   * @throws AccumuloSecurityException
+   * @throws TableNotFoundException
+   * @throws AccumuloException
+   */
+  public void optimizeIndices(Set<Index> indices) throws AccumuloSecurityException, TableNotFoundException, AccumuloException {
+    Preconditions.checkNotNull(indices);
+    
+    final TableOperations tops = connector().tableOperations();
+    
+    Map<String,Set<Text>> locGroups = tops.getLocalityGroups(dataTable());
+    int size = locGroups.size();
+    
+    // Take the set of indicies that were requested to be "optimized" (read as locality group'ed)
+    for (Index i : indices) {
+      String colf = i.column().name();
+      // And update our mapping accordingly
+      if (!locGroups.containsKey(colf)) {
+        locGroups.put(colf, Sets.newHashSet(new Text(colf)));
+      }
+    }
+    
+    // If we've actually added some locality groups, set them back on the table
+    if (size != locGroups.size()) {
+      log.debug("Setting {} new locality groups", locGroups.size() - size);
+      tops.setLocalityGroups(dataTable(), locGroups);
+      
+      tops.compact(dataTable(), new Text(uuid()), new Text(uuid() + Defaults.EIN_BYTE_STR), false, true);
+    } else {
+      log.debug("No new locality groups to set");
+    }
   }
   
   public Connector connector() {

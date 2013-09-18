@@ -29,23 +29,21 @@ import org.apache.hadoop.io.Writable;
 import com.google.common.base.Preconditions;
 
 public class Column implements Writable {
-  private String column;
+  private String name;
   
   protected Column() { }
   
-  public Column(String column) {
-    Preconditions.checkNotNull(column);
-    this.column = column;
+  public Column(String name) {
+    Preconditions.checkNotNull(name);
+    this.name = name;
   }
 
-  public String column() {
-    return this.column;
+  public String name() {
+    return this.name;
   }
   
-  public static Column create(String column) {
-    Preconditions.checkNotNull(column);
-    
-    return new Column(column);
+  public static Column create(String name) {
+    return new Column(name);
   }
   
   public static Column recreate(DataInput in) throws IOException {
@@ -56,13 +54,13 @@ public class Column implements Writable {
   
   @Override
   public int hashCode() {
-    return this.column.hashCode();
+    return this.name.hashCode();
   }
   
   @Override
   public boolean equals(Object o) {
     if (o instanceof Column) {
-      return this.column.equals(((Column) o).column());
+      return this.name.equals(((Column) o).name());
     }
     
     return false;
@@ -70,14 +68,14 @@ public class Column implements Writable {
   
   @Override
   public String toString() {
-    return column.toString();
+    return name.toString();
   }
 
   public void write(DataOutput out) throws IOException {
-    Text.writeString(out, this.column);
+    Text.writeString(out, this.name);
   }
 
   public void readFields(DataInput in) throws IOException {
-    this.column = Text.readString(in);
+    this.name = Text.readString(in);
   }
 }
