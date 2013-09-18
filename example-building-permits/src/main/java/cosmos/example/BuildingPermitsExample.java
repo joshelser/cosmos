@@ -141,14 +141,14 @@ public class BuildingPermitsExample {
     while (iter.hasNext()) {
       Column c = iter.next();
       // Remove the internal ID field and columns that begin with CONTRACTOR_
-      if (c.equals(LoadBuildingPermits.ID) || c.column().startsWith("CONTRACTOR_")) {
+      if (c.equals(LoadBuildingPermits.ID) || c.name().startsWith("CONTRACTOR_")) {
         iter.remove();
       }
     }
     
     Map<String,Set<Text>> locGroups = connector.tableOperations().getLocalityGroups(Defaults.DATA_TABLE);
     for (Column column : schema) {
-      String columnName = column.column();
+      String columnName = column.name();
       Text textColumnName = new Text(columnName);
       
       if (!locGroups.containsKey(columnName)) {
@@ -175,7 +175,7 @@ public class BuildingPermitsExample {
       // Get the number of times we've seen each value in a given column
       CloseableIterable<Entry<SValue,Long>> groupingsInColumn = cosmos.groupResults(id, c);
       
-      System.out.println(c.column() + ":");
+      System.out.println(c.name() + ":");
       
       // Iterate over the counts, collecting the top N values in each column
       TreeMap<Long,SValue> topValues = Maps.newTreeMap();
