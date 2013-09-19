@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -19,9 +20,9 @@
       <version>2.3</version>
     </dependency>
     <dependency>
-     <groupId>com.beust</groupId>
-     <artifactId>jcommander</artifactId>
-     <version>1.30</version>
+      <groupId>com.beust</groupId>
+      <artifactId>jcommander</artifactId>
+      <version>1.30</version>
     </dependency>
     <dependency>
       <groupId>org.apache.accumulo</groupId>
@@ -52,7 +53,7 @@
               <executable>java</executable>
               <arguments>
                 <argument>-classpath</argument>
-                <classpath />
+                <classpath></classpath>
                 <argument>cosmos.example.BuildingPermitsExample</argument>
                 <argument>-z</argument>
                 <argument>${zookeepers}</argument>
@@ -69,7 +70,7 @@
           </plugin>
         </plugins>
       </build>
-      <!-- Some "reasonable" defaults" --> 
+      <!-- Some "reasonable" defaults" -->
       <properties>
         <zookeepers>localhost:2181</zookeepers>
         <instanceName>accumulo</instanceName>
@@ -88,7 +89,7 @@
               <executable>java</executable>
               <arguments>
                 <argument>-classpath</argument>
-                <classpath />
+                <classpath></classpath>
                 <argument>cosmos.example.BuildingPermitsExample</argument>
                 <argument>-mac</argument>
                 <argument>-f</argument>
