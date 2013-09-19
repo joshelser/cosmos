@@ -55,7 +55,7 @@ public class SortableResult {
   private static final Logger log = LoggerFactory.getLogger(SortableResult.class);
   
   private static final SortedSet<Text> SPLITS = ImmutableSortedSet.of(new Text("0"), new Text("1"), new Text("2"), new Text("3"), new Text("4"), new Text("5"),
-      new Text("6"), new Text("7"), new Text("8"), new Text("9"));
+      new Text("6"), new Text("7"), new Text("8"), new Text("9"), new Text("a"), new Text("b"), new Text("c"), new Text("d"), new Text("e"), new Text("f"));
   
   protected final Connector connector;
   protected final Authorizations auths;
@@ -265,7 +265,7 @@ public class SortableResult {
    * @throws TableNotFoundException
    * @throws AccumuloException
    */
-  public void optimizeIndices(Set<Index> indices) throws AccumuloSecurityException, TableNotFoundException, AccumuloException {
+  public void optimizeIndices(Iterable<Index> indices) throws AccumuloSecurityException, TableNotFoundException, AccumuloException {
     Preconditions.checkNotNull(indices);
     
     final TableOperations tops = connector().tableOperations();
@@ -286,8 +286,6 @@ public class SortableResult {
     if (size != locGroups.size()) {
       log.debug("Setting {} new locality groups", locGroups.size() - size);
       tops.setLocalityGroups(dataTable(), locGroups);
-      
-      tops.compact(dataTable(), new Text(uuid()), new Text(uuid() + Defaults.EIN_BYTE_STR), false, true);
     } else {
       log.debug("No new locality groups to set");
     }
@@ -366,6 +364,13 @@ public class SortableResult {
       // We aren't already an IdentitySet
       this.columnsToIndex.addAll(columns);
     }
+  }
+  
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(256);
+    sb.append("SortableResult:").append(uuid()).append(",").append(dataTable()).append(",").append(metadataTable());
+    return sb.toString();
   }
   
   public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
