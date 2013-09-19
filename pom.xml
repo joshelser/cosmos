@@ -9,6 +9,7 @@
   <modules>
     <module>core</module>
     <module>test</module>
+	<module>sql</module>
     <module>tracing</module>
     <module>tracing-web</module>
     <module>example-building-permits</module>
