@@ -2,3 +2,4 @@
 .project
 .settings
 target
+example-building-permits/src/main/resources/Building_Permits.csv

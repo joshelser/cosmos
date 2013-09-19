@@ -1,5 +1,4 @@
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +41,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
@@ -52,6 +52,7 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import cosmos.IntegrationTests;
 import cosmos.impl.CosmosImpl;
 import cosmos.impl.SortableResult;
 import cosmos.mediawiki.MediawikiPage.Page;
@@ -64,6 +65,7 @@ import cosmos.results.impl.MultimapQueryResult;
 import cosmos.util.sql.AccumuloDriver;
 import cosmos.util.sql.impl.CosmosSql;
 
+@Category(IntegrationTests.class)
 public class TestSql {
 
 	protected static File tmp = Files.createTempDir();

@@ -262,7 +262,7 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
 				FieldInfoBuilder builder = new RelDataTypeFactory.FieldInfoBuilder();
 
 				for (Index indexField : sort.columnsToIndex()) {
-					builder.add(indexField.column().column(),
+					builder.add(indexField.column().name(),
 							typeFactory.createType(indexField.getIndexTyped()));
 				}
 

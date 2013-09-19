@@ -70,7 +70,7 @@ public class FieldLimiter implements
 
 		@Override
 		public boolean apply(Entry<Column, SValue> entry) {
-			return fields.contains(entry.getKey().column());
+			return fields.contains(entry.getKey().name());
 		}
 	}
 

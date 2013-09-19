@@ -94,8 +94,7 @@ public class AggregatingRecordReader extends LongLineRecordReader {
     // We found a start tag but no end tag
     if (aggValue.getLength() > 0 && startFound) {
       final Text buf = new Text();
-      int bytesRead = 0;
-      while (!endFound && (bytesRead = in.readLine(buf)) > 0) {
+      while (!endFound && in.readLine(buf) > 0) {
         if (process(buf)) {
           endFound = true;
         }

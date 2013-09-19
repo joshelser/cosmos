@@ -82,7 +82,7 @@ public class MediawikiQueries {
   public static final boolean preloadData = false;
   
   public static final String TIMINGS = "[TIMINGS] ";
-  public static final int MAX_SIZE = 16000;
+  public static final int MAX_SIZE = 8000;
   
   // MAX_OFFSET is a little misleading because the max pageID is 33928886
   // Don't have contiguous pageIDs
@@ -145,7 +145,7 @@ public class MediawikiQueries {
       SortableResult id = SortableResult.create(this.con, this.con.securityOperations().getUserAuthorizations(this.con.whoami()), IdentitySet.<Index> create());
       
       int offset = offsetR.nextInt(MAX_OFFSET);
-      int numRecords = cardinalityR.nextInt(MAX_SIZE);
+      int numRecords = cardinalityR.nextInt(MAX_SIZE) + 1;
       
       BatchScanner bs = this.con.createBatchScanner("sortswiki", new Authorizations(), 4);
       
@@ -201,10 +201,10 @@ public class MediawikiQueries {
       bs.close();
       
       Random r = new Random();
+      int max = r.nextInt(10) + 1;
       
       // Run a bunch of queries
-      
-      for (int count = 0; count < 30; count++) {
+      for (int count = 0; count < max; count++) {
         long resultCount;
         String name;
         int i = r.nextInt(9);
@@ -477,8 +477,8 @@ public class MediawikiQueries {
     
 
     ExecutorService runner = Executors.newFixedThreadPool(3);
-    for (int i = 0; i < 3; i++) {
-      runner.execute(runQueries(5));
+    for (int i = 0; i < 4; i++) {
+      runner.execute(runQueries(200));
     }
     
     runner.shutdown();

@@ -143,7 +143,7 @@ public class CosmosImpl implements Cosmos{
   public void register(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
-    Stopwatch sw = id.tracer().startTiming("Cosmos:register");
+    Stopwatch sw = new Stopwatch().start();
     
     sortableResultMap.put(id.uuid(), id);
     
@@ -163,6 +163,7 @@ public class CosmosImpl implements Cosmos{
       SortingMetadata.setState(id, targetState);
     } finally {
       sw.stop();
+      id.tracer().addTiming("Cosmos:register", sw.elapsed(TimeUnit.MILLISECONDS));
     }
   }
   
@@ -170,11 +171,12 @@ public class CosmosImpl implements Cosmos{
   public void addResult(SortableResult id, QueryResult<?> queryResult) throws Exception {
     checkNotNull(queryResult);
     
-    Stopwatch sw = id.tracer().startTiming("Cosmos:addResult");
+    Stopwatch sw = new Stopwatch().start();
     try {
       addResults(id, Single.<QueryResult<?>> create(queryResult));
     } finally {
       sw.stop();
+      id.tracer().addTiming("Cosmos:addResult", sw.elapsed(TimeUnit.MILLISECONDS));
     }
   }
   
@@ -183,11 +185,12 @@ public class CosmosImpl implements Cosmos{
     checkNotNull(id);
     checkNotNull(queryResults);
     
-    Stopwatch sw = id.tracer().startTiming("Cosmos:addResults");
+    Stopwatch sw = new Stopwatch().start();
     try {
       State s = SortingMetadata.getState(id);
       
       if (!State.LOADING.equals(s)) {
+        // stopwatch closed in finally
         UnexpectedStateException e = unexpectedState(id, State.LOADING, s);
         log.error(e.getMessage());
         throw e;
@@ -221,6 +224,7 @@ public class CosmosImpl implements Cosmos{
       }
     } finally {
       sw.stop();
+      id.tracer().addTiming("Cosmos:addResults", sw.elapsed(TimeUnit.MILLISECONDS));
     }
   }
   
@@ -249,7 +253,7 @@ public class CosmosImpl implements Cosmos{
           final SValue v = entry.getValue();
           
           if (!columnsAlreadyIndexed.contains(c)) {
-            holder.set(c.column());
+            holder.set(c.name());
             columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, Defaults.EMPTY_VALUE);
             columnsAlreadyIndexed.add(c);
             newColumnIndexed = true;
@@ -297,7 +301,7 @@ public class CosmosImpl implements Cosmos{
   public void finalize(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
-    Stopwatch sw = id.tracer().startTiming("Cosmos:finalize");
+    Stopwatch sw = new Stopwatch().start();
     
     try {
       State s = SortingMetadata.getState(id);
@@ -313,6 +317,7 @@ public class CosmosImpl implements Cosmos{
       SortingMetadata.setState(id, desiredState);
     } finally {
       sw.stop();
+      id.tracer().addTiming("Cosmos:finalize", sw.elapsed(TimeUnit.MILLISECONDS));
     }
   }
   
@@ -321,12 +326,13 @@ public class CosmosImpl implements Cosmos{
     checkNotNull(id);
     checkNotNull(columnsToIndex);
     
-    Stopwatch sw = id.tracer().startTiming("Cosmos:index");
+    Stopwatch sw = new Stopwatch().start();
     
     try {
       State s = SortingMetadata.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+        // stopwatch stopped by finally
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
@@ -359,6 +365,7 @@ public class CosmosImpl implements Cosmos{
       }
     } finally {
       sw.stop();
+      id.tracer().addTiming("Cosmos:index", sw.elapsed(TimeUnit.MILLISECONDS));
     }
   }
   
@@ -447,21 +454,29 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public Iterable<Column> columns(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
+  public CloseableIterable<Column> columns(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     
-    Stopwatch sw = id.tracer().startTiming("Cosmos:columns");
+    final String description = "Cosmos:columns";
+    Stopwatch sw = new Stopwatch().start();
     
     try {
       State s = SortingMetadata.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
+        // Stopwatch stopped by finally
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
-      return SortingMetadata.columns(id);
-    } finally {
+      return SortingMetadata.columns(id, description, sw);
+    } catch (TableNotFoundException e) {
       sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
+      throw e;
+    } catch (UnexpectedStateException e) {
+      sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
+      throw e;
     }
   }
   
@@ -469,13 +484,15 @@ public class CosmosImpl implements Cosmos{
   public CloseableIterable<MultimapQueryResult> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     
-    Stopwatch sw = id.tracer().startTiming("Cosmos:fetch");
+    final String description = "Cosmos:fetch";
+    Stopwatch sw = new Stopwatch().start();
     
     try {
       State s = SortingMetadata.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
         sw.stop();
+        id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
@@ -484,20 +501,24 @@ public class CosmosImpl implements Cosmos{
       bs.fetchColumnFamily(Defaults.DOCID_FIELD_NAME_TEXT);
       
       // Handles stoping the stopwatch
-      return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id), sw);
+      return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id), id.tracer(), description, sw);
     } catch (TableNotFoundException e) {
       // In the exceptional case, stop the timer
       sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
       throw e;
     } catch (UnexpectedStateException e) {
       // In the exceptional case, stop the timer
       sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
       throw e;
     } catch (RuntimeException e) {
       // In the exceptional case, stop the timer
       sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
       throw e;
     }
+    // no finally as the trace is stopped by the CloseableIterable
   }
   
   @Override
@@ -516,39 +537,46 @@ public class CosmosImpl implements Cosmos{
     checkNotNull(column);
     checkNotNull(value);
     
-    Stopwatch sw = id.tracer().startTiming("Cosmos:fetchWithColumnValue");
+    final String description = "Cosmos:fetchWithColumnValue";
+    Stopwatch sw = new Stopwatch().start();
     
     try {
       State s = SortingMetadata.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
         sw.stop();
+        id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
+        
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
       BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
       bs.setRanges(Collections.singleton(Range.exact(id.uuid() + Defaults.NULL_BYTE_STR + value)));
-      bs.fetchColumnFamily(new Text(column.column()));
+      bs.fetchColumnFamily(new Text(column.name()));
       
       // Filter on cq-prefix to only look at the ordering we want
       IteratorSetting filter = new IteratorSetting(50, "cqFilter", OrderFilter.class);
       filter.addOption(OrderFilter.PREFIX, Order.direction(Order.ASCENDING));
       bs.addScanIterator(filter);
       
-      return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id), sw);
+      return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id), id.tracer(), description, sw);
     } catch (TableNotFoundException e) {
       // In the exceptional case, stop the timer
       sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
       throw e;
     } catch (UnexpectedStateException e) {
       // In the exceptional case, stop the timer
       sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
       throw e;
     } catch (RuntimeException e) {
       // In the exceptional case, stop the timer
       sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
       throw e;
     }
+    // no finally as the trace is stopped by the CloseableIterable
   }
   
   @Override
@@ -573,7 +601,8 @@ public class CosmosImpl implements Cosmos{
     checkNotNull(id);
     checkNotNull(ordering);
     
-    Stopwatch sw = id.tracer().startTiming("Cosmos:fetchWithIndex");
+    final String description = "Cosmos:fetchWithIndex";
+    Stopwatch sw = new Stopwatch().start();
     
     try {
       State s = SortingMetadata.getState(id);
@@ -589,13 +618,14 @@ public class CosmosImpl implements Cosmos{
         log.error("{} is not indexed by {}", ordering, id);
         
         sw.stop();
+        id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
         
         throw new UnindexedColumnException();
       }
       
       Scanner scanner = id.connector().createScanner(id.dataTable(), id.auths());
       scanner.setRange(Range.prefix(id.uuid()));
-      scanner.fetchColumnFamily(new Text(ordering.column().column()));
+      scanner.fetchColumnFamily(new Text(ordering.column().name()));
       scanner.setBatchSize(200);
       
       // Filter on cq-prefix to only look at the ordering we want
@@ -605,23 +635,27 @@ public class CosmosImpl implements Cosmos{
       
       // If the client has told us they don't want duplicate records, lets not give them duplicate records
       if (duplicateUidsAllowed) {
-        return CloseableIterable.transform(scanner, new IndexToMultimapQueryResult(this, id), sw);
+        return CloseableIterable.transform(scanner, new IndexToMultimapQueryResult(this, id), id.tracer(), description, sw);
       } else {
-        return CloseableIterable.filterAndTransform(scanner, new DedupingPredicate(), new IndexToMultimapQueryResult(this, id), sw);
+        return CloseableIterable.filterAndTransform(scanner, new DedupingPredicate(), new IndexToMultimapQueryResult(this, id), id.tracer(), description, sw);
       }
     } catch (TableNotFoundException e) {
       // In the exceptional case, stop the timer
       sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
       throw e;
     } catch (UnexpectedStateException e) {
       // In the exceptional case, stop the timer
       sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
       throw e;
     } catch (RuntimeException e) {
       // In the exceptional case, stop the timer
       sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
       throw e;
     }
+    // no finally as the trace is stopped by the CloseableIterable
   }
   
   @Override
@@ -640,7 +674,8 @@ public class CosmosImpl implements Cosmos{
       UnindexedColumnException {
     checkNotNull(id);
     
-    Stopwatch sw = id.tracer().startTiming("Cosmos:groupResults"); 
+    Stopwatch sw = new Stopwatch().start();
+    final String description = "Cosmos:groupResults";
     
     try {
       State s = SortingMetadata.getState(id);
@@ -652,7 +687,7 @@ public class CosmosImpl implements Cosmos{
       
       checkNotNull(column);
       
-      Text colf = new Text(column.column());
+      Text colf = new Text(column.name());
       
       BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
       bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
@@ -666,20 +701,24 @@ public class CosmosImpl implements Cosmos{
       IteratorSetting cfg = new IteratorSetting(60, GroupByRowSuffixIterator.class);
       bs.addScanIterator(cfg);
       
-      return CloseableIterable.transform(bs, new GroupByFunction(), sw);
+      return CloseableIterable.transform(bs, new GroupByFunction(), id.tracer(), description, sw);
     } catch (TableNotFoundException e) {
       // In the exceptional case, stop the timer
       sw.stop();
+      id.tracer().addTiming(description,  sw.elapsed(TimeUnit.MILLISECONDS)); 
       throw e;
     } catch (UnexpectedStateException e) {
       // In the exceptional case, stop the timer
       sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS)); 
       throw e;
     } catch (RuntimeException e) {
       // In the exceptional case, stop the timer
       sw.stop();
+      id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS)); 
       throw e;
     }
+    // no finally as the trace is stopped by the CloseableIterable
   }
   
   @Override
@@ -726,7 +765,7 @@ public class CosmosImpl implements Cosmos{
   public void delete(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
-    Stopwatch sw = id.tracer().startTiming("Cosmos:delete");
+    Stopwatch sw = new Stopwatch().start();
     
 
     try {
@@ -760,6 +799,7 @@ public class CosmosImpl implements Cosmos{
       SortingMetadata.remove(id);
     } finally {
       sw.stop();
+      id.tracer().addTiming("Cosmos:delete", sw.elapsed(TimeUnit.MILLISECONDS));
       
       // Be nice and when the client deletes these results, automatically flush the traces for them too
       id.sendTraces();

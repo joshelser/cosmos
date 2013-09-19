@@ -81,7 +81,7 @@ public interface Cosmos {
    * @param id
    * @return
    */
-  public Iterable<Column> columns(SortableResult id) throws TableNotFoundException, UnexpectedStateException;
+  public CloseableIterable<Column> columns(SortableResult id) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Fetch all results from the given {@link SortableResult}

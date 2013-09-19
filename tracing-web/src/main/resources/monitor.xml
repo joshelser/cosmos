@@ -1,0 +1,18 @@
+<configuration>
+    <property>
+        <name>zookeepers</name>
+        <value>localhost</value>
+    </property>
+    <property>
+        <name>instance</name>
+        <value>accumulo1.5</value>
+    </property>
+    <property>
+        <name>username</name>
+        <value>root</value>
+    </property>
+    <property>
+        <name>password</name>
+        <value>secret</value>
+    </property>
+</configuration>
