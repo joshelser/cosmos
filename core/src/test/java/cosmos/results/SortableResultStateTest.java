@@ -22,6 +22,7 @@ package cosmos.results;
 import java.util.Collections;
 
 import org.apache.accumulo.core.Constants;
+import org.apache.commons.lang.NotImplementedException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +41,8 @@ import cosmos.options.Index;
 @RunWith(JUnit4.class)
 public class SortableResultStateTest extends AbstractSortableTest {
   
-  @Test
+  // Accumulo 1.5 actually implements locGroups in Mock...
+  @Test(expected = NotImplementedException.class)
   public void test() throws Exception {
     SortableResult id = SortableResult.create(c, Constants.NO_AUTHS, Collections.<Index> emptySet());
     

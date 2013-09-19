@@ -162,7 +162,6 @@ public class Tracer {
     byte[] serializedBytes = builder.build().toByteArray();
     recordMutation.put(UUID, "", new Value(serializedBytes));
     
-    System.out.println("begin:" + begin);
     Mutation timeMutation = new Mutation(new Text(revLongLex.encode(begin)));
     timeMutation.put(TIME, this.uuid, new Value(serializedBytes));
     

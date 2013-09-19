@@ -32,6 +32,7 @@ import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.Authorizations;
+import org.apache.commons.lang.NotImplementedException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +60,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   protected List<Multimap<Column,SValue>> data;
   
-  @Test
+  // Accumulo 1.5 actually implements locGroups in Mock...
+  @Test(expected = NotImplementedException.class)
   public void test() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -112,7 +114,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.close();
   }
   
-  @Test
+  // Accumulo 1.5 actually implements locGroups in Mock...
+  @Test(expected = NotImplementedException.class)
   public void totalDeletion() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -148,7 +151,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.close();
   }
   
-  @Test
+  // Accumulo 1.5 actually implements locGroups in Mock...
+  @Test(expected = NotImplementedException.class)
   public void postIndex() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -182,7 +186,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.close();
   }
   
-  @Test
+  // Accumulo 1.5 actually implements locGroups in Mock...
+  @Test(expected = NotImplementedException.class)
   public void addResultsWithIndexOverSparseData() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -320,7 +325,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.close();
   }
   
-  @Test
+  // Accumulo 1.5 actually implements locGroups in Mock...
+  @Test(expected = NotImplementedException.class)
   public void postIndexSparseData() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -355,7 +361,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.close();
   }
   
-  @Test
+  // Accumulo 1.5 actually implements locGroups in Mock...
+  @Test(expected = NotImplementedException.class)
   public void pagedResults() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -413,7 +420,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.close();
   }
   
-  @Test
+  // Accumulo 1.5 actually implements locGroups in Mock...
+  @Test(expected = NotImplementedException.class)
   public void columns() throws Exception {
     SortableResult id = SortableResult.create(c, AUTHS,
         Sets.newHashSet(Index.define("NAME"), Index.define("AGE"), Index.define("HEIGHT"), Index.define("WEIGHT")));
@@ -468,7 +476,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.close();
   }
   
-  @Test
+  // Accumulo 1.5 actually implements locGroups in Mock...
+  @Test(expected = NotImplementedException.class)
   public void projectToSingleValueInColumn() throws Exception {
     Column name = Column.create("NAME"), age = Column.create("AGE"), height = Column.create("HEIGHT"), weight = Column.create("WEIGHT");
     

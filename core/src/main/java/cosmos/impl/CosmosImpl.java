@@ -245,7 +245,7 @@ public class CosmosImpl implements Cosmos {
           final SValue v = entry.getValue();
           
           if (!columnsAlreadyIndexed.contains(c)) {
-            holder.set(c.column());
+            holder.set(c.name());
             columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, Defaults.EMPTY_VALUE);
             columnsAlreadyIndexed.add(c);
             newColumnIndexed = true;
@@ -544,7 +544,7 @@ public class CosmosImpl implements Cosmos {
       
       BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
       bs.setRanges(Collections.singleton(Range.exact(id.uuid() + Defaults.NULL_BYTE_STR + value)));
-      bs.fetchColumnFamily(new Text(column.column()));
+      bs.fetchColumnFamily(new Text(column.name()));
       
       return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id), id.tracer(), description, sw);
     } catch (TableNotFoundException e) {
@@ -612,7 +612,7 @@ public class CosmosImpl implements Cosmos {
       
       Scanner scanner = id.connector().createScanner(id.dataTable(), id.auths());
       scanner.setRange(Range.prefix(id.uuid()));
-      scanner.fetchColumnFamily(new Text(ordering.column().column()));
+      scanner.fetchColumnFamily(new Text(ordering.column().name()));
       scanner.setBatchSize(200);
       
       // Filter on cq-prefix to only look at the ordering we want
@@ -674,7 +674,7 @@ public class CosmosImpl implements Cosmos {
       
       checkNotNull(column);
       
-      Text colf = new Text(column.column());
+      Text colf = new Text(column.name());
       
       BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
       bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
