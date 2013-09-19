@@ -1,3 +1,4 @@
+package cosmos.sql;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -103,6 +104,7 @@ public class TestSql {
   @BeforeClass
   public static void setup() throws Exception {
     macConfig = new MiniAccumuloConfig(tmp, "root");
+    macConfig.setNumTservers(1);
     
     mac = new MiniAccumuloCluster(macConfig);
     
