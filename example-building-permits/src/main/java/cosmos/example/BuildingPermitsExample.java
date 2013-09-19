@@ -18,7 +18,6 @@ package cosmos.example;
 
 import java.io.File;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
@@ -26,15 +25,20 @@ import java.util.TreeMap;
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
+import org.apache.accumulo.core.conf.Property;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
 import org.apache.accumulo.minicluster.MiniAccumuloConfig;
-import org.apache.hadoop.io.Text;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
@@ -42,17 +46,18 @@ import com.google.common.io.Files;
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
 import cosmos.impl.SortableResult;
-import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
 import cosmos.results.SValue;
+import cosmos.util.AscendingIndexIdentitySet;
 import cosmos.util.IdentitySet;
 
 /**
  * 
  */
 public class BuildingPermitsExample {
+  private static final Logger log = LoggerFactory.getLogger(BuildingPermitsExample.class);
   
   @Parameter(names = { "--zookeepers", "-z"}, description = "CSV of zookeepers to use")
   public String zookeepers;
@@ -88,13 +93,14 @@ public class BuildingPermitsExample {
     String instanceName;
     Connector connector;
     MiniAccumuloCluster mac = null;
+    File macDir = null;
     
     // Use the MiniAccumuloCluster is requested
     if (example.useMiniAccumuloCluster) {
-      File f = Files.createTempDir();
+      macDir = Files.createTempDir();
       String password = "password";
-      MiniAccumuloConfig config = new MiniAccumuloConfig(f, password);
-      config.setNumTservers(2);
+      MiniAccumuloConfig config = new MiniAccumuloConfig(macDir, password);
+      config.setNumTservers(1);
       
       mac = new MiniAccumuloCluster(config);
       mac.start();
@@ -117,7 +123,7 @@ public class BuildingPermitsExample {
     Cosmos cosmos = new CosmosImpl(zookeepers);
     
     // Create a definition for the data we want to load
-    SortableResult id = SortableResult.create(connector, new Authorizations(), IdentitySet.<Index> create());
+    SortableResult id = SortableResult.create(connector, new Authorizations(), AscendingIndexIdentitySet.create());
     
     // Register the definition with Cosmos so it can track its progress.
     cosmos.register(id);
@@ -135,7 +141,7 @@ public class BuildingPermitsExample {
     // Get back the Set of Columns that we've ingested.
     Set<Column> schema = Sets.newHashSet(cosmos.columns(id));
     
-    System.out.println("Columns: " + schema);
+    log.debug("\nColumns: " + schema);
     
     Iterator<Column> iter = schema.iterator();
     while (iter.hasNext()) {
@@ -146,24 +152,22 @@ public class BuildingPermitsExample {
       }
     }
     
-    Map<String,Set<Text>> locGroups = connector.tableOperations().getLocalityGroups(Defaults.DATA_TABLE);
-    for (Column column : schema) {
-      String columnName = column.name();
-      Text textColumnName = new Text(columnName);
-      
-      if (!locGroups.containsKey(columnName)) {
-        locGroups.put(columnName, Sets.newHashSet(textColumnName));
+    Iterable<Index> indices = Iterables.transform(schema, new Function<Column,Index>() {
+
+      @Override
+      public Index apply(Column col) {
+        return Index.define(col);
       }
-    }
+      
+    });
     
-    // Set the locality groups
-    connector.tableOperations().setLocalityGroups(Defaults.DATA_TABLE, locGroups);
+    // Ensure that we have locality groups set as we expect
+    log.info("Ensure locality groups are set");
+    id.optimizeIndices(indices);
     
-    System.out.println("Starting compaction");
-    
-    connector.tableOperations().compact(Defaults.DATA_TABLE, null, null, true, true);
-    
-    System.out.println("Finished compaction");
+    // Compact down the data for this SortableResult    
+    log.info("Issuing compaction for relevant data");
+    id.consolidate();
     
     final int numTopValues = 10;
     
@@ -175,7 +179,7 @@ public class BuildingPermitsExample {
       // Get the number of times we've seen each value in a given column
       CloseableIterable<Entry<SValue,Long>> groupingsInColumn = cosmos.groupResults(id, c);
       
-      System.out.println(c.name() + ":");
+      log.info(c.name() + ":");
       
       // Iterate over the counts, collecting the top N values in each column
       TreeMap<Long,SValue> topValues = Maps.newTreeMap();
@@ -195,25 +199,34 @@ public class BuildingPermitsExample {
       }
       
       for (Long key: topValues.descendingKeySet()) {
-        System.out.println(topValues.get(key).value() + " occurred " + key + " times");
+        log.info(topValues.get(key).value() + " occurred " + key + " times");
       }
 
       sw.stop();
       
-      System.out.println("\nTook " + sw.toString() + " to run query.");
-      
-      System.out.println();
+      log.info("Took " + sw.toString() + " to run query.\n");
     }
     
+    log.info("Deleting records");
+    
     // Delete the records we've ingested
-    cosmos.delete(id);
+    if (!example.useMiniAccumuloCluster) {
+      // Because I'm lazy and don't want to wait around to run the BatchDeleter when we're just going
+      // to rm -rf the directory in a few secs.
+      cosmos.delete(id);
+    }
     
     // And shut down Cosmos
     cosmos.close();
     
+    log.info("Cosmos stopped");
+    
     // If we were using MAC, also stop that
     if (example.useMiniAccumuloCluster && null != mac) {
       mac.stop();
+      if (null != macDir) {
+        FileUtils.deleteDirectory(macDir);
+      }
     }
   }
 }

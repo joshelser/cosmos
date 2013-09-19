@@ -76,8 +76,10 @@ public class LoadBuildingPermits implements Runnable {
       throw new RuntimeException(e);
     }
     
+    CSVReader reader = null;
+    
     try {
-      CSVReader reader = new CSVReader(new FileReader(csvData));
+      reader = new CSVReader(new FileReader(csvData));
       
       // Consume the schema line as we don't want to treat it as a record
       reader.readNext();
@@ -89,6 +91,7 @@ public class LoadBuildingPermits implements Runnable {
       int numFlushes = 0;
       int logUpdateEveryNBuffers = 5;
       int itemsToBuffer = 10000;
+      long entriesLoadedSinceLastLog = 0l;
       
       // Buffer 100 results to ammortize the BatchWriter costs underneath
       ArrayList<MultimapQueryResult> cachedResults = Lists.newArrayListWithCapacity(itemsToBuffer + 1);
@@ -127,14 +130,16 @@ public class LoadBuildingPermits implements Runnable {
           try {
             cosmos.addResults(this.id, cachedResults);
             numFlushes++;
+            entriesLoadedSinceLastLog += cachedResults.size();
           } catch (Exception e) {
             log.error("Problem adding results to cosmos", e);
             throw new RuntimeException(e);
           }
           
           if (0 == numFlushes % logUpdateEveryNBuffers) {
-            log.info("Loaded {} records", itemsToBuffer * logUpdateEveryNBuffers);
+            log.info("Loaded {} records", entriesLoadedSinceLastLog);
             numFlushes = 0;
+            entriesLoadedSinceLastLog = 0l;
           }
           
           resultsInserted += cachedResults.size();
@@ -148,10 +153,19 @@ public class LoadBuildingPermits implements Runnable {
         }
       }
       
+      if (0 < numFlushes) {
+        log.info("Loaded {} records", entriesLoadedSinceLastLog);
+      }
+      
       // Make sure we catch the tail-end of any results we buffered
       if (!cachedResults.isEmpty()) {
         try {
           cosmos.addResults(this.id, cachedResults);
+          
+          log.info("Loaded {} records", cachedResults.size());
+
+          // Try to force a cleanup on next GC
+          cachedResults = null;
         } catch (Exception e) {
           log.error("Problem adding results to cosmos", e);
           throw new RuntimeException(e);
@@ -160,6 +174,14 @@ public class LoadBuildingPermits implements Runnable {
       
     } catch (IOException e) {
       throw new RuntimeException(e);
+    } finally {
+      if (null != reader) {
+        try {
+          reader.close();
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
     }
   }
 }
