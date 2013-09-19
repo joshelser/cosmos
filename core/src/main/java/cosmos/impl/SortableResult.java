@@ -40,11 +40,13 @@ import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 
 import cosmos.options.Defaults;
 import cosmos.options.Index;
+import cosmos.results.Column;
 import cosmos.trace.AccumuloTraceStore;
 import cosmos.trace.Tracer;
 import cosmos.util.IdentitySet;
@@ -53,7 +55,7 @@ public class SortableResult {
   private static final Logger log = LoggerFactory.getLogger(SortableResult.class);
   
   private static final SortedSet<Text> SPLITS = ImmutableSortedSet.of(new Text("0"), new Text("1"), new Text("2"), new Text("3"), new Text("4"), new Text("5"),
-      new Text("6"), new Text("7"), new Text("8"), new Text("9"));
+      new Text("6"), new Text("7"), new Text("8"), new Text("9"), new Text("a"), new Text("b"), new Text("c"), new Text("d"), new Text("e"), new Text("f"));
   
   protected final Connector connector;
   protected final Authorizations auths;
@@ -65,16 +67,29 @@ public class SortableResult {
   protected Set<Index> columnsToIndex;
   
   public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
-    this(connector, auths, columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
+    this(connector, auths, randomUUID().toString(), columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
-  
+
+  public SortableResult(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex) {
+    this(connector, auths, uuid, columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
+  }
+
   public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
-    this(connector, auths, columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
+    this(connector, auths, randomUUID().toString(), columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
   
+  public SortableResult(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+    this(connector, auths, uuid, columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
+  }
+
   public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
+    this(connector, auths, randomUUID().toString(), columnsToIndex, lockOnUpdates, dataTable, metadataTable);
+  }
+  
+  public SortableResult(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
     checkNotNull(connector);
     checkNotNull(auths);
+    checkNotNull(uuid);
     checkNotNull(columnsToIndex);
     checkNotNull(dataTable);
     checkNotNull(metadataTable);
@@ -93,7 +108,7 @@ public class SortableResult {
     this.dataTable = dataTable;
     this.metadataTable = metadataTable;
     
-    this.UUID = randomUUID().toString();
+    this.UUID = uuid;
     
     TableOperations tops = this.connector.tableOperations();
     
@@ -188,6 +203,47 @@ public class SortableResult {
       log.error("Could not add locality groups to table '{}'", tableName, e);
       throw new RuntimeException(e);
     }
+    
+    Set<Index> columns = columnsToIndex();
+    if (!(columns instanceof IdentitySet)) {
+      try {
+        Map<String,Set<Text>> localityGroups = tops.getLocalityGroups(tableName);
+        
+        for (Index index: columns) {
+          Column c = index.column();
+          String columnName = c.name();
+          Text textColumnName = new Text(columnName);
+          
+          Set<Text> colfams;
+          if (localityGroups.containsKey(columnName)) {
+            colfams = localityGroups.get(columnName);
+            
+            // We already have the colfam defined
+            if (colfams.contains(textColumnName)) {
+              continue;
+            }
+          } else {
+            colfams = Sets.newHashSet();
+          }
+          
+          colfams.add(textColumnName);
+          
+          localityGroups.put(c.name(), colfams);
+        }
+        
+        tops.setLocalityGroups(tableName, localityGroups);
+        
+      } catch (AccumuloException e) {
+        log.error("Could not add locality groups to table '{}'", tableName, e);
+        throw new RuntimeException(e);
+      } catch (AccumuloSecurityException e) {
+        log.error("Could not add locality groups to table '{}'", tableName, e);
+        throw new RuntimeException(e);
+      } catch (TableNotFoundException e) {
+        log.error("Could not add locality groups to table '{}'", tableName, e);
+        throw new RuntimeException(e);
+      }
+    }
   }
   
   protected void ensureTracingTableExists() {    
@@ -199,6 +255,61 @@ public class SortableResult {
       throw new RuntimeException(e);
     }
     
+  }
+  
+  /**
+   * Given some {@link Index}s, we can assign locality groups to make queries over those columns more efficient, especially
+   * for operations like groupBy.
+   * @param indices
+   * @throws AccumuloSecurityException
+   * @throws TableNotFoundException
+   * @throws AccumuloException
+   */
+  public void optimizeIndices(Iterable<Index> indices) throws AccumuloSecurityException, TableNotFoundException, AccumuloException {
+    Preconditions.checkNotNull(indices);
+    
+    final TableOperations tops = connector().tableOperations();
+    
+    Map<String,Set<Text>> locGroups = tops.getLocalityGroups(dataTable());
+    int size = locGroups.size();
+    
+    // Take the set of indicies that were requested to be "optimized" (read as locality group'ed)
+    for (Index i : indices) {
+      String colf = i.column().name();
+      // And update our mapping accordingly
+      if (!locGroups.containsKey(colf)) {
+        locGroups.put(colf, Sets.newHashSet(new Text(colf)));
+      }
+    }
+    
+    // If we've actually added some locality groups, set them back on the table
+    if (size != locGroups.size()) {
+      log.debug("Setting {} new locality groups", locGroups.size() - size);
+      tops.setLocalityGroups(dataTable(), locGroups);
+    } else {
+      log.debug("No new locality groups to set");
+    }
+  }
+  
+  /**
+   * Issues a compaction for the range of data contained in this SortableResult
+   * @throws AccumuloSecurityException
+   * @throws TableNotFoundException
+   * @throws AccumuloException
+   */
+  public void consolidate() throws AccumuloSecurityException, TableNotFoundException, AccumuloException {
+    consolidate(true);
+  }
+  
+  /**
+   * Issues a compaction for the range od data contained in this SortableResult, optionally issuing a flush first
+   * @param flush Whether or not to flush the data sitting in memory before compaction
+   * @throws AccumuloSecurityException
+   * @throws TableNotFoundException
+   * @throws AccumuloException
+   */
+  public void consolidate(boolean flush) throws AccumuloSecurityException, TableNotFoundException, AccumuloException {
+    connector().tableOperations().compact(dataTable(), new Text(uuid()), new Text(uuid() + Defaults.EIN_BYTE_STR), flush, true);
   }
   
   public Connector connector() {
@@ -255,17 +366,37 @@ public class SortableResult {
     }
   }
   
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(256);
+    sb.append("SortableResult:").append(uuid()).append(",").append(dataTable()).append(",").append(metadataTable());
+    return sb.toString();
+  }
+  
   public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
     return new SortableResult(connector, auths, columnsToIndex);
+  }
+  
+  public static SortableResult create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex) {
+    return new SortableResult(connector, auths, uuid, columnsToIndex);
   }
   
   public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
     return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates);
   }
   
+  public static SortableResult create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+    return new SortableResult(connector, auths, uuid, columnsToIndex, lockOnUpdates);
+  }
+  
   public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable,
       String metadataTable) {
     return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
+  }
+  
+  public static SortableResult create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates,
+      String dataTable, String metadataTable) {
+    return new SortableResult(connector, auths, uuid, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
   }
   
 }
