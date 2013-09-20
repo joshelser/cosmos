@@ -26,49 +26,44 @@ import cosmos.sql.call.impl.OperationVisitor;
  * 
  */
 public class Projection extends ProjectRelBase implements AccumuloRel {
-
-	private AccumuloTable<?> accumuloAccessor;
-
-	public Projection(RelOptCluster cluster, RelTraitSet traits, RelNode child,
-			List<RexNode> exps, RelDataType rowType,
-			AccumuloTable<?> accumuloAccessor) {
-		super(cluster, traits, child, exps, rowType, Flags.Boxed, Collections
-				.<RelCollation> emptyList());
-		assert getConvention() == CONVENTION;
-		this.accumuloAccessor = accumuloAccessor;
-	}
-
-	@Override
-	public RelNode copy(RelTraitSet traitSet, List<RelNode> inputs) {
-		return new Projection(getCluster(), traitSet, sole(inputs),
-				new ArrayList<RexNode>(exps), rowType, accumuloAccessor);
-	}
-
-	@Override
-	public RelOptCost computeSelfCost(RelOptPlanner planner) {
-		return super.computeSelfCost(planner).multiplyBy(0.1);
-	}
-
-	@Override
-	public int implement(Plan implementor) {
-
-		implementor.visitChild(getChild());
-
-		implementor.table = accumuloAccessor;
-
-		OperationVisitor visitor = new OperationVisitor(getChild());
-
-		cosmos.sql.call.impl.Projection projections = new cosmos.sql.call.impl.Projection();
-		for (RexNode node : exps) {
-			CallIfc projection = node.accept(visitor);
-			projections.addChild(projection.getClass().getSimpleName(),
-					projection);
-
-		}
-		implementor.add(projections.getClass().getSimpleName(), projections);
-
-		return 1;
-
-	}
-
+  
+  private AccumuloTable<?> accumuloAccessor;
+  
+  public Projection(RelOptCluster cluster, RelTraitSet traits, RelNode child, List<RexNode> exps, RelDataType rowType, AccumuloTable<?> accumuloAccessor) {
+    super(cluster, traits, child, exps, rowType, Flags.Boxed, Collections.<RelCollation> emptyList());
+    assert getConvention() == CONVENTION;
+    this.accumuloAccessor = accumuloAccessor;
+  }
+  
+  @Override
+  public RelNode copy(RelTraitSet traitSet, List<RelNode> inputs) {
+    return new Projection(getCluster(), traitSet, sole(inputs), new ArrayList<RexNode>(exps), rowType, accumuloAccessor);
+  }
+  
+  @Override
+  public RelOptCost computeSelfCost(RelOptPlanner planner) {
+    return super.computeSelfCost(planner).multiplyBy(0.1);
+  }
+  
+  @Override
+  public int implement(Plan implementor) {
+    
+    implementor.visitChild(getChild());
+    
+    implementor.table = accumuloAccessor;
+    
+    OperationVisitor visitor = new OperationVisitor(getChild());
+    
+    cosmos.sql.call.impl.Projection projections = new cosmos.sql.call.impl.Projection();
+    for (RexNode node : exps) {
+      CallIfc projection = node.accept(visitor);
+      projections.addChild(projection.getClass().getSimpleName(), projection);
+      
+    }
+    implementor.add(projections.getClass().getSimpleName(), projections);
+    
+    return 1;
+    
+  }
+  
 }

@@ -14,23 +14,22 @@ import cosmos.options.Index;
 
 /**
  * Transforms indexes into an immutable entry describing the indexed entry
+ * 
  * @author marc
- *
+ * 
  */
-public class IndexTransform implements
-		Function<Index, Entry<String, RelDataType>> {
-
-	
-	protected JavaTypeFactory javaFactory;
-
-	public IndexTransform(JavaTypeFactory javaFactory) {
-		this.javaFactory = javaFactory;
-	}
-
-	@Override
-	public Entry<String, RelDataType> apply(Index input) {
-		
-		return Maps.immutableEntry(input.column().toString(), javaFactory.createSqlType(SqlTypeName.VARCHAR));
-	}
-
+public class IndexTransform implements Function<Index,Entry<String,RelDataType>> {
+  
+  protected JavaTypeFactory javaFactory;
+  
+  public IndexTransform(JavaTypeFactory javaFactory) {
+    this.javaFactory = javaFactory;
+  }
+  
+  @Override
+  public Entry<String,RelDataType> apply(Index input) {
+    
+    return Maps.immutableEntry(input.column().toString(), javaFactory.createSqlType(SqlTypeName.VARCHAR));
+  }
+  
 }

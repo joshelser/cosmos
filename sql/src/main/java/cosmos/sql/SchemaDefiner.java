@@ -9,8 +9,7 @@ import cosmos.options.Index;
 import cosmos.sql.AccumuloRel.Plan;
 
 /**
- * Interface that defines an interface that enables us funcionality in defining
- * our referential schema.
+ * Interface that defines an interface that enables us funcionality in defining our referential schema.
  * 
  * @author phrocker
  * 
@@ -18,13 +17,12 @@ import cosmos.sql.AccumuloRel.Plan;
  */
 
 public interface SchemaDefiner<T> {
-
-	public void register(AccumuloSchema<?> parentSchema);
-
-	public String getDataTable();
-
-	public Set<Index> getIndexColumns(String table);
-
-	public AccumuloIterables<T> iterator(List<String> schemaLayout,
-			AccumuloRel.Plan query, Plan aggregatePlan);
+  
+  public void register(AccumuloSchema<?> parentSchema);
+  
+  public String getDataTable();
+  
+  public Set<Index> getIndexColumns(String table);
+  
+  public AccumuloIterables<T> iterator(List<String> schemaLayout, AccumuloRel.Plan query, Plan aggregatePlan);
 }

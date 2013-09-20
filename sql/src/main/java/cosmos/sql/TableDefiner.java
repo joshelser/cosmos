@@ -1,8 +1,7 @@
 package cosmos.sql;
 
 /**
- * Interface that defines an interface that enables us funcionality in defining
- * our referential schema.
+ * Interface that defines an interface that enables us funcionality in defining our referential schema.
  * 
  * @author phrocker
  * 
@@ -10,6 +9,6 @@ package cosmos.sql;
  */
 
 public interface TableDefiner {
-
-	public AccumuloTable<?> getTable(String name);
+  
+  public AccumuloTable<?> getTable(String name);
 }

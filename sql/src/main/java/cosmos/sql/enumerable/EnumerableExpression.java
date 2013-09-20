@@ -24,20 +24,19 @@ import org.eigenbase.rel.convert.ConverterRule;
 
 import cosmos.sql.AccumuloRel;
 
-
 public class EnumerableExpression extends ConverterRule {
   public static final EnumerableExpression ARRAY_INSTANCE = new EnumerableExpression();
-
+  
   private EnumerableExpression() {
     super(RelNode.class, AccumuloRel.CONVENTION, EnumerableConvention.INSTANCE, "EnumerableDrillRule");
     
   }
-
+  
   @Override
   public boolean isGuaranteed() {
     return true;
   }
-
+  
   @Override
   public RelNode convert(RelNode rel) {
     assert rel.getTraitSet().contains(AccumuloRel.CONVENTION);

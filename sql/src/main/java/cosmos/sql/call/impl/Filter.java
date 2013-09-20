@@ -12,27 +12,26 @@ import cosmos.sql.call.BaseVisitor;
 import cosmos.sql.call.ChildVisitor;
 
 public class Filter extends BaseVisitor {
-
-	public Filter() {
-
-	}
-
-	@Override
-	public CallIfc addChild(String id, CallIfc child) {
-		System.out.println("child is " + child.getClass().getCanonicalName());
-		Preconditions.checkArgument(child instanceof ChildVisitor);
-		return super.addChild(id, child);
-	}
-
-	public List<ChildVisitor> getFilters() {
-		return Lists.newArrayList(Iterables.transform(children.values(),
-				new Function<CallIfc, ChildVisitor>() {
-
-					@Override
-					public ChildVisitor apply(CallIfc child) {
-						return (ChildVisitor) child;
-					}
-
-				}));
-	}
+  
+  public Filter() {
+    
+  }
+  
+  @Override
+  public CallIfc addChild(String id, CallIfc child) {
+    System.out.println("child is " + child.getClass().getCanonicalName());
+    Preconditions.checkArgument(child instanceof ChildVisitor);
+    return super.addChild(id, child);
+  }
+  
+  public List<ChildVisitor> getFilters() {
+    return Lists.newArrayList(Iterables.transform(children.values(), new Function<CallIfc,ChildVisitor>() {
+      
+      @Override
+      public ChildVisitor apply(CallIfc child) {
+        return (ChildVisitor) child;
+      }
+      
+    }));
+  }
 }

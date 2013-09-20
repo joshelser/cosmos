@@ -1,4 +1,5 @@
 package cosmos.sql;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -142,7 +143,7 @@ public class TestSql {
   
   @Before
   public void setupVariables() throws Exception {
-    final String inputTableName = "cosmoswiki"; 
+    final String inputTableName = "cosmoswiki";
     if (connector.tableOperations().exists(inputTableName)) {
       connector.tableOperations().delete(inputTableName);
     }
@@ -169,7 +170,7 @@ public class TestSql {
     BatchScanner bs = null;
     try {
       bs = connector.createBatchScanner(inputTableName, new Authorizations(), 4);
-    
+      
       bs.setRanges(Collections.singleton(new Range()));
       
       meataData = new SortableResult(connector, connector.securityOperations().getUserAuthorizations("root"), columns);
