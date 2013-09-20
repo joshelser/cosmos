@@ -18,7 +18,7 @@ import cosmos.sql.AccumuloRel.Plan;
 
 public interface SchemaDefiner<T> {
   
-  public void register(AccumuloSchema<?> parentSchema);
+  public void register(CosmosSchema<?> parentSchema);
   
   public String getDataTable();
   

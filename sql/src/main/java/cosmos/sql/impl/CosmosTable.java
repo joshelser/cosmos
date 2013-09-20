@@ -18,8 +18,8 @@ import cosmos.results.impl.MultimapQueryResult;
 import cosmos.sql.AccumuloIterables;
 import cosmos.sql.AccumuloRel;
 import cosmos.sql.AccumuloRel.Plan;
-import cosmos.sql.AccumuloSchema;
-import cosmos.sql.ResultTable;
+import cosmos.sql.AccumuloTable;
+import cosmos.sql.CosmosSchema;
 import cosmos.sql.SchemaDefiner;
 import cosmos.sql.TableScanner;
 
@@ -29,7 +29,7 @@ import cosmos.sql.TableScanner;
  * @author phrocker
  * 
  */
-public class CosmosTable extends ResultTable {
+public class CosmosTable extends AccumuloTable<Object[]> {
   
   protected JavaTypeFactory javaFactory;
   
@@ -39,7 +39,7 @@ public class CosmosTable extends ResultTable {
   
   protected String table;
   
-  public CosmosTable(AccumuloSchema<? extends SchemaDefiner<?>> meataSchema, SchemaDefiner<?> metadata, JavaTypeFactory typeFactory, RelDataType rowType,
+  public CosmosTable(CosmosSchema<? extends SchemaDefiner<?>> meataSchema, SchemaDefiner<?> metadata, JavaTypeFactory typeFactory, RelDataType rowType,
       String table) {
     
     super(meataSchema, table, typeFactory);

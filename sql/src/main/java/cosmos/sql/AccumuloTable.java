@@ -27,9 +27,7 @@ import cosmos.sql.call.Fields;
 
 public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements TranslatableTable<T> {
   
-  Class<?> rawType;
-  
-  protected AccumuloSchema<? extends SchemaDefiner<?>> schema;
+  protected CosmosSchema<? extends SchemaDefiner<?>> schema;
   
   protected String tableName;
   
@@ -39,7 +37,7 @@ public abstract class AccumuloTable<T> extends AbstractQueryable<T> implements T
   
   protected Queue<Plan> plans;
   
-  public AccumuloTable(final AccumuloSchema<? extends SchemaDefiner<?>> schema, final String tableName, JavaTypeFactory typeFactory) {
+  public AccumuloTable(final CosmosSchema<? extends SchemaDefiner<?>> schema, final String tableName, JavaTypeFactory typeFactory) {
     this.schema = schema;
     this.tableName = tableName;
     plans = Queues.newPriorityQueue();

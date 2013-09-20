@@ -11,18 +11,18 @@ import net.hydromatic.optiq.impl.java.MapSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
+public class CosmosSchema<T extends SchemaDefiner<?>> extends MapSchema {
   
   protected T meataData;
   
   private Class<? extends AccumuloTable<?>> clazz = null;
   
-  private static final Logger log = LoggerFactory.getLogger(AccumuloSchema.class);
+  private static final Logger log = LoggerFactory.getLogger(CosmosSchema.class);
   
   /**
    * Accumulo schema constructor
    */
-  public AccumuloSchema(Schema parentSchema, String name, String host, String database, Expression expression, T schemaDefiner,
+  public CosmosSchema(Schema parentSchema, String name, Expression expression, T schemaDefiner,
       Class<? extends AccumuloTable<?>> clazz) {
     super(parentSchema, name, expression);
     meataData = schemaDefiner;

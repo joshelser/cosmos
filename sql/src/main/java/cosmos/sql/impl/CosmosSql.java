@@ -37,9 +37,9 @@ import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
 import cosmos.sql.AccumuloIterables;
 import cosmos.sql.AccumuloRel;
-import cosmos.sql.AccumuloSchema;
 import cosmos.sql.AccumuloTable;
-import cosmos.sql.ResultDefiner;
+import cosmos.sql.CosmosSchema;
+import cosmos.sql.SchemaDefiner;
 import cosmos.sql.TableDefiner;
 import cosmos.sql.call.BaseVisitor;
 import cosmos.sql.call.CallIfc;
@@ -54,7 +54,7 @@ import cosmos.sql.impl.functions.FieldLimiter;
  * @author marc
  * 
  */
-public class CosmosSql extends ResultDefiner implements TableDefiner {
+public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
   
   /**
    * Main cosmos reference
@@ -72,7 +72,7 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
   
   private JavaTypeFactory typeFactory;
   
-  private AccumuloSchema<?> schema;
+  private CosmosSchema<?> schema;
   
   private static final Logger log = LoggerFactory.getLogger(CosmosSql.class);
   
@@ -286,7 +286,7 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
   }
   
   @Override
-  public void register(AccumuloSchema<?> parentSchema) {
+  public void register(CosmosSchema<?> parentSchema) {
     this.schema = parentSchema;
     this.typeFactory = parentSchema.getTypeFactory();
     

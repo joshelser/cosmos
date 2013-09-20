@@ -130,7 +130,7 @@ public class TestSql {
     
     cosmosSql = new CosmosSql(impl);
     
-    new AccumuloDriver(cosmosSql, "cosmos");
+    new CosmosDriver(cosmosSql, "cosmos");
     
   }
   
@@ -249,7 +249,7 @@ public class TestSql {
   
   private void loadDriverClass() {
     try {
-      Class.forName(AccumuloDriver.class.getCanonicalName());
+      Class.forName(CosmosDriver.class.getCanonicalName());
     } catch (ClassNotFoundException e) {
       throw new RuntimeException("driver not found", e);
     }
@@ -285,7 +285,7 @@ public class TestSql {
       connection = DriverManager.getConnection("jdbc:accumulo:cosmos//localhost", info);
       statement = connection.createStatement();
       final ResultSet resultSet = statement
-          .executeQuery("select \"PAGE_ID\" from \"sorts\".\"" + meataData.uuid() + "\"  where PAGE_ID='9' or REVISION_ID='8'");
+          .executeQuery("select \"PAGE_ID\" from \"" + CosmosDriver.COSMOS + "\".\"" + meataData.uuid() + "\"  where PAGE_ID='9' or REVISION_ID='8'");
       final ResultSetMetaData metaData = resultSet.getMetaData();
       final int columnCount = metaData.getColumnCount();
       
@@ -323,7 +323,7 @@ public class TestSql {
       info.put("password", PASSWORD);
       connection = DriverManager.getConnection("jdbc:accumulo:cosmos//localhost", info);
       statement = connection.createStatement();
-      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"sorts\".\"" + meataData.uuid()
+      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"" + CosmosDriver.COSMOS + "\".\"" + meataData.uuid()
           + "\"  where PAGE_ID='9' and REVISION_ID='9'");
       final ResultSetMetaData metaData = resultSet.getMetaData();
       final int columnCount = metaData.getColumnCount();
@@ -363,7 +363,7 @@ public class TestSql {
       info.put("password", PASSWORD);
       connection = DriverManager.getConnection("jdbc:accumulo:cosmos//localhost", info);
       statement = connection.createStatement();
-      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"sorts\".\"" + meataData.uuid() + "\"  limit 2 OFFSET 0");
+      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"" + CosmosDriver.COSMOS + "\".\"" + meataData.uuid() + "\"  limit 2 OFFSET 0");
       final ResultSetMetaData metaData = resultSet.getMetaData();
       final int columnCount = metaData.getColumnCount();
       
@@ -401,7 +401,7 @@ public class TestSql {
       info.put("password", PASSWORD);
       connection = DriverManager.getConnection("jdbc:accumulo:cosmos//localhost", info);
       statement = connection.createStatement();
-      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"sorts\".\"" + meataData.uuid() + "\"  limit 2 OFFSET 0");
+      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"" + CosmosDriver.COSMOS + "\".\"" + meataData.uuid() + "\"  limit 2 OFFSET 0");
       final ResultSetMetaData metaData = resultSet.getMetaData();
       final int columnCount = metaData.getColumnCount();
       
@@ -439,7 +439,7 @@ public class TestSql {
       info.put("password", PASSWORD);
       connection = DriverManager.getConnection("jdbc:accumulo:cosmos//localhost", info);
       statement = connection.createStatement();
-      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"sorts\".\"" + meataData.uuid() + "\"");
+      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"" + CosmosDriver.COSMOS + "\".\"" + meataData.uuid() + "\"");
       
       final ResultSetMetaData metaData = resultSet.getMetaData();
       final int columnCount = metaData.getColumnCount();

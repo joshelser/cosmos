@@ -20,20 +20,20 @@ import cosmos.sql.impl.CosmosTable;
 /**
  * JDBC Driver.
  */
-public class AccumuloDriver extends UnregisteredDriver {
+public class CosmosDriver extends UnregisteredDriver {
   
-  private static final String ACCUMULO = "accumulo";
+  public static final String COSMOS = "cosmos";
   protected SchemaDefiner<?> definer;
-  private AccumuloSchema<CosmosSql> schema;
+  private CosmosSchema<CosmosSql> schema;
   
   protected String jdbcConnector = null;
   
-  protected AccumuloDriver(String connectorName) {
+  protected CosmosDriver(String connectorName) {
     super();
     jdbcConnector = connectorName;
   }
   
-  public AccumuloDriver(SchemaDefiner<?> definer, String connectorPrefix) {
+  public CosmosDriver(SchemaDefiner<?> definer, String connectorPrefix) {
     this(connectorPrefix);
     this.definer = definer;
     register();
@@ -44,7 +44,7 @@ public class AccumuloDriver extends UnregisteredDriver {
   }
   
   protected DriverVersion createDriverVersion() {
-    return new AccumuloJdbcDriverVersion(jdbcConnector);
+    return new CosmosJdbcDriverVersion(jdbcConnector);
   }
   
   @Override
@@ -53,15 +53,14 @@ public class AccumuloDriver extends UnregisteredDriver {
     OptiqConnection optiqConnection = (OptiqConnection) connection;
     
     final MutableSchema rootSchema = optiqConnection.getRootSchema();
-    final String schemaName = "sorts";
     
     // optiqConnection.setSchema("");
     try {
-      schema = new AccumuloSchema<CosmosSql>(rootSchema, "sorts", "sorts", "sorts", rootSchema.getSubSchemaExpression(schemaName, AccumuloSchema.class),
+      schema = new CosmosSchema<CosmosSql>(rootSchema, "cosmos", rootSchema.getSubSchemaExpression(COSMOS, CosmosSchema.class),
           (CosmosSql) definer, CosmosTable.class);
       
       schema.initialize();
-      rootSchema.addSchema(schemaName, schema);
+      rootSchema.addSchema(COSMOS, schema);
       
       Map<String,Object> users = Maps.newHashMap();
       users.put("admin", "changeme");
