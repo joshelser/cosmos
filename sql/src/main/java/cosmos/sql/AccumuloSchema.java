@@ -8,7 +8,8 @@ import net.hydromatic.optiq.Schema;
 import net.hydromatic.optiq.Table;
 import net.hydromatic.optiq.impl.java.MapSchema;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
   
@@ -16,7 +17,7 @@ public class AccumuloSchema<T extends SchemaDefiner<?>> extends MapSchema {
   
   private Class<? extends AccumuloTable<?>> clazz = null;
   
-  private static final Logger log = Logger.getLogger(AccumuloSchema.class);
+  private static final Logger log = LoggerFactory.getLogger(AccumuloSchema.class);
   
   /**
    * Accumulo schema constructor

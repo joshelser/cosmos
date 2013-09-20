@@ -13,10 +13,11 @@ import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 
 import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.TableNotFoundException;
-import org.apache.log4j.Logger;
 import org.eigenbase.reltype.RelDataType;
 import org.eigenbase.reltype.RelDataTypeFactory;
 import org.eigenbase.reltype.RelDataTypeFactory.FieldInfoBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.cache.Cache;
@@ -40,11 +41,11 @@ import cosmos.sql.AccumuloSchema;
 import cosmos.sql.AccumuloTable;
 import cosmos.sql.ResultDefiner;
 import cosmos.sql.TableDefiner;
-import cosmos.sql.call.CallIfc;
 import cosmos.sql.call.BaseVisitor;
+import cosmos.sql.call.CallIfc;
+import cosmos.sql.call.ChildVisitor;
 import cosmos.sql.call.Field;
 import cosmos.sql.call.Fields;
-import cosmos.sql.call.ChildVisitor;
 import cosmos.sql.call.impl.Filter;
 import cosmos.sql.impl.functions.FieldLimiter;
 
@@ -73,7 +74,7 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
   
   private AccumuloSchema<?> schema;
   
-  private static final Logger log = Logger.getLogger(CosmosSql.class);
+  private static final Logger log = LoggerFactory.getLogger(CosmosSql.class);
   
   protected Cache<String,CosmosTable> tableCache = CacheBuilder.newBuilder().expireAfterAccess(24, TimeUnit.HOURS).build();
   
@@ -162,11 +163,11 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
       }
       
     } catch (UnexpectedStateException e1) {
-      log.error(e1);
+      log.error("Could not group results", e1);
     } catch (TableNotFoundException e) {
-      log.error(e);
+      log.error("Could not group results", e);
     } catch (UnindexedColumnException e) {
-      log.error(e);
+      log.error("Could not group results", e);
     }
     
     return new AccumuloIterables<Object[]>(returnIter);
@@ -256,12 +257,12 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
           
           tableCache.put(name, table);
         } catch (SecurityException e) {
-          log.error(e);
+          log.error("Could not create CosmosTable", e);
         }
       }
       
     } catch (UnexpectedStateException e) {
-      log.error(e);
+      log.error("Couldn't find result in Cosmos", e);
       
     }
     
@@ -279,7 +280,7 @@ public class CosmosSql extends ResultDefiner implements TableDefiner {
       }
       
     } catch (UnexpectedStateException e) {
-      log.error(e);
+      log.error("Could not find result in Cosmos", e);
     }
     return Collections.emptySet();
   }

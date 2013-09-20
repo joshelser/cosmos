@@ -7,7 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.TableNotFoundException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.cache.Cache;
@@ -19,8 +20,6 @@ import com.google.common.collect.Maps;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import cosmos.Cosmos;
 import cosmos.UnexpectedStateException;
@@ -41,7 +40,7 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
   private SortableResult sortRes;
   private Cosmos cosmosRef;
   
-  private static final Logger log = Logger.getLogger(LogicVisitor.class);
+  private static final Logger log = LoggerFactory.getLogger(LogicVisitor.class);
   
   protected static final Cache<String,Entry<Cosmos,SortableResult>> tempTableCache;
   
@@ -54,11 +53,11 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
         try {
           entry.getKey().delete(entry.getValue());
         } catch (MutationsRejectedException e) {
-          log.error(e);
+          log.error("Could not delete", e);
         } catch (TableNotFoundException e) {
-          log.error(e);
+          log.error("Could not delete", e);
         } catch (UnexpectedStateException e) {
-          log.error(e);
+          log.error("Could not delete", e);
         }
         
       }
@@ -85,9 +84,9 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
       try {
         return entry.getKey().fetch(entry.getValue());
       } catch (TableNotFoundException e) {
-        log.error(e);
+        log.error("Could not fetch results", e);
       } catch (UnexpectedStateException e) {
-        log.error(e);
+        log.error("Could not fetch results", e);
       }
     }
     
@@ -157,7 +156,7 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
       
       return cosmosRef.fetch(meatadata);
     } catch (Exception e) {
-      log.error(e);
+      log.error("Could not fetch results", e);
     }
     
     return iter;
@@ -172,14 +171,11 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
       try {
         iter = Iterables.concat(cosmosRef.fetch(sortRes, new Column(field.toString()), literal.toString()));
       } catch (TableNotFoundException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Could not fetch results", e);
       } catch (UnexpectedStateException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Could not fetch results", e);
       } catch (UnindexedColumnException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Could not fetch results", e);
       }
     }
     return iter;

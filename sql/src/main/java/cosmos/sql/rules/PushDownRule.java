@@ -1,22 +1,21 @@
 package cosmos.sql.rules;
 
-import org.apache.log4j.Logger;
 import org.eigenbase.rel.AggregateRel;
 import org.eigenbase.rel.FilterRel;
 import org.eigenbase.rel.InvalidRelException;
 import org.eigenbase.rel.ProjectRel;
 import org.eigenbase.rel.RelNode;
-import org.eigenbase.rel.SortRel;
 import org.eigenbase.relopt.RelOptRuleCall;
 import org.eigenbase.relopt.RelOptRuleOperand;
 import org.eigenbase.relopt.RelTraitSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cosmos.sql.AccumuloRel;
 import cosmos.sql.impl.CosmosTable;
 import cosmos.sql.rules.impl.Filter;
 import cosmos.sql.rules.impl.GroupBy;
 import cosmos.sql.rules.impl.Projection;
-import cosmos.sql.rules.impl.EnumerableSort;
 
 /**
  * Initially the rule were separate; however, since they can be handled in a single class we simply use this class to push the rules down the optimizer
@@ -28,7 +27,7 @@ public class PushDownRule extends RuleBase {
   
   CosmosTable accumuloAccessor;
   
-  private static final Logger log = Logger.getLogger(PushDownRule.class);
+  private static final Logger log = LoggerFactory.getLogger(PushDownRule.class);
   
   public PushDownRule(CosmosTable resultTable, RelOptRuleOperand operand, String name) {
     super(operand, PushDownRule.class.getSimpleName() + name);
@@ -66,7 +65,7 @@ public class PushDownRule extends RuleBase {
       try {
         call.transformTo(new GroupBy(aggy.getCluster(), traits, convertedInput, aggy.getGroupSet(), aggy.getAggCallList(), accumuloAccessor));
       } catch (InvalidRelException e) {
-        log.error(e);
+        log.error("Could not transform aggregate into groupby", e);
       }
     } else {
       
