@@ -19,6 +19,7 @@
  */
 package cosmos.sql.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 
 import cosmos.sql.call.ChildVisitor;
@@ -28,6 +29,7 @@ public class FilterFilter implements Predicate<ChildVisitor> {
 
   @Override
   public boolean apply(ChildVisitor input) {
+	Preconditions.checkNotNull(input);
     if (input instanceof FieldEquality)
       return true;
     else
