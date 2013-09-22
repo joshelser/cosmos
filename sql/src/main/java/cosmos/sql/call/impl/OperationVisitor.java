@@ -1,3 +1,22 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with this
+ * work for additional information regarding copyright ownership. The ASF
+ * licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *  Copyright 2013 
+ *
+ */
 package cosmos.sql.call.impl;
 
 import net.hydromatic.linq4j.Ord;
@@ -22,12 +41,12 @@ import cosmos.sql.call.impl.operators.OrOperator;
 public class OperationVisitor extends RexVisitorImpl<ChildVisitor> {
   final StringBuilder buf = new StringBuilder();
   private final RelNode input;
-  
+
   public OperationVisitor(RelNode input) {
     super(true);
     this.input = input;
   }
-  
+
   @Override
   public ChildVisitor visitCall(RexCall call) {
     final SqlSyntax syntax = call.getOperator().getSyntax();
@@ -46,11 +65,11 @@ public class OperationVisitor extends RexVisitorImpl<ChildVisitor> {
           case Cast:
             // Ignore casts. Drill is type-less.
             return call.getOperands().get(0).accept(this);
+          default:
+            break;
         }
         if (call.getOperator() == SqlStdOperatorTable.itemOp) {
           final RexNode left = call.getOperands().get(0);
-          final RexLiteral literal = (RexLiteral) call.getOperands().get(1);
-          final String field = (String) literal.getValue2();
           final int length = buf.length();
           left.accept(this);
           if (buf.length() > length) {
@@ -65,12 +84,12 @@ public class OperationVisitor extends RexVisitorImpl<ChildVisitor> {
         throw new AssertionError("todo: implement syntax " + syntax + "(" + call + ")");
     }
   }
-  
+
   public ChildVisitor visitBinary(RexCall binarySyntax) {
-    
+
     ChildVisitor left = binarySyntax.getOperands().get(0).accept(this);
     ChildVisitor right = binarySyntax.getOperands().get(1).accept(this);
-    
+
     SqlOperator operator = binarySyntax.getOperator();
     Operator op = null;
     switch (operator.getKind()) {
@@ -85,31 +104,31 @@ public class OperationVisitor extends RexVisitorImpl<ChildVisitor> {
         break;
       default:
         op = new Operator(operator);
-        
+
     }
     op.addChild("left", left);
     op.addChild("right", right);
     return op;
-    
+
   }
-  
+
   @Override
   public String toString() {
     return buf.toString();
   }
-  
+
   @Override
   public ChildVisitor visitInputRef(RexInputRef inputRef) {
-    
+
     final int index = inputRef.getIndex();
     final RelDataTypeField field = input.getRowType().getFieldList().get(index);
     return new Field(field.getName());
   }
-  
+
   @Override
   public ChildVisitor visitLiteral(RexLiteral literal) {
-    
+
     return new Literal(RexLiteral.stringValue(literal));
   }
-  
+
 }
