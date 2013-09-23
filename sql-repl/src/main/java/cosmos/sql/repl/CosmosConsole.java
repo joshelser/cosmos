@@ -31,6 +31,8 @@ import org.mediawiki.xml.export_0.MediaWikiType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 
@@ -50,9 +52,24 @@ public class CosmosConsole {
   private static final String EXIT = "exit";
   private static final String PROMPT = "cosmos> ";
   
-  public static final String JDBC_URL = "https://localhost:8089";
-  public static final String USER = "admin";
-  public static final String PASSWORD = "changeme";
+  public static class CosmosConsoleOptions {
+    @Parameter(names = {"--id", "-s"}, description = "The UUID of the SortableResult to use")
+    public String uuid;
+    
+    @Parameter(names = {"--zookeepers", "-z"}, description = "CSV of zookeepers to use")
+    public String zookeepers;
+    
+    @Parameter(names = {"--instance", "-i"}, description = "Accumulo instance name")
+    public String instanceName;
+    
+    @Parameter(names = {"--username", "-u"}, description = "Accumulo user name")
+    public String username;
+    
+    @Parameter(names = {"--password", "-p"}, description = "Accumulo user password")
+    public String password;
+    
+    public CosmosConsoleOptions() {} 
+  }
   
   protected Cosmos cosmos;
   protected Connection connection;
@@ -63,8 +80,8 @@ public class CosmosConsole {
   }
   
   /**
-   * Load the History from disk if a $HOME directory is defined,
-   * otherwise fall back to using an in-memory history object  
+   * Load the History from disk if a $HOME directory is defined, otherwise fall back to using an in-memory history object
+   * 
    * @return
    * @throws IOException
    */
@@ -219,48 +236,67 @@ public class CosmosConsole {
       throw new RuntimeException("driver not found", e);
     }
     
-    try {
-      MiniAccumuloConfig macConf = new MiniAccumuloConfig(tmp, passwd);
-      macConf.setNumTservers(1);
+    try { 
+      CosmosConsoleOptions consoleOptions = new CosmosConsoleOptions();
+      new JCommander(consoleOptions, args);
       
-      mac = new MiniAccumuloCluster(macConf);
+      SortableResult id = null;
+      Connector connector = null;
       
-      mac.start();
-      
-      log.info("Started Accumulo MiniCluster");
-      
-      // Pre-load jaxb
-      CosmosIntegrationSetup.initializeJaxb();
-      
-      MediaWikiType wiki1 = CosmosIntegrationSetup.getWiki1();
-      List<QueryResult<?>> results1 = CosmosIntegrationSetup.wikiToMultimap(wiki1);
-      
-      cosmos = new CosmosImpl(mac.getZooKeepers());
-      
-      ZooKeeperInstance instance = new ZooKeeperInstance(mac.getInstanceName(), mac.getZooKeepers());
-      Connector connector = instance.getConnector("root", new PasswordToken(passwd));
-      
-      connector.securityOperations().changeUserAuthorizations("root", new Authorizations("en"));
-      
-      SortableResult id = new SortableResult(connector, connector.securityOperations().getUserAuthorizations("root"), 
-          Sets.newHashSet(Index.define("PAGE_ID"), Index.define("PAGE_TITLE"), Index.define("CONTRIBUTOR_IP"), Index.define("CONTRIBUTOR_USERNAME"),
-              Index.define("CONTRIBUTOR_ID"), Index.define("REVISION_ID"), Index.define("REVISION_TIMESTAMP"), Index.define("REVISION_COMMENT")));
-      
-      cosmos.register(id);
-      cosmos.addResults(id, results1);
-      cosmos.finalize(id);
-      
-      log.info("Loaded wiki data with an id of {}", id.uuid());
+      if (null == consoleOptions.uuid) {
+        log.info("Starting Accumulo MiniCluster");
+        
+        MiniAccumuloConfig macConf = new MiniAccumuloConfig(tmp, passwd);
+        macConf.setNumTservers(1);
+        
+        mac = new MiniAccumuloCluster(macConf);
+        
+        mac.start();
+        
+        log.info("Loading wiki data");
+        
+        // Pre-load jaxb
+        CosmosIntegrationSetup.initializeJaxb();
+        
+        MediaWikiType wiki1 = CosmosIntegrationSetup.getWiki1();
+        List<QueryResult<?>> results1 = CosmosIntegrationSetup.wikiToMultimap(wiki1);
+        
+        cosmos = new CosmosImpl(mac.getZooKeepers());
+        
+        ZooKeeperInstance instance = new ZooKeeperInstance(mac.getInstanceName(), mac.getZooKeepers());
+        connector = instance.getConnector("root", new PasswordToken(passwd));
+        
+        // Set this since we know we need it for the wiki test data
+        connector.securityOperations().changeUserAuthorizations("root", new Authorizations("en"));
+        
+        id = new SortableResult(connector, connector.securityOperations().getUserAuthorizations("root"), CosmosIntegrationSetup.ALL_INDEXES);
+        
+        cosmos.register(id);
+        cosmos.addResults(id, results1);
+        cosmos.finalize(id);
+        
+        log.info("Loaded wiki data with an id of {}", id.uuid());
+      } else {
+        if (null == consoleOptions.instanceName || null == consoleOptions.zookeepers || null == consoleOptions.username || null == consoleOptions.password) {
+          log.error("If an ID for preloaded data is provided, connection information must also be provided");
+          System.exit(1);
+          return;
+        }
+        
+        ZooKeeperInstance instance = new ZooKeeperInstance(consoleOptions.instanceName, consoleOptions.zookeepers);
+        connector = instance.getConnector(consoleOptions.username, new PasswordToken(consoleOptions.password));
+        
+        cosmos = new CosmosImpl(consoleOptions.zookeepers);
+        
+        id = SortableResult.create(connector, connector.securityOperations().getUserAuthorizations("root"), consoleOptions.uuid, CosmosIntegrationSetup.ALL_INDEXES);
+        log.info("Using pre-loaded data in {}", consoleOptions.uuid);
+      }
       
       cosmosSql = new CosmosSql(cosmos);
       
-      new CosmosDriver(cosmosSql, "cosmos");
+      CosmosDriver driver = new CosmosDriver(cosmosSql, "cosmos");
       
-      Properties info = new Properties();
-      info.put("url", JDBC_URL);
-      info.put("user", USER);
-      info.put("password", PASSWORD);
-      Connection connection = DriverManager.getConnection("jdbc:accumulo:cosmos//localhost", info);
+      Connection connection = DriverManager.getConnection(CosmosDriver.jdbcConnectionString(driver) + "//localhost", new Properties());
       
       CosmosConsole console = new CosmosConsole(cosmos, connection);
       

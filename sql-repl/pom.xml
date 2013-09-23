@@ -94,5 +94,41 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>shell</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <configuration>
+              <executable>java</executable>
+              <arguments>
+                <argument>-classpath</argument>
+                <classpath></classpath>
+                <argument>cosmos.sql.repl.CosmosConsole</argument>
+                <argument>-z</argument>
+                <argument>${zookeepers}</argument>
+                <argument>-i</argument>
+                <argument>${instanceName}</argument>
+                <argument>-u</argument>
+                <argument>${username}</argument>
+                <argument>-p</argument>
+                <argument>${password}</argument>
+                <argument>-s</argument>
+                <argument>${sortable_result_id}</argument>
+              </arguments>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+      <!-- Some "reasonable" defaults" -->
+      <properties>
+        <zookeepers>localhost:2181</zookeepers>
+        <instanceName>accumulo</instanceName>
+        <username>root</username>
+        <password>password</password>
+      </properties>
+    </profile>
   </profiles>
 </project>
