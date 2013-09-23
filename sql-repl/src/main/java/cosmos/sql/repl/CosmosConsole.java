@@ -2,6 +2,7 @@ package cosmos.sql.repl;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -11,8 +12,10 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.TreeSet;
 
 import jline.console.ConsoleReader;
+import jline.console.history.FileHistory;
 
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
@@ -25,7 +28,6 @@ import org.mediawiki.xml.export_0.MediaWikiType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 
@@ -43,7 +45,7 @@ import cosmos.sql.impl.CosmosSql;
 public class CosmosConsole {
   private static final Logger log = LoggerFactory.getLogger(CosmosConsole.class);
   private static final String EXIT = "exit";
-  private static final String PROMPT = "cosmos > ";
+  private static final String PROMPT = "cosmos> ";
   
   public static final String JDBC_URL = "https://localhost:8089";
   public static final String USER = "admin";
@@ -58,12 +60,45 @@ public class CosmosConsole {
   }
   
   public void startRepl() {
+    ConsoleReader reader = null;
+    FileHistory history = null;
+    
     try {
-      ConsoleReader reader = new ConsoleReader();
+      reader = new ConsoleReader();
+      PrintWriter sysout = new PrintWriter(reader.getOutput());
+      
+      String home = System.getProperty("HOME");
+      if (null == home) {
+        home = System.getenv("HOME");
+      }
+      
+      // Get the home directory
+      File homeDir = new File(home);
+      
+      // Make sure it actually exists
+      if (homeDir.exists() && homeDir.isDirectory()) {
+        // Check for, and create if necessary, the directory for cosmos to use
+        File historyDir = new File(homeDir, ".cosmos");
+        if (!historyDir.exists() && !historyDir.mkdirs()) {
+          log.warn("Could not create directory for history at {}", historyDir);
+        }
+        
+        // Get a file for jline history
+        File historyFile = new File(historyDir, "history");
+        history = new FileHistory(historyFile);
+        reader.setHistory(history);
+      } else {
+        log.warn("Home directory not found: {}", homeDir);
+      }
       
       String line;
       while ((line = reader.readLine(PROMPT)) != null) {
         line = StringUtils.strip(line);
+        
+        if (StringUtils.isBlank(line)) {
+          continue;
+        }
+        
         if (EXIT.equals(line)) {
           break;
         }
@@ -77,7 +112,7 @@ public class CosmosConsole {
           final ResultSetMetaData metadata = resultSet.getMetaData();
           final int columnCount = metadata.getColumnCount();
           
-          List<String> columns = Lists.newArrayListWithExpectedSize(columnCount);
+          TreeSet<String> columns = Sets.newTreeSet();
           StringBuilder header = new StringBuilder(256);
           final String separator = "\t";
           final String newline = "\n";
@@ -86,7 +121,7 @@ public class CosmosConsole {
             String columnName = metadata.getColumnName(i);
             columns.add(columnName);
             header.append(columnName);
-            if (i <= columnCount - 1) {
+            if (i < columnCount) {
               header.append(separator);
             }
           }
@@ -116,21 +151,33 @@ public class CosmosConsole {
           }
           
           // Print out the header and then the body (we already have an extra newline on the body)
-          System.out.println(header);
-          System.out.print(body);
+          sysout.println(header);
+          sysout.print(body);
           
         } catch (SQLException e) {
           log.error("SQLException", e);
-          System.out.println();
+          sysout.println();
         } catch (RuntimeException e) {
           log.error("RuntimeException", e);
-          System.out.println();
+          sysout.println();
+        } finally {
+          sysout.flush();
         }
       }
     } catch (IOException e) {
       log.error("Caught IOException", e);
     } finally {
+      if (null != reader) {
+        reader.shutdown();
+      }
       
+      if (null != history) {
+        try {
+          history.flush();
+        } catch (IOException e) {
+          log.warn("Couldn't flush history to disk", e);
+        }
+      }
     }
   }
   
@@ -150,13 +197,14 @@ public class CosmosConsole {
     }
     
     try {
-      
       MiniAccumuloConfig macConf = new MiniAccumuloConfig(tmp, passwd);
       macConf.setNumTservers(1);
       
       mac = new MiniAccumuloCluster(macConf);
       
       mac.start();
+      
+      log.info("Started Accumulo MiniCluster");
       
       // Pre-load jaxb
       CosmosIntegrationSetup.initializeJaxb();
