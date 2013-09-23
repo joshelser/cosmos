@@ -24,13 +24,13 @@ import net.hydromatic.optiq.rules.java.EnumerableConvention;
 import org.eigenbase.rel.RelNode;
 import org.eigenbase.rel.convert.ConverterRule;
 
-import cosmos.sql.AccumuloRel;
+import cosmos.sql.CosmosRelNode;
 
 public class EnumerableExpression extends ConverterRule {
   public static final EnumerableExpression ARRAY_INSTANCE = new EnumerableExpression();
   
   private EnumerableExpression() {
-    super(RelNode.class, AccumuloRel.CONVENTION, EnumerableConvention.INSTANCE, "EnumerableRule");
+    super(RelNode.class, CosmosRelNode.CONVENTION, EnumerableConvention.INSTANCE, "EnumerableRule");
     
   }
   
@@ -41,7 +41,7 @@ public class EnumerableExpression extends ConverterRule {
   
   @Override
   public RelNode convert(RelNode rel) {
-    assert rel.getTraitSet().contains(AccumuloRel.CONVENTION);
+    assert rel.getTraitSet().contains(CosmosRelNode.CONVENTION);
     return new EnumerableRelation(rel.getCluster(), rel.getTraitSet().replace(getOutConvention()), rel);
   }
 }

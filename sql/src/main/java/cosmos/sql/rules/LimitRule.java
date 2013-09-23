@@ -29,7 +29,7 @@ import org.eigenbase.relopt.Convention;
 import org.eigenbase.relopt.RelOptRuleCall;
 import org.eigenbase.relopt.RelTraitSet;
 
-import cosmos.sql.AccumuloRel;
+import cosmos.sql.CosmosRelNode;
 import cosmos.sql.impl.CosmosTable;
 import cosmos.sql.rules.impl.EnumerableSort;
 
@@ -43,7 +43,7 @@ public class LimitRule extends ConverterRule {
   CosmosTable accumuloAccessor;
 
   public LimitRule(CosmosTable resultTable) {
-    super(SortRel.class, Convention.NONE, AccumuloRel.CONVENTION, "SorterShmorter");
+    super(SortRel.class, Convention.NONE, CosmosRelNode.CONVENTION, "SorterShmorter");
     this.accumuloAccessor = resultTable;
   }
 
@@ -58,14 +58,14 @@ public class LimitRule extends ConverterRule {
       return;
     }
 
-    final RelTraitSet traits = sort.getTraitSet().plus(AccumuloRel.CONVENTION);
+    final RelTraitSet traits = sort.getTraitSet().plus(CosmosRelNode.CONVENTION);
 
     RelNode input = sort.getChild();
     if (!sort.getCollation().getFieldCollations().isEmpty()) {
       input = sort.copy(sort.getTraitSet().replace(RelCollationImpl.EMPTY), input, RelCollationImpl.EMPTY, null, null);
     }
 
-    final RelNode convertedInput = convert(input, input.getTraitSet().plus(AccumuloRel.CONVENTION));
+    final RelNode convertedInput = convert(input, input.getTraitSet().plus(CosmosRelNode.CONVENTION));
 
     call.transformTo(new EnumerableSort(sort.getCluster(), traits, convertedInput, sort.fetch, sort.offset, accumuloAccessor));
 

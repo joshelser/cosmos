@@ -28,15 +28,15 @@ import com.google.common.collect.Iterators;
  * 
  * @param <T>
  */
-public class AccumuloIterables<T> implements Iterable<T> {
+public class BaseIterable<T> implements Iterable<T> {
 
   Iterator<T> kvIter;
 
-  public AccumuloIterables() {
+  public BaseIterable() {
     kvIter = Iterators.emptyIterator();
   }
 
-  public AccumuloIterables(Iterator<T> uter) {
+  public BaseIterable(Iterator<T> uter) {
     kvIter = uter;
 
   }

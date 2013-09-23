@@ -161,7 +161,6 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
     }
 
     SortableResult meatadata = new SortableResult(sortRes.connector(), sortRes.auths(), sortRes.columnsToIndex());
-
     try {
       cosmosRef.register(meatadata);
       cosmosRef.addResults(meatadata, iter);

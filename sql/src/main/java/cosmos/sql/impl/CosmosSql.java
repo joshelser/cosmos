@@ -54,10 +54,10 @@ import cosmos.options.Index;
 import cosmos.results.Column;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
-import cosmos.sql.AccumuloIterables;
-import cosmos.sql.AccumuloRel;
-import cosmos.sql.AccumuloTable;
-import cosmos.sql.CosmosSchema;
+import cosmos.sql.BaseIterable;
+import cosmos.sql.CosmosRelNode;
+import cosmos.sql.DataTable;
+import cosmos.sql.TableSchema;
 import cosmos.sql.SchemaDefiner;
 import cosmos.sql.TableDefiner;
 import cosmos.sql.call.BaseVisitor;
@@ -89,7 +89,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
 
   private JavaTypeFactory typeFactory;
 
-  private CosmosSchema<?> schema;
+  private TableSchema<?> schema;
 
   private static final Logger log = LoggerFactory.getLogger(CosmosSql.class);
 
@@ -114,7 +114,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
 
   @SuppressWarnings("unchecked")
   @Override
-  public AccumuloIterables<Object[]> iterator(List<String> schemaLayout, AccumuloRel.Plan planner, AccumuloRel.Plan aggregatePlan) {
+  public BaseIterable<Object[]> iterator(List<String> schemaLayout, CosmosRelNode.Plan planner, CosmosRelNode.Plan aggregatePlan) {
 
     plannedParentHood = Lists.newArrayList();
     iter = Collections.emptyList();
@@ -186,7 +186,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
       log.error("Could not group results", e);
     }
 
-    return new AccumuloIterables<Object[]>(returnIter);
+    return new BaseIterable<Object[]>(returnIter);
   }
 
   private Iterable<MultimapQueryResult> buildFilterIterator(List<ChildVisitor> filters, SortableResult res) {
@@ -252,7 +252,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
   }
 
   @Override
-  public AccumuloTable<?> getTable(String name) {
+  public DataTable<?> getTable(String name) {
     CosmosTable table = tableCache.getIfPresent(name);
     try {
 
@@ -301,7 +301,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
   }
 
   @Override
-  public void register(CosmosSchema<?> parentSchema) {
+  public void register(TableSchema<?> parentSchema) {
     this.schema = parentSchema;
     this.typeFactory = parentSchema.getTypeFactory();
 

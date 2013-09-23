@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import cosmos.options.Index;
-import cosmos.sql.AccumuloRel.Plan;
+import cosmos.sql.CosmosRelNode.Plan;
 
 /**
  * Interface that defines an interface that enables us funcionality in defining our referential schema.
@@ -33,11 +33,11 @@ import cosmos.sql.AccumuloRel.Plan;
 
 public interface SchemaDefiner<T> {
 
-  public void register(CosmosSchema<?> parentSchema);
+  public void register(TableSchema<?> parentSchema);
 
   public String getDataTable();
 
   public Set<Index> getIndexColumns(String table);
 
-  public AccumuloIterables<T> iterator(List<String> schemaLayout, AccumuloRel.Plan query, Plan aggregatePlan);
+  public BaseIterable<T> iterator(List<String> schemaLayout, CosmosRelNode.Plan query, Plan aggregatePlan);
 }

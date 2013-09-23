@@ -34,17 +34,17 @@ import org.eigenbase.relopt.RelOptPlanner;
 import org.eigenbase.relopt.RelTraitSet;
 import org.eigenbase.rex.RexNode;
 
-import cosmos.sql.AccumuloRel;
-import cosmos.sql.AccumuloTable;
+import cosmos.sql.CosmosRelNode;
+import cosmos.sql.DataTable;
 
-public class EnumerableSort extends SingleRel implements AccumuloRel, EnumerableRel {
+public class EnumerableSort extends SingleRel implements CosmosRelNode, EnumerableRel {
 
-  private AccumuloTable<?> accumuloAccessor;
+  private DataTable<?> accumuloAccessor;
 
   private RexNode offset = null;
   private RexNode fetch = null;
 
-  public EnumerableSort(RelOptCluster cluster, RelTraitSet traits, RelNode input, RexNode offset, RexNode fetch, AccumuloTable<?> accumuloAccessor) {
+  public EnumerableSort(RelOptCluster cluster, RelTraitSet traits, RelNode input, RexNode offset, RexNode fetch, DataTable<?> accumuloAccessor) {
     super(cluster, traits, input);
 
     this.offset = offset;

@@ -41,15 +41,15 @@ import org.eigenbase.relopt.RelOptCost;
 import org.eigenbase.relopt.RelOptPlanner;
 import org.eigenbase.relopt.RelTraitSet;
 
-import cosmos.sql.AccumuloRel;
-import cosmos.sql.AccumuloTable;
+import cosmos.sql.CosmosRelNode;
+import cosmos.sql.DataTable;
 import cosmos.sql.call.Field;
 
-public class GroupBy extends EnumerableAggregateRel implements AccumuloRel {
+public class GroupBy extends EnumerableAggregateRel implements CosmosRelNode {
   
-  private AccumuloTable<?> accumuloAccessor;
+  private DataTable<?> accumuloAccessor;
   
-  public GroupBy(RelOptCluster cluster, RelTraitSet traits, RelNode input, BitSet groupSet, List<AggregateCall> list, AccumuloTable<?> accumuloAccessor)
+  public GroupBy(RelOptCluster cluster, RelTraitSet traits, RelNode input, BitSet groupSet, List<AggregateCall> list, DataTable<?> accumuloAccessor)
       throws InvalidRelException {
     super(cluster, traits, input, groupSet, list);
     assert getConvention() instanceof EnumerableConvention;

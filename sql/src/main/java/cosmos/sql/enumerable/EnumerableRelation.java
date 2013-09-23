@@ -47,8 +47,8 @@ import org.eigenbase.reltype.RelDataTypeFactory;
 import org.eigenbase.reltype.RelDataTypeField;
 import org.eigenbase.reltype.RelDataTypeFieldImpl;
 
-import cosmos.sql.AccumuloRel;
-import cosmos.sql.AccumuloRel.Plan;
+import cosmos.sql.CosmosRelNode;
+import cosmos.sql.CosmosRelNode.Plan;
 
 public class EnumerableRelation extends SingleRel implements EnumerableRel {
   
@@ -70,7 +70,7 @@ public class EnumerableRelation extends SingleRel implements EnumerableRel {
     super(cluster, traitSet, input);
     factory = (JavaTypeFactory) cluster.getTypeFactory();
     assert getConvention() instanceof EnumerableConvention;
-    assert input.getConvention() == AccumuloRel.CONVENTION;
+    assert input.getConvention() == CosmosRelNode.CONVENTION;
     physType = PhysTypeImpl.of((JavaTypeFactory) cluster.getTypeFactory(), input.getRowType(), JavaRowFormat.ARRAY);
     
   }
@@ -111,7 +111,7 @@ public class EnumerableRelation extends SingleRel implements EnumerableRel {
     
     final BlockBuilder list = new BlockBuilder();
     
-    selectQuery = new AccumuloRel.Plan();
+    selectQuery = new CosmosRelNode.Plan();
     
     selectQuery.visitChild(getChild());
     

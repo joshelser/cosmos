@@ -33,8 +33,8 @@ import org.eigenbase.relopt.RelTraitSet;
 import org.eigenbase.reltype.RelDataType;
 import org.eigenbase.rex.RexNode;
 
-import cosmos.sql.AccumuloRel;
-import cosmos.sql.AccumuloTable;
+import cosmos.sql.CosmosRelNode;
+import cosmos.sql.DataTable;
 import cosmos.sql.call.CallIfc;
 import cosmos.sql.call.impl.OperationVisitor;
 
@@ -43,11 +43,11 @@ import cosmos.sql.call.impl.OperationVisitor;
  * 
  * 
  */
-public class Projection extends ProjectRelBase implements AccumuloRel {
+public class Projection extends ProjectRelBase implements CosmosRelNode {
   
-  private AccumuloTable<?> accumuloAccessor;
+  private DataTable<?> accumuloAccessor;
   
-  public Projection(RelOptCluster cluster, RelTraitSet traits, RelNode child, List<RexNode> exps, RelDataType rowType, AccumuloTable<?> accumuloAccessor) {
+  public Projection(RelOptCluster cluster, RelTraitSet traits, RelNode child, List<RexNode> exps, RelDataType rowType, DataTable<?> accumuloAccessor) {
     super(cluster, traits, child, exps, rowType, Flags.Boxed, Collections.<RelCollation> emptyList());
     assert getConvention() == CONVENTION;
     this.accumuloAccessor = accumuloAccessor;
