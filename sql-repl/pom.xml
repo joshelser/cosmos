@@ -1,14 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>cosmos-project</artifactId>
     <groupId>cosmos</groupId>
+    <artifactId>cosmos-project</artifactId>
     <version>0.3.0-SNAPSHOT</version>
   </parent>
-  <artifactId>cosmos-sql</artifactId>
-  <name>SQL</name>
-  <dependencies>
+  <artifactId>cosmos-sql-repl</artifactId>
+  <name>SQL REPL</name>
+    <dependencies>
     <dependency>
       <groupId>cosmos</groupId>
       <artifactId>cosmos-core</artifactId>
@@ -16,6 +15,10 @@
     <dependency>
       <groupId>cosmos</groupId>
       <artifactId>cosmos-test</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>cosmos</groupId>
+      <artifactId>cosmos-sql</artifactId>
     </dependency>
     <dependency>
       <groupId>cosmos</groupId>
@@ -66,13 +69,13 @@
       <artifactId>jline</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.curator</groupId>
-      <artifactId>curator-test</artifactId>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.11.0</version>
     </dependency>
   </dependencies>
 </project>
