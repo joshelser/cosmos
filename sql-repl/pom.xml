@@ -74,4 +74,25 @@
       <version>2.11.0</version>
     </dependency>
   </dependencies>
+  <profiles>
+    <profile>
+      <id>mac-shell</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <configuration>
+              <executable>java</executable>
+              <arguments>
+                <argument>-classpath</argument>
+                <classpath></classpath>
+                <argument>cosmos.sql.repl.CosmosConsole</argument>
+              </arguments>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
