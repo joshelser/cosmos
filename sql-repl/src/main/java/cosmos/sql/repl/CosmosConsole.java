@@ -16,6 +16,8 @@ import java.util.TreeSet;
 
 import jline.console.ConsoleReader;
 import jline.console.history.FileHistory;
+import jline.console.history.History;
+import jline.console.history.MemoryHistory;
 
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
@@ -23,6 +25,7 @@ import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
 import org.apache.accumulo.minicluster.MiniAccumuloConfig;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.mediawiki.xml.export_0.MediaWikiType;
 import org.slf4j.Logger;
@@ -59,46 +62,62 @@ public class CosmosConsole {
     this.connection = connection;
   }
   
+  /**
+   * Load the History from disk if a $HOME directory is defined,
+   * otherwise fall back to using an in-memory history object  
+   * @return
+   * @throws IOException
+   */
+  protected History getJLineHistory() throws IOException {
+    String home = System.getProperty("HOME");
+    if (null == home) {
+      home = System.getenv("HOME");
+    }
+    
+    // Get the home directory
+    File homeDir = new File(home);
+    
+    // Make sure it actually exists
+    if (homeDir.exists() && homeDir.isDirectory()) {
+      // Check for, and create if necessary, the directory for cosmos to use
+      File historyDir = new File(homeDir, ".cosmos");
+      if (!historyDir.exists() && !historyDir.mkdirs()) {
+        log.warn("Could not create directory for history at {}", historyDir);
+      }
+      
+      // Get a file for jline history
+      File historyFile = new File(historyDir, "history");
+      return new FileHistory(historyFile);
+    } else {
+      log.warn("Home directory not found: {}, using temporary history", homeDir);
+      return new MemoryHistory();
+    }
+  }
+  
   public void startRepl() {
     ConsoleReader reader = null;
-    FileHistory history = null;
+    History history = null;
     
     try {
       reader = new ConsoleReader();
       PrintWriter sysout = new PrintWriter(reader.getOutput());
       
-      String home = System.getProperty("HOME");
-      if (null == home) {
-        home = System.getenv("HOME");
-      }
-      
-      // Get the home directory
-      File homeDir = new File(home);
-      
-      // Make sure it actually exists
-      if (homeDir.exists() && homeDir.isDirectory()) {
-        // Check for, and create if necessary, the directory for cosmos to use
-        File historyDir = new File(homeDir, ".cosmos");
-        if (!historyDir.exists() && !historyDir.mkdirs()) {
-          log.warn("Could not create directory for history at {}", historyDir);
-        }
-        
-        // Get a file for jline history
-        File historyFile = new File(historyDir, "history");
-        history = new FileHistory(historyFile);
+      // Try to load the history and set it on the ConsoleReader
+      history = getJLineHistory();
+      if (null != history) {
         reader.setHistory(history);
-      } else {
-        log.warn("Home directory not found: {}", homeDir);
       }
       
       String line;
       while ((line = reader.readLine(PROMPT)) != null) {
         line = StringUtils.strip(line);
         
+        // Eat a blank line
         if (StringUtils.isBlank(line)) {
           continue;
         }
         
+        // Quit on `exit`
         if (EXIT.equals(line)) {
           break;
         }
@@ -172,10 +191,12 @@ public class CosmosConsole {
       }
       
       if (null != history) {
-        try {
-          history.flush();
-        } catch (IOException e) {
-          log.warn("Couldn't flush history to disk", e);
+        if (FileHistory.class.isAssignableFrom(history.getClass())) {
+          try {
+            ((FileHistory) history).flush();
+          } catch (IOException e) {
+            log.warn("Couldn't flush history to disk", e);
+          }
         }
       }
     }
@@ -188,6 +209,8 @@ public class CosmosConsole {
     MiniAccumuloCluster mac = null;
     Cosmos cosmos = null;
     CosmosSql cosmosSql = null;
+    
+    log.info("Starting Cosmos Console");
     
     // Make sure optiq can load the class we need for sql
     try {
@@ -255,7 +278,7 @@ public class CosmosConsole {
         log.error("Error stopping Accumulo minicluster", e);
       }
       
-//      FileUtils.deleteDirectory(tmp);
+      FileUtils.deleteDirectory(tmp);
     }
   }
 }
