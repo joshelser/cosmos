@@ -38,7 +38,7 @@ import com.google.common.io.Files;
 
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.SortableResult;
+import cosmos.impl.Store;
 import cosmos.options.Index;
 import cosmos.results.Column;
 import cosmos.results.QueryResult;
@@ -240,7 +240,7 @@ public class CosmosConsole {
       CosmosConsoleOptions consoleOptions = new CosmosConsoleOptions();
       new JCommander(consoleOptions, args);
       
-      SortableResult id = null;
+      Store id = null;
       Connector connector = null;
       
       if (null == consoleOptions.uuid) {
@@ -269,7 +269,7 @@ public class CosmosConsole {
         // Set this since we know we need it for the wiki test data
         connector.securityOperations().changeUserAuthorizations("root", new Authorizations("en"));
         
-        id = new SortableResult(connector, connector.securityOperations().getUserAuthorizations("root"), CosmosIntegrationSetup.ALL_INDEXES);
+        id = new Store(connector, connector.securityOperations().getUserAuthorizations("root"), CosmosIntegrationSetup.ALL_INDEXES);
         
         cosmos.register(id);
         cosmos.addResults(id, results1);
@@ -288,7 +288,7 @@ public class CosmosConsole {
         
         cosmos = new CosmosImpl(consoleOptions.zookeepers);
         
-        id = SortableResult.create(connector, connector.securityOperations().getUserAuthorizations("root"), consoleOptions.uuid, CosmosIntegrationSetup.ALL_INDEXES);
+        id = Store.create(connector, connector.securityOperations().getUserAuthorizations("root"), consoleOptions.uuid, CosmosIntegrationSetup.ALL_INDEXES);
         log.info("Using pre-loaded data in {}", consoleOptions.uuid);
       }
       

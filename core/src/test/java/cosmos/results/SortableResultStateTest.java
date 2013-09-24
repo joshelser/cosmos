@@ -31,7 +31,7 @@ import cosmos.Cosmos;
 import cosmos.SortingMetadata;
 import cosmos.SortingMetadata.State;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.SortableResult;
+import cosmos.impl.Store;
 import cosmos.options.Index;
 
 /**
@@ -42,7 +42,7 @@ public class SortableResultStateTest extends AbstractSortableTest {
   
   @Test
   public void test() throws Exception {
-    SortableResult id = SortableResult.create(c, Constants.NO_AUTHS, Collections.<Index> emptySet());
+    Store id = Store.create(c, Constants.NO_AUTHS, Collections.<Index> emptySet());
     
     Assert.assertEquals(State.UNKNOWN, SortingMetadata.getState(id));
         

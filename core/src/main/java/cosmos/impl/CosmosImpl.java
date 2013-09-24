@@ -93,7 +93,7 @@ public class CosmosImpl implements Cosmos{
   /**
    * TODO: store this in accumulo?
    */
-  protected Map<String,SortableResult> sortableResultMap;
+  protected Map<String,Store> sortableResultMap;
   
   public CosmosImpl(String zookeepers) {
     RetryPolicy retryPolicy = new ExponentialBackoffRetry(2000, 3);
@@ -140,7 +140,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public void register(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
+  public void register(Store id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
     Stopwatch sw = new Stopwatch().start();
@@ -168,7 +168,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public void addResult(SortableResult id, QueryResult<?> queryResult) throws Exception {
+  public void addResult(Store id, QueryResult<?> queryResult) throws Exception {
     checkNotNull(queryResult);
     
     Stopwatch sw = new Stopwatch().start();
@@ -181,7 +181,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public void addResults(SortableResult id, Iterable<? extends QueryResult<?>> queryResults) throws Exception {
+  public void addResults(Store id, Iterable<? extends QueryResult<?>> queryResults) throws Exception {
     checkNotNull(id);
     checkNotNull(queryResults);
     
@@ -228,7 +228,7 @@ public class CosmosImpl implements Cosmos{
     }
   }
   
-  protected void performAdd(SortableResult id, Iterable<? extends QueryResult<?>> queryResults) throws MutationsRejectedException, TableNotFoundException,
+  protected void performAdd(Store id, Iterable<? extends QueryResult<?>> queryResults) throws MutationsRejectedException, TableNotFoundException,
       IOException {
     BatchWriter bw = null, metadataBw = null;
     
@@ -298,7 +298,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public void finalize(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
+  public void finalize(Store id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
     Stopwatch sw = new Stopwatch().start();
@@ -322,7 +322,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public void index(SortableResult id, Set<Index> columnsToIndex) throws Exception {
+  public void index(Store id, Set<Index> columnsToIndex) throws Exception {
     checkNotNull(id);
     checkNotNull(columnsToIndex);
     
@@ -369,7 +369,7 @@ public class CosmosImpl implements Cosmos{
     }
   }
   
-  protected void performUpdate(SortableResult id, Set<Index> columnsToIndex) throws TableNotFoundException, UnexpectedStateException,
+  protected void performUpdate(Store id, Set<Index> columnsToIndex) throws TableNotFoundException, UnexpectedStateException,
       MutationsRejectedException, IOException {
     final IndexHelper indexHelper = IndexHelper.create(columnsToIndex);
     final int numCols = indexHelper.columnCount();
@@ -439,7 +439,7 @@ public class CosmosImpl implements Cosmos{
    * @throws MutationsRejectedException
    * @throws IOException
    */
-  protected void addIndicesForRecord(SortableResult id, MultimapQueryResult result, BatchWriter bw, Collection<Index> indices, Collection<SValue> values)
+  protected void addIndicesForRecord(Store id, MultimapQueryResult result, BatchWriter bw, Collection<Index> indices, Collection<SValue> values)
       throws MutationsRejectedException, IOException {
     // Place an Index entry for each value in each direction defined
     for (Index index : indices) {
@@ -454,7 +454,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public CloseableIterable<Column> columns(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
+  public CloseableIterable<Column> columns(Store id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     
     final String description = "Cosmos:columns";
@@ -481,7 +481,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public CloseableIterable<MultimapQueryResult> fetch(SortableResult id) throws TableNotFoundException, UnexpectedStateException {
+  public CloseableIterable<MultimapQueryResult> fetch(Store id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     
     final String description = "Cosmos:fetch";
@@ -522,7 +522,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+  public PagedQueryResult<MultimapQueryResult> fetch(Store id, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     checkNotNull(limits);
     
@@ -532,7 +532,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public CloseableIterable<MultimapQueryResult> fetch(SortableResult id, Column column, String value) throws TableNotFoundException, UnexpectedStateException {
+  public CloseableIterable<MultimapQueryResult> fetch(Store id, Column column, String value) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     checkNotNull(column);
     checkNotNull(value);
@@ -580,7 +580,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Column column, String value, Paging limits) throws TableNotFoundException,
+  public PagedQueryResult<MultimapQueryResult> fetch(Store id, Column column, String value, Paging limits) throws TableNotFoundException,
       UnexpectedStateException {
     checkNotNull(limits);
     
@@ -590,13 +590,13 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public CloseableIterable<MultimapQueryResult> fetch(SortableResult id, Index ordering) throws TableNotFoundException, UnexpectedStateException,
+  public CloseableIterable<MultimapQueryResult> fetch(Store id, Index ordering) throws TableNotFoundException, UnexpectedStateException,
       UnindexedColumnException {
     return fetch(id, ordering, true);
   }
   
   @Override
-  public CloseableIterable<MultimapQueryResult> fetch(SortableResult id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException,
+  public CloseableIterable<MultimapQueryResult> fetch(Store id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException,
       UnexpectedStateException, UnindexedColumnException {
     checkNotNull(id);
     checkNotNull(ordering);
@@ -659,7 +659,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public PagedQueryResult<MultimapQueryResult> fetch(SortableResult id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException,
+  public PagedQueryResult<MultimapQueryResult> fetch(Store id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException,
       UnindexedColumnException {
     checkNotNull(id);
     checkNotNull(limits);
@@ -670,7 +670,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public CloseableIterable<Entry<SValue,Long>> groupResults(SortableResult id, Column column) throws TableNotFoundException, UnexpectedStateException,
+  public CloseableIterable<Entry<SValue,Long>> groupResults(Store id, Column column) throws TableNotFoundException, UnexpectedStateException,
       UnindexedColumnException {
     checkNotNull(id);
     
@@ -722,7 +722,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public PagedQueryResult<Entry<SValue,Long>> groupResults(SortableResult id, Column column, Paging limits) throws TableNotFoundException,
+  public PagedQueryResult<Entry<SValue,Long>> groupResults(Store id, Column column, Paging limits) throws TableNotFoundException,
       UnexpectedStateException, UnindexedColumnException {
     checkNotNull(limits);
     
@@ -732,7 +732,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public MultimapQueryResult contents(SortableResult id, String docId) throws TableNotFoundException, UnexpectedStateException {
+  public MultimapQueryResult contents(Store id, String docId) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     checkNotNull(docId);
     
@@ -762,7 +762,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public void delete(SortableResult id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
+  public void delete(Store id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException {
     checkNotNull(id);
     
     Stopwatch sw = new Stopwatch().start();
@@ -806,7 +806,7 @@ public class CosmosImpl implements Cosmos{
     }
   }
   
-  protected Mutation getDocumentPrefix(SortableResult id, QueryResult<?> queryResult, String suffix, Order order) {
+  protected Mutation getDocumentPrefix(Store id, QueryResult<?> queryResult, String suffix, Order order) {
     final Text t = new Text();
     byte[] b = id.uuid().getBytes();
     t.append(b, 0, b.length);
@@ -821,7 +821,7 @@ public class CosmosImpl implements Cosmos{
     return new Mutation(t);
   }
   
-  protected Mutation addDocument(SortableResult id, QueryResult<?> queryResult) throws IOException {
+  protected Mutation addDocument(Store id, QueryResult<?> queryResult) throws IOException {
     Mutation m = getDocumentPrefix(id, queryResult, queryResult.docId(), Order.ASCENDING);
     
     // Store the docId as a searchable entry
@@ -833,20 +833,20 @@ public class CosmosImpl implements Cosmos{
     return m;
   }
   
-  protected UnexpectedStateException unexpectedState(SortableResult id, State[] expected, State actual) {
+  protected UnexpectedStateException unexpectedState(Store id, State[] expected, State actual) {
     return new UnexpectedStateException("Invalid state " + id + " for " + id + ". Expected one of " + Arrays.asList(expected) + " but was " + actual);
   }
   
-  protected UnexpectedStateException unexpectedState(SortableResult id, State expected, State actual) {
+  protected UnexpectedStateException unexpectedState(Store id, State expected, State actual) {
     return new UnexpectedStateException("Invalid state " + id + " for " + id + ". Expected " + expected + " but was " + actual);
   }
   
-  protected final InterProcessMutex getMutex(SortableResult id) {
+  protected final InterProcessMutex getMutex(Store id) {
     return new InterProcessMutex(curator, Defaults.CURATOR_PREFIX + id.uuid());
   }
 
 @Override
-public SortableResult fetch(String uuid) throws UnexpectedStateException {
+public Store fetch(String uuid) throws UnexpectedStateException {
 	
 	return sortableResultMap.get(uuid);
 }

@@ -43,7 +43,7 @@ import org.apache.hadoop.io.Text;
 import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
 
-import cosmos.impl.SortableResult;
+import cosmos.impl.Store;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
 
@@ -53,24 +53,24 @@ public class SortingMetadata {
   public static final Text COLUMN_COLFAM = new Text("column");
   
   /**
-   * A {@link State} determines the lifecycle phases of a {@link SortableResult} in Accumulo.
+   * A {@link State} determines the lifecycle phases of a {@link Store} in Accumulo.
    * 
    * <p>
    * {@code LOADING} means that new records are actively being loaded and queries can start; however, only the columns specified as being indexed when the
-   * {@link SortableResult} was defined can be guaranteed to exist. Meaning, calls to {@link Cosmos#index(SortableResult, Iterable)} will not block queries from
-   * running while the index is being updated. Obviously, queries in this state are not guaranteed to be the column result set for a {@link SortableResult}
+   * {@link Store} was defined can be guaranteed to exist. Meaning, calls to {@link Cosmos#index(Store, Iterable)} will not block queries from
+   * running while the index is being updated. Obviously, queries in this state are not guaranteed to be the column result set for a {@link Store}
    * 
    * <p>
    * {@code LOADED} means that the {@link Cosmos} client writing results has completed.
    * 
    * <p>
-   * {@code ERROR} means that there an error in the loading of the data for the given {@link SortableResult} and processing has ceased.
+   * {@code ERROR} means that there an error in the loading of the data for the given {@link Store} and processing has ceased.
    * 
    * <p>
-   * {@code DELETING} means that a client has called {@link Cosmos#delete(SortableResult)} and the results are in the process of being deleted.
+   * {@code DELETING} means that a client has called {@link Cosmos#delete(Store)} and the results are in the process of being deleted.
    * 
    * <p>
-   * {@code UNKNOWN} means that the software is unaware of the given {@link SortableResult}
+   * {@code UNKNOWN} means that the software is unaware of the given {@link Store}
    * 
    * 
    */
@@ -78,7 +78,7 @@ public class SortingMetadata {
     LOADING, LOADED, ERROR, DELETING, UNKNOWN
   }
   
-  public static State getState(SortableResult id) throws TableNotFoundException {
+  public static State getState(Store id) throws TableNotFoundException {
     checkNotNull(id);
     
     Connector con = id.connector();
@@ -99,7 +99,7 @@ public class SortingMetadata {
     return State.UNKNOWN;
   }
   
-  public static void setState(SortableResult id, State state) throws TableNotFoundException, MutationsRejectedException {
+  public static void setState(Store id, State state) throws TableNotFoundException, MutationsRejectedException {
     checkNotNull(id);
     checkNotNull(state);
     
@@ -118,7 +118,7 @@ public class SortingMetadata {
     }
   }
   
-  public static void remove(SortableResult id) throws TableNotFoundException, MutationsRejectedException {
+  public static void remove(Store id) throws TableNotFoundException, MutationsRejectedException {
     checkNotNull(id);
     
     BatchDeleter bd = null;
@@ -138,13 +138,13 @@ public class SortingMetadata {
   }
   
   /**
-   * Return the {@link Column}s that exist for the given {@link SortableResult}
+   * Return the {@link Column}s that exist for the given {@link Store}
    * 
    * @param id
    * @return
    * @throws TableNotFoundException
    */
-  public static CloseableIterable<Column> columns(SortableResult id, String description, Stopwatch sw) throws TableNotFoundException {
+  public static CloseableIterable<Column> columns(Store id, String description, Stopwatch sw) throws TableNotFoundException {
     checkNotNull(id);
     
     BatchScanner bs = id.connector().createBatchScanner(id.metadataTable(), id.auths(), 10);

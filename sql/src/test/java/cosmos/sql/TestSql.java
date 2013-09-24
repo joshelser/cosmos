@@ -82,7 +82,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import cosmos.IntegrationTests;
 import cosmos.UnexpectedStateException;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.SortableResult;
+import cosmos.impl.Store;
 import cosmos.mediawiki.MediawikiPage.Page;
 import cosmos.mediawiki.MediawikiPage.Page.Revision;
 import cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor;
@@ -100,7 +100,7 @@ public class TestSql {
   protected static MiniAccumuloCluster mac;
   protected static MiniAccumuloConfig macConfig;
   private static ZooKeeperInstance instance;
-  private SortableResult meataData;
+  private Store meataData;
   private static CosmosSql cosmosSql;
   
   public static final ColumnVisibility cv = new ColumnVisibility("en");
@@ -192,7 +192,7 @@ public class TestSql {
       
       bs.setRanges(Collections.singleton(new Range()));
       
-      meataData = new SortableResult(connector, connector.securityOperations().getUserAuthorizations("root"), columns);
+      meataData = new Store(connector, connector.securityOperations().getUserAuthorizations("root"), columns);
       
       Function<Entry<Key,Value>,MultimapQueryResult> func = new Function<Entry<Key,Value>,MultimapQueryResult>() {
         @Override

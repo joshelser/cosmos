@@ -49,7 +49,7 @@ import com.google.common.io.Files;
 import cosmos.Cosmos;
 import cosmos.IntegrationTests;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.SortableResult;
+import cosmos.impl.Store;
 import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.results.CloseableIterable;
@@ -109,7 +109,7 @@ public class GroupByIntegrationTest {
   
   @Test
   public void simpleNonSparseRecordTest() throws Exception {
-    SortableResult id = SortableResult.create(con, new Authorizations(), Sets.newHashSet(Index.define("NAME"),
+    Store id = Store.create(con, new Authorizations(), Sets.newHashSet(Index.define("NAME"),
         Index.define("AGE"), Index.define("STATE"), Index.define("COLOR")));
     
     // Register the ID with the implementation

@@ -46,7 +46,7 @@ import com.google.common.collect.Sets;
 import cosmos.Cosmos;
 import cosmos.SortingMetadata;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.SortableResult;
+import cosmos.impl.Store;
 import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.options.Order;
@@ -70,7 +70,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Set<Index> columnsToIndex = Collections.singleton(Index.define("TEXT"));
     
-    SortableResult id = SortableResult.create(c, AUTHS, columnsToIndex);
+    Store id = Store.create(c, AUTHS, columnsToIndex);
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -121,7 +121,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
     
-    SortableResult id = SortableResult.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
+    Store id = Store.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -157,7 +157,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
     
-    SortableResult id = SortableResult.create(c, AUTHS, Collections.<Index> emptySet());
+    Store id = Store.create(c, AUTHS, Collections.<Index> emptySet());
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -193,7 +193,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Set<Index> columnsToIndex = Sets.newHashSet(Index.define("TEXT"), Index.define("DOESNTEXIST"));
     
-    SortableResult id = SortableResult.create(c, AUTHS, columnsToIndex);
+    Store id = Store.create(c, AUTHS, columnsToIndex);
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -232,7 +232,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Set<Index> columnsToIndex = IdentitySet.<Index> create();
     
-    SortableResult id = SortableResult.create(c, AUTHS, columnsToIndex);
+    Store id = Store.create(c, AUTHS, columnsToIndex);
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -330,7 +330,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
     
-    SortableResult id = SortableResult.create(c, AUTHS, Collections.<Index> emptySet());
+    Store id = Store.create(c, AUTHS, Collections.<Index> emptySet());
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -368,7 +368,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
       mqrs.add(new MultimapQueryResult(data, Integer.toString(i), VIZ));
     }
     
-    SortableResult id = SortableResult.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
+    Store id = Store.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -415,7 +415,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void columns() throws Exception {
-    SortableResult id = SortableResult.create(c, AUTHS,
+    Store id = Store.create(c, AUTHS,
         Sets.newHashSet(Index.define("NAME"), Index.define("AGE"), Index.define("HEIGHT"), Index.define("WEIGHT")));
     
     Multimap<Column,SValue> data = HashMultimap.create();
@@ -472,7 +472,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
   public void projectToSingleValueInColumn() throws Exception {
     Column name = Column.create("NAME"), age = Column.create("AGE"), height = Column.create("HEIGHT"), weight = Column.create("WEIGHT");
     
-    SortableResult id = SortableResult.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
+    Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
     
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -542,7 +542,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Set<Index> columnsToIndex = IdentitySet.<Index> create();
     
-    SortableResult id = SortableResult.create(c, AUTHS, columnsToIndex);
+    Store id = Store.create(c, AUTHS, columnsToIndex);
     
     Cosmos s = new CosmosImpl(zkConnectString());
     

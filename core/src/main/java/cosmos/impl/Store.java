@@ -51,8 +51,8 @@ import cosmos.trace.AccumuloTraceStore;
 import cosmos.trace.Tracer;
 import cosmos.util.IdentitySet;
 
-public class SortableResult {
-  private static final Logger log = LoggerFactory.getLogger(SortableResult.class);
+public class Store {
+  private static final Logger log = LoggerFactory.getLogger(Store.class);
   
   private static final SortedSet<Text> SPLITS = ImmutableSortedSet.of(new Text("0"), new Text("1"), new Text("2"), new Text("3"), new Text("4"), new Text("5"),
       new Text("6"), new Text("7"), new Text("8"), new Text("9"), new Text("a"), new Text("b"), new Text("c"), new Text("d"), new Text("e"), new Text("f"));
@@ -66,27 +66,27 @@ public class SortableResult {
   
   protected Set<Index> columnsToIndex;
   
-  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
+  public Store(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
     this(connector, auths, randomUUID().toString(), columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex) {
+  public Store(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex) {
     this(connector, auths, uuid, columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+  public Store(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
     this(connector, auths, randomUUID().toString(), columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+  public Store(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates) {
     this(connector, auths, uuid, columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
+  public Store(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
     this(connector, auths, randomUUID().toString(), columnsToIndex, lockOnUpdates, dataTable, metadataTable);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable,
+  public Store(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable,
       String metadataTable) {
     checkNotNull(connector);
     checkNotNull(auths);
@@ -378,30 +378,30 @@ public class SortableResult {
     return sb.toString();
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
-    return new SortableResult(connector, auths, columnsToIndex);
+  public static Store create(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
+    return new Store(connector, auths, columnsToIndex);
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex) {
-    return new SortableResult(connector, auths, uuid, columnsToIndex);
+  public static Store create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex) {
+    return new Store(connector, auths, uuid, columnsToIndex);
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
-    return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates);
+  public static Store create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+    return new Store(connector, auths, columnsToIndex, lockOnUpdates);
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates) {
-    return new SortableResult(connector, auths, uuid, columnsToIndex, lockOnUpdates);
+  public static Store create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+    return new Store(connector, auths, uuid, columnsToIndex, lockOnUpdates);
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable,
+  public static Store create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable,
       String metadataTable) {
-    return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
+    return new Store(connector, auths, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates,
+  public static Store create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates,
       String dataTable, String metadataTable) {
-    return new SortableResult(connector, auths, uuid, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
+    return new Store(connector, auths, uuid, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
   }
   
 }

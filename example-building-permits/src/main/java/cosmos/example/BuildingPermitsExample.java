@@ -45,7 +45,7 @@ import com.google.common.io.Files;
 
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.SortableResult;
+import cosmos.impl.Store;
 import cosmos.options.Index;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
@@ -123,7 +123,7 @@ public class BuildingPermitsExample {
     Cosmos cosmos = new CosmosImpl(zookeepers);
     
     // Create a definition for the data we want to load
-    SortableResult id = SortableResult.create(connector, new Authorizations(), AscendingIndexIdentitySet.create());
+    Store id = Store.create(connector, new Authorizations(), AscendingIndexIdentitySet.create());
     
     // Register the definition with Cosmos so it can track its progress.
     cosmos.register(id);
