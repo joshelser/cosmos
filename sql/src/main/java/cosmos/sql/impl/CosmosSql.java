@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Iterables;
@@ -100,6 +101,8 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
    */
 
   public CosmosSql(Cosmos cosmosImpl) throws MutationsRejectedException, TableNotFoundException, UnexpectedStateException {
+    Preconditions.checkNotNull(cosmosImpl);
+    
     plannedParentHood = Lists.newArrayList();
     iter = Collections.emptyList();
     this.cosmos = cosmosImpl;

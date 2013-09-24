@@ -21,18 +21,12 @@ package cosmos.sql;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.Properties;
 
 import net.hydromatic.optiq.MutableSchema;
 import net.hydromatic.optiq.jdbc.DriverVersion;
 import net.hydromatic.optiq.jdbc.OptiqConnection;
 import net.hydromatic.optiq.jdbc.UnregisteredDriver;
-
-import org.apache.commons.dbcp.BasicDataSource;
-
-import com.google.common.collect.Maps;
-
 import cosmos.sql.impl.CosmosSql;
 import cosmos.sql.impl.CosmosTable;
 
@@ -40,8 +34,10 @@ import cosmos.sql.impl.CosmosTable;
  * JDBC Driver.
  */
 public class CosmosDriver extends UnregisteredDriver {
+  private static final String CONNECTOR_STRING_PREFIX = "jdbc:accumulo:";
   
   public static final String COSMOS = "cosmos";
+  
   protected SchemaDefiner<?> definer;
   private TableSchema<CosmosSql> schema;
   
@@ -58,8 +54,22 @@ public class CosmosDriver extends UnregisteredDriver {
     register();
   }
   
+  /**
+   * Returns the JDBC connector string using the given {@link connectorName}
+   * 
+   * @param connectorName
+   * @return
+   */
+  public static String jdbcConnectionString(String connectorName) {
+    return CONNECTOR_STRING_PREFIX + connectorName;
+  }
+  
+  public static String jdbcConnectionString(CosmosDriver driver) {
+    return jdbcConnectionString(driver.jdbcConnector);
+  }
+  
   protected String getConnectStringPrefix() {
-    return "jdbc:accumulo:" + jdbcConnector;
+    return CONNECTOR_STRING_PREFIX + jdbcConnector;
   }
   
   protected DriverVersion createDriverVersion() {
@@ -80,14 +90,15 @@ public class CosmosDriver extends UnregisteredDriver {
       schema.initialize();
       rootSchema.addSchema(COSMOS, schema);
       
-      Map<String,Object> users = Maps.newHashMap();
-      users.put("admin", "changeme");
-      
-      BasicDataSource dataSource = new BasicDataSource();
-      dataSource.setUrl(getConnectStringPrefix() + "//" + url);
-      dataSource.setUsername("admin");
-      dataSource.setPassword("changeme");
-      
+      //TODO Pass through the user management operations through Cosmos to Accumulo
+      //     given that I don't want to reimplement crap like kerberos/ldap
+      // Map<String,Object> users = Maps.newHashMap();
+      // users.put("admin", "changeme");
+      //
+      // BasicDataSource dataSource = new BasicDataSource();
+      // dataSource.setUrl(getConnectStringPrefix() + "//" + url);
+      // dataSource.setUsername("admin");
+      // dataSource.setPassword("changeme");
       
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -97,5 +108,3 @@ public class CosmosDriver extends UnregisteredDriver {
   }
   
 }
-
-// End SplunkDriver.java

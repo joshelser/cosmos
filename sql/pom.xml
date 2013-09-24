@@ -14,6 +14,14 @@
       <artifactId>cosmos-core</artifactId>
     </dependency>
     <dependency>
+      <groupId>cosmos</groupId>
+      <artifactId>cosmos-test</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>cosmos</groupId>
+      <artifactId>cosmos-test-data</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
@@ -48,6 +56,14 @@
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jline</groupId>
+      <artifactId>jline</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.curator</groupId>
+      <artifactId>curator-test</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

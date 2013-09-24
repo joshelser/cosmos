@@ -28,6 +28,8 @@ import cosmos.sql.CosmosRelNode.Plan;
 /**
  * Interface that defines an interface that enables us funcionality in defining our referential schema.
  * 
+ * @TODO: this can be merged with TableDefiner
+ * 
  * @param <T>
  */
 
