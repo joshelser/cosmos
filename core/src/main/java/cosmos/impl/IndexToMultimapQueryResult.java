@@ -33,6 +33,7 @@ import cosmos.Cosmos;
 import cosmos.UnexpectedStateException;
 import cosmos.options.Defaults;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.store.Store;
 
 /**
  * 
@@ -40,9 +41,9 @@ import cosmos.results.impl.MultimapQueryResult;
 public class IndexToMultimapQueryResult implements Function<Entry<Key,Value>,MultimapQueryResult> {
   
   protected final Cosmos sorts;
-  protected final SortableResult id;
+  protected final Store id;
   
-  public IndexToMultimapQueryResult(Cosmos sorts, SortableResult id) {
+  public IndexToMultimapQueryResult(Cosmos sorts, Store id) {
     this.sorts = sorts;
     this.id = id;
   }

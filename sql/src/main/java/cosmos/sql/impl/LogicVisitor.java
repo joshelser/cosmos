@@ -43,7 +43,6 @@ import com.google.common.hash.Hashing;
 import cosmos.Cosmos;
 import cosmos.UnexpectedStateException;
 import cosmos.UnindexedColumnException;
-import cosmos.impl.SortableResult;
 import cosmos.results.Column;
 import cosmos.results.impl.MultimapQueryResult;
 import cosmos.sql.call.ChildVisitor;
@@ -53,21 +52,22 @@ import cosmos.sql.call.Pair;
 import cosmos.sql.call.impl.FieldEquality;
 import cosmos.sql.call.impl.operators.AndOperator;
 import cosmos.sql.call.impl.operators.OrOperator;
+import cosmos.store.Store;
 
 public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQueryResult>> {
 
-  private SortableResult sortRes;
+  private Store sortRes;
   private Cosmos cosmosRef;
 
   private static final Logger log = LoggerFactory.getLogger(LogicVisitor.class);
 
-  protected static final Cache<String,Entry<Cosmos,SortableResult>> tempTableCache;
+  protected static final Cache<String,Entry<Cosmos,Store>> tempTableCache;
 
   static {
 
-    RemovalListener<String,Entry<Cosmos,SortableResult>> removalListener = new RemovalListener<String,Entry<Cosmos,SortableResult>>() {
-      public void onRemoval(RemovalNotification<String,Entry<Cosmos,SortableResult>> removal) {
-        Entry<Cosmos,SortableResult> entry = removal.getValue();
+    RemovalListener<String,Entry<Cosmos,Store>> removalListener = new RemovalListener<String,Entry<Cosmos,Store>>() {
+      public void onRemoval(RemovalNotification<String,Entry<Cosmos,Store>> removal) {
+        Entry<Cosmos,Store> entry = removal.getValue();
 
         try {
           entry.getKey().delete(entry.getValue());
@@ -84,7 +84,7 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
     tempTableCache = CacheBuilder.newBuilder().expireAfterAccess(2, TimeUnit.HOURS).removalListener(removalListener).build();
   }
 
-  public LogicVisitor(Cosmos cosmos, SortableResult res) {
+  public LogicVisitor(Cosmos cosmos, Store res) {
     this.sortRes = res;
     this.cosmosRef = cosmos;
   }
@@ -95,7 +95,7 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
     HashFunction hf = Hashing.md5();
     HashCode hc = hf.newHasher().putObject(input, input).hash();
 
-    Entry<Cosmos,SortableResult> entry = tempTableCache.getIfPresent(hc.toString());
+    Entry<Cosmos,Store> entry = tempTableCache.getIfPresent(hc.toString());
 
     if (null != entry) {
 
@@ -160,7 +160,8 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
 
     }
 
-    SortableResult meatadata = new SortableResult(sortRes.connector(), sortRes.auths(), sortRes.columnsToIndex());
+    Store meatadata = new Store(sortRes.connector(), sortRes.auths(), sortRes.columnsToIndex());
+
     try {
       cosmosRef.register(meatadata);
       cosmosRef.addResults(meatadata, iter);

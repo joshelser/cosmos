@@ -44,7 +44,6 @@ import com.google.common.collect.Sets;
 import cosmos.Cosmos;
 import cosmos.IntegrationTests;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.SortableResult;
 import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.results.CloseableIterable;
@@ -52,6 +51,7 @@ import cosmos.results.Column;
 import cosmos.results.QueryResult;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.store.Store;
 
 /**
  * 
@@ -152,7 +152,7 @@ public class CosmosIntegrationTest extends CosmosIntegrationSetup {
     con.tableOperations().create(Defaults.DATA_TABLE);
     con.tableOperations().create(Defaults.METADATA_TABLE);
     
-    SortableResult id = SortableResult.create(con, new Authorizations("en"),
+    Store id = Store.create(con, new Authorizations("en"),
         Sets.newHashSet(Index.define(PAGE_ID)));
     
     Cosmos s = new CosmosImpl(CosmosIntegrationTest.zk.getConnectString());

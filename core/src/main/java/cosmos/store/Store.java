@@ -17,7 +17,7 @@
  *  Copyright 2013 Josh Elser
  *
  */
-package cosmos.impl;
+package cosmos.store;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.UUID.randomUUID;
@@ -51,8 +51,8 @@ import cosmos.trace.AccumuloTraceStore;
 import cosmos.trace.Tracer;
 import cosmos.util.IdentitySet;
 
-public class SortableResult {
-  private static final Logger log = LoggerFactory.getLogger(SortableResult.class);
+public class Store {
+  private static final Logger log = LoggerFactory.getLogger(Store.class);
   
   private static final SortedSet<Text> SPLITS = ImmutableSortedSet.of(new Text("0"), new Text("1"), new Text("2"), new Text("3"), new Text("4"), new Text("5"),
       new Text("6"), new Text("7"), new Text("8"), new Text("9"), new Text("a"), new Text("b"), new Text("c"), new Text("d"), new Text("e"), new Text("f"));
@@ -66,28 +66,27 @@ public class SortableResult {
   
   protected Set<Index> columnsToIndex;
   
-  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
+  public Store(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
     this(connector, auths, randomUUID().toString(), columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex) {
+  public Store(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex) {
     this(connector, auths, uuid, columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+  public Store(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
     this(connector, auths, randomUUID().toString(), columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+  public Store(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates) {
     this(connector, auths, uuid, columnsToIndex, lockOnUpdates, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
+  public Store(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
     this(connector, auths, randomUUID().toString(), columnsToIndex, lockOnUpdates, dataTable, metadataTable);
   }
   
-  public SortableResult(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable,
-      String metadataTable) {
+  public Store(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
     checkNotNull(connector);
     checkNotNull(auths);
     checkNotNull(uuid);
@@ -111,15 +110,19 @@ public class SortableResult {
     
     this.UUID = uuid;
     
+    this.tracer = new Tracer(uuid());
+    
     TableOperations tops = this.connector.tableOperations();
     
-    createIfNotExists(tops, this.dataTable());
-    splitTable(tops, this.dataTable());
-    addLocalityGroups(tops, this.dataTable());
-    createIfNotExists(tops, this.metadataTable());
-    
-    this.tracer = new Tracer(uuid());
-    ensureTracingTableExists();
+    // A slight hack -- if we have something that isn't actually providing us
+    // a valid tableOperations element, don't try to create/configure tables
+    if (null != tops) {
+      createIfNotExists(tops, this.dataTable());
+      splitTable(tops, this.dataTable());
+      addLocalityGroups(tops, this.dataTable());
+      createIfNotExists(tops, this.metadataTable());
+      ensureTracingTableExists();
+    }
   }
   
   protected void createIfNotExists(TableOperations tops, String tableName) {
@@ -359,7 +362,7 @@ public class SortableResult {
     }
   }
   
-  protected void addColumnsToIndex(Collection<Index> columns) {
+  public void addColumnsToIndex(Collection<Index> columns) {
     checkNotNull(columns);
     
     if (IdentitySet.class.isAssignableFrom(columns.getClass())) {
@@ -372,36 +375,75 @@ public class SortableResult {
   }
   
   @Override
+  public boolean equals(Object o) {
+    if (o instanceof Store) {
+      Store other = (Store) o;
+      
+      // There's no equality check on the connector implementations, which makes this
+      // check very brittle. Not to mention, you could have multiple "equivalent" connectors
+      // to the same Instance. Even using the Instance (name + zookeepers) isn't perfect because
+      // you could have subset zookeepers declared that would still point to the same instance..
+      //
+      // So -- I'm going to be lazy right now
+      //
+      // if (!connector().equals(other.connector())) {
+      // return false;
+      // }
+      
+      if (!auths().equals(other.auths()) || !uuid().equals(other.uuid()) || lockOnUpdates() != other.lockOnUpdates() || !dataTable().equals(other.dataTable())
+          || !metadataTable().equals(other.metadataTable())) {
+        return false;
+      }
+      
+      Set<Index> ourIndex = columnsToIndex(), theirIndex = other.columnsToIndex();
+      
+      // Try to unravel the confusion in multiple implementations of Set that I created
+      if (ourIndex.equals(theirIndex)) {
+        return true;
+      } else if (IdentitySet.class.isAssignableFrom(ourIndex.getClass()) && IdentitySet.class.isAssignableFrom(theirIndex.getClass())) {
+        // We're both IdentitySets -- contents of the "Set" doesn't matter, just that they're the same
+        // implementation (assuming their implementation of contains(Object) is what uniquely identifies the class)
+        return ourIndex.getClass().equals(theirIndex.getClass());
+        
+      } else if (!IdentitySet.class.isAssignableFrom(ourIndex.getClass()) && !IdentitySet.class.isAssignableFrom(theirIndex.getClass())) {
+        // They're both not IdentitySets, so we assume that they're both "regular" concrete Set impls (TreeSet, HashSet, etc)
+        return ourIndex.equals(theirIndex);
+      }
+    }
+    
+    return false;
+  }
+  
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder(256);
     sb.append("SortableResult:").append(uuid()).append(",").append(dataTable()).append(",").append(metadataTable());
     return sb.toString();
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
-    return new SortableResult(connector, auths, columnsToIndex);
+  public static Store create(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
+    return new Store(connector, auths, columnsToIndex);
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex) {
-    return new SortableResult(connector, auths, uuid, columnsToIndex);
+  public static Store create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex) {
+    return new Store(connector, auths, uuid, columnsToIndex);
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
-    return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates);
+  public static Store create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+    return new Store(connector, auths, columnsToIndex, lockOnUpdates);
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates) {
-    return new SortableResult(connector, auths, uuid, columnsToIndex, lockOnUpdates);
+  public static Store create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates) {
+    return new Store(connector, auths, uuid, columnsToIndex, lockOnUpdates);
   }
   
-  public static SortableResult create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable,
+  public static Store create(Connector connector, Authorizations auths, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable, String metadataTable) {
+    return new Store(connector, auths, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
+  }
+  
+  public static Store create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates, String dataTable,
       String metadataTable) {
-    return new SortableResult(connector, auths, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
-  }
-  
-  public static SortableResult create(Connector connector, Authorizations auths, String uuid, Set<Index> columnsToIndex, boolean lockOnUpdates,
-      String dataTable, String metadataTable) {
-    return new SortableResult(connector, auths, uuid, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
+    return new Store(connector, auths, uuid, columnsToIndex, lockOnUpdates, dataTable, metadataTable);
   }
   
 }

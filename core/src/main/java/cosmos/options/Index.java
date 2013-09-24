@@ -20,8 +20,8 @@
 package cosmos.options;
 
 import com.google.common.base.Preconditions;
-import java.lang.reflect.Type;
 
+import cosmos.protobuf.StoreProtobuf;
 import cosmos.results.Column;
 
 public class Index {
@@ -107,4 +107,28 @@ public class Index {
 		return this.column + ", " + this.order;
 	}
 
+	public StoreProtobuf.Index toProtobufIndex() {
+	  StoreProtobuf.Index.Builder builder = StoreProtobuf.Index.newBuilder();
+	  
+	  builder.setColumn(column().name());
+	  
+	  switch (order()) {
+	    case ASCENDING: {
+	      builder.setOrder(StoreProtobuf.Order.ASCENDING);
+	      break;
+	    }
+	    case DESCENDING: {
+	      builder.setOrder(StoreProtobuf.Order.DESCENDING);
+	      break;
+	    }
+	    default: {
+	      throw new IllegalArgumentException("Unknown Order: " + order());
+	    }
+	  }
+	  
+	  builder.setType(indexedType.getName());
+	  
+	  return builder.build();
+	}
+	
 }

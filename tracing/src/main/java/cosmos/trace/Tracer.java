@@ -168,6 +168,7 @@ public class Tracer {
     return Arrays.asList(recordMutation, timeMutation);
   }
  
+  @Override
   public boolean equals(Object o) {
     if (null == o) {
       return false;

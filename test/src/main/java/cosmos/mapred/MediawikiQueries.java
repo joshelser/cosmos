@@ -62,7 +62,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.SortableResult;
 import cosmos.mediawiki.MediawikiPage.Page;
 import cosmos.mediawiki.MediawikiPage.Page.Revision;
 import cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor;
@@ -73,6 +72,7 @@ import cosmos.results.Column;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
 import cosmos.results.integration.CosmosIntegrationSetup;
+import cosmos.store.Store;
 import cosmos.util.IdentitySet;
 
 /**
@@ -142,7 +142,7 @@ public class MediawikiQueries {
     int iters = 0;
     
     while (iters < numIterations) {
-      SortableResult id = SortableResult.create(this.con, this.con.securityOperations().getUserAuthorizations(this.con.whoami()), IdentitySet.<Index> create());
+      Store id = Store.create(this.con, this.con.securityOperations().getUserAuthorizations(this.con.whoami()), IdentitySet.<Index> create());
       
       int offset = offsetR.nextInt(MAX_OFFSET);
       int numRecords = cardinalityR.nextInt(MAX_SIZE) + 1;
@@ -275,7 +275,7 @@ public class MediawikiQueries {
 	  }
   }
   
-  public long docIdFetch(SortableResult id, Map<Column,Long> counts, long totalResults) throws Exception {
+  public long docIdFetch(Store id, Map<Column,Long> counts, long totalResults) throws Exception {
     Stopwatch sw = new Stopwatch();
     
     // This is dumb, I didn't pad the docids...
@@ -312,7 +312,7 @@ public class MediawikiQueries {
     return resultCount;
   }
   
-  public long columnFetch(SortableResult id, Column colToFetch, Map<Column,Long> counts, long totalResults) throws Exception {
+  public long columnFetch(Store id, Column colToFetch, Map<Column,Long> counts, long totalResults) throws Exception {
     Stopwatch sw = new Stopwatch();
     String prev = null;
     String lastDocId = null;
@@ -374,7 +374,7 @@ public class MediawikiQueries {
     return resultCount;
   }
   
-  public void groupBy(SortableResult id, Column colToFetch, Map<Column,Long> columnCounts, long totalResults) throws Exception {
+  public void groupBy(Store id, Column colToFetch, Map<Column,Long> columnCounts, long totalResults) throws Exception {
     Stopwatch sw = new Stopwatch();
     
     sw.start();

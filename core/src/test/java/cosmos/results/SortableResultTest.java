@@ -14,8 +14,8 @@ import org.junit.Test;
 
 import com.google.common.collect.Sets;
 
-import cosmos.impl.SortableResult;
 import cosmos.options.Index;
+import cosmos.store.Store;
 
 public class SortableResultTest {
   
@@ -29,7 +29,7 @@ public class SortableResultTest {
   
   @Test
   public void testLocalityGroupsSetAfterOptimize() throws Exception {
-    SortableResult id = SortableResult.create(c, new Authorizations(), Sets.<Index> newHashSet());
+    Store id = Store.create(c, new Authorizations(), Sets.<Index> newHashSet());
     
     Set<Index> indiciesToOptimize = Sets.newHashSet(
         Index.define("COL1"),

@@ -50,7 +50,6 @@ import com.google.common.collect.Maps;
 import cosmos.Cosmos;
 import cosmos.UnexpectedStateException;
 import cosmos.UnindexedColumnException;
-import cosmos.impl.SortableResult;
 import cosmos.options.Index;
 import cosmos.results.Column;
 import cosmos.results.SValue;
@@ -68,6 +67,7 @@ import cosmos.sql.call.Field;
 import cosmos.sql.call.Fields;
 import cosmos.sql.call.impl.Filter;
 import cosmos.sql.impl.functions.FieldLimiter;
+import cosmos.store.Store;
 
 /**
  * Cosmos SQL defines a table and a schema, therefore it is capable of returning an iterator of results for a given expression
@@ -131,7 +131,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
 
     String table = ((CosmosTable) planner.table).getTable();
 
-    SortableResult res;
+    Store res;
     try {
 
       res = cosmos.fetch(table);
@@ -192,7 +192,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
     return new BaseIterable<Object[]>(returnIter);
   }
 
-  private Iterable<MultimapQueryResult> buildFilterIterator(List<ChildVisitor> filters, SortableResult res) {
+  private Iterable<MultimapQueryResult> buildFilterIterator(List<ChildVisitor> filters, Store res) {
 
     Iterable<MultimapQueryResult> baseIter = Collections.emptyList();
     Iterable<Iterable<MultimapQueryResult>> ret = Iterables.transform(filters, new LogicVisitor(cosmos, res));
@@ -260,7 +260,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
     try {
 
       if (table == null) {
-        SortableResult sort = cosmos.fetch(name);
+        Store sort = cosmos.fetch(name);
 
         FieldInfoBuilder builder = new RelDataTypeFactory.FieldInfoBuilder();
 
@@ -289,7 +289,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
 
   @Override
   public Set<Index> getIndexColumns(String table) {
-    SortableResult sort;
+    Store sort;
     try {
       sort = cosmos.fetch(table);
 

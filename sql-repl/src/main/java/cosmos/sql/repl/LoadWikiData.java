@@ -15,10 +15,10 @@ import com.google.common.collect.Sets;
 
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.SortableResult;
 import cosmos.options.Index;
 import cosmos.results.QueryResult;
 import cosmos.results.integration.CosmosIntegrationSetup;
+import cosmos.store.Store;
 
 public class LoadWikiData {
   private static final Logger log = LoggerFactory.getLogger(LoadWikiData.class);
@@ -49,7 +49,7 @@ public class LoadWikiData {
     log.info("Instantiating Cosmos");
     Cosmos cosmos = new CosmosImpl(obj.zookeepers);
     
-    SortableResult id = new SortableResult(connector, connector.securityOperations().getUserAuthorizations(obj.username), CosmosIntegrationSetup.ALL_INDEXES);
+    Store id = new Store(connector, connector.securityOperations().getUserAuthorizations(obj.username), CosmosIntegrationSetup.ALL_INDEXES);
     
     cosmos.register(id);
     
