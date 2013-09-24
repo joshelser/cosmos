@@ -11,7 +11,8 @@ import org.eigenbase.relopt.RelTraitSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cosmos.sql.AccumuloRel;
+import cosmos.sql.CosmosRelNode;
+import cosmos.sql.DataTable;
 import cosmos.sql.impl.CosmosTable;
 import cosmos.sql.rules.impl.Filter;
 import cosmos.sql.rules.impl.GroupBy;
@@ -25,11 +26,11 @@ import cosmos.sql.rules.impl.Projection;
  */
 public class PushDownRule extends RuleBase {
   
-  CosmosTable accumuloAccessor;
+  DataTable<?> accumuloAccessor;
   
   private static final Logger log = LoggerFactory.getLogger(PushDownRule.class);
   
-  public PushDownRule(CosmosTable resultTable, RelOptRuleOperand operand, String name) {
+  public PushDownRule(DataTable<?> resultTable, RelOptRuleOperand operand, String name) {
     super(operand, PushDownRule.class.getSimpleName() + name);
     this.accumuloAccessor = resultTable;
   }
@@ -42,7 +43,7 @@ public class PushDownRule extends RuleBase {
     if (node instanceof ProjectRel) {
       final ProjectRel project = (ProjectRel) node;
       final RelNode input = call.rel(1);
-      final RelTraitSet traits = project.getTraitSet().plus(AccumuloRel.CONVENTION);
+      final RelTraitSet traits = project.getTraitSet().plus(CosmosRelNode.CONVENTION);
       final RelNode convertedInput = convert(input, traits);
       call.transformTo(new Projection(project.getCluster(), traits, convertedInput, project.getProjects(), project.getRowType(), accumuloAccessor));
       
@@ -50,7 +51,7 @@ public class PushDownRule extends RuleBase {
       final FilterRel filter = (FilterRel) node;
       
       final RelNode input = call.rel(1);
-      final RelTraitSet traits = filter.getTraitSet().plus(AccumuloRel.CONVENTION);
+      final RelTraitSet traits = filter.getTraitSet().plus(CosmosRelNode.CONVENTION);
       final RelNode convertedInput = convert(input, traits);
       call.transformTo(new Filter(filter.getCluster(), traits, convertedInput, filter.getCondition(), accumuloAccessor));
       
@@ -59,7 +60,7 @@ public class PushDownRule extends RuleBase {
       final AggregateRel aggy = (AggregateRel) node;
       final RelNode input = call.rel(1);
       
-      final RelTraitSet traits = aggy.getTraitSet().plus(AccumuloRel.CONVENTION);
+      final RelTraitSet traits = aggy.getTraitSet().plus(CosmosRelNode.CONVENTION);
       
       final RelNode convertedInput = convert(input, traits);
       try {

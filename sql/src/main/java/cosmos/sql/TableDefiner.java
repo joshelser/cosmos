@@ -27,5 +27,5 @@ package cosmos.sql;
 
 public interface TableDefiner {
 
-  public AccumuloTable<?> getTable(String name);
+  public DataTable<?> getTable(String name);
 }

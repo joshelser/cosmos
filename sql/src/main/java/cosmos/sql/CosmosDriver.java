@@ -39,7 +39,7 @@ public class CosmosDriver extends UnregisteredDriver {
   public static final String COSMOS = "cosmos";
   
   protected SchemaDefiner<?> definer;
-  private CosmosSchema<CosmosSql> schema;
+  private TableSchema<CosmosSql> schema;
   
   protected String jdbcConnector = null;
   
@@ -84,8 +84,8 @@ public class CosmosDriver extends UnregisteredDriver {
     final MutableSchema rootSchema = optiqConnection.getRootSchema();
     
     try {
-      schema = new CosmosSchema<CosmosSql>(rootSchema, "cosmos", rootSchema.getSubSchemaExpression(COSMOS, CosmosSchema.class), (CosmosSql) definer,
-          CosmosTable.class);
+      schema = new TableSchema<CosmosSql>(rootSchema, "cosmos", rootSchema.getSubSchemaExpression(COSMOS, TableSchema.class),
+          (CosmosSql) definer, CosmosTable.class);
       
       schema.initialize();
       rootSchema.addSchema(COSMOS, schema);

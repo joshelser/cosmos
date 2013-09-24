@@ -29,16 +29,16 @@ import org.eigenbase.relopt.RelOptPlanner;
 import org.eigenbase.relopt.RelTraitSet;
 import org.eigenbase.rex.RexNode;
 
-import cosmos.sql.AccumuloRel;
-import cosmos.sql.AccumuloTable;
+import cosmos.sql.CosmosRelNode;
+import cosmos.sql.DataTable;
 import cosmos.sql.call.CallIfc;
 import cosmos.sql.call.impl.OperationVisitor;
 
-public class Filter extends FilterRelBase implements AccumuloRel {
+public class Filter extends FilterRelBase implements CosmosRelNode {
   
-  private AccumuloTable<?> accumuloAccessor;
+  private DataTable<?> accumuloAccessor;
   
-  public Filter(RelOptCluster cluster, RelTraitSet traits, RelNode child, RexNode condition, AccumuloTable<?> accumuloAccessor) {
+  public Filter(RelOptCluster cluster, RelTraitSet traits, RelNode child, RexNode condition, DataTable<?> accumuloAccessor) {
     super(cluster, traits, child, condition);
     
     assert getConvention() == CONVENTION;

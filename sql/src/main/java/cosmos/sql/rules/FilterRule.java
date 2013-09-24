@@ -21,8 +21,8 @@ package cosmos.sql.rules;
 
 import org.eigenbase.rel.FilterRel;
 
+import cosmos.sql.DataTable;
 import cosmos.sql.TableScanner;
-import cosmos.sql.impl.CosmosTable;
 
 /**
  * Initially the rule were separate; however, since they can be handled in a single class we simply use this class to push the rules down the optimizer
@@ -31,9 +31,9 @@ import cosmos.sql.impl.CosmosTable;
  */
 public class FilterRule extends PushDownRule {
   
-  CosmosTable accumuloAccessor;
+  DataTable<?> accumuloAccessor;
   
-  public FilterRule(CosmosTable resultTable) {
+  public FilterRule(DataTable<?> resultTable) {
     super(resultTable, some(FilterRel.class, any(TableScanner.class)), "FilterShmilter");
     this.accumuloAccessor = resultTable;
   }

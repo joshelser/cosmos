@@ -21,8 +21,8 @@ package cosmos.sql.rules;
 
 import org.eigenbase.rel.SortRel;
 
+import cosmos.sql.DataTable;
 import cosmos.sql.TableScanner;
-import cosmos.sql.impl.CosmosTable;
 
 /**
  * Initially the rule were separate; however, since they can be handled in a single class we simply use this class to push the rules down the optimizer
@@ -31,9 +31,9 @@ import cosmos.sql.impl.CosmosTable;
  */
 public class ProjectRule extends PushDownRule {
   
-  CosmosTable accumuloAccessor;
+	DataTable<?> accumuloAccessor;
   
-  public ProjectRule(CosmosTable resultTable) {
+  public ProjectRule(DataTable<?> resultTable) {
     super(resultTable, some(SortRel.class, any(TableScanner.class)), "ProjectShmore");
     this.accumuloAccessor = resultTable;
   }

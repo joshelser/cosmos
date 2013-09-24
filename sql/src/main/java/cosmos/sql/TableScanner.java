@@ -46,14 +46,14 @@ import cosmos.sql.rules.ProjectRule;
  * 
  */
 
-public class TableScanner extends TableAccessRelBase implements AccumuloRel {
-  final CosmosTable resultTable;
+public class TableScanner extends TableAccessRelBase implements CosmosRelNode {
+  final DataTable<?> resultTable;
 
   final List<String> fieldList;
 
   List<String> selectedFields;
 
-  public TableScanner(RelOptCluster cluster, RelTraitSet traitSet, RelOptTable table, CosmosTable resultTable, List<String> fieldList) {
+  public TableScanner(RelOptCluster cluster, RelTraitSet traitSet, RelOptTable table, DataTable<?> resultTable, List<String> fieldList) {
     super(cluster, traitSet, table);
 
     this.resultTable = resultTable;

@@ -30,11 +30,11 @@ import cosmos.sql.call.BaseVisitor;
  * 
  * @TODO implement stronger planning here
  */
-public interface AccumuloRel extends RelNode {
+public interface CosmosRelNode extends RelNode {
   /**
    * Calling convention for relational expressions that are "implemented" by generating Drill logical plans.
    */
-  Convention CONVENTION = new Convention.Impl("COSMOS", AccumuloRel.class);
+  Convention CONVENTION = new Convention.Impl("COSMOS", CosmosRelNode.class);
 
   int implement(Plan implementor);
 
@@ -42,7 +42,7 @@ public interface AccumuloRel extends RelNode {
 
     protected BaseVisitor<CallIfc<?>> operations;
 
-    public AccumuloTable<?> table;
+    public DataTable<?> table;
 
     public Plan() {
       operations = new BaseVisitor<CallIfc<?>>();
@@ -59,7 +59,7 @@ public interface AccumuloRel extends RelNode {
     }
 
     public void visitChild(RelNode input) {
-      ((AccumuloRel) input).implement(this);
+      ((CosmosRelNode) input).implement(this);
 
     }
 

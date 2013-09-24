@@ -20,16 +20,15 @@
 package cosmos.sql;
 
 import java.util.Collection;
-import java.util.Collections;
-
-import com.google.common.collect.Lists;
 
 import net.hydromatic.linq4j.expressions.Expression;
 import net.hydromatic.optiq.Schema;
 import net.hydromatic.optiq.Table;
 import net.hydromatic.optiq.impl.java.MapSchema;
 
-public class CosmosSchema<T extends SchemaDefiner<?>> extends MapSchema {
+import com.google.common.collect.Lists;
+
+public class TableSchema<T extends SchemaDefiner<?>> extends MapSchema {
 
   protected T metaData;
 
@@ -45,22 +44,22 @@ public class CosmosSchema<T extends SchemaDefiner<?>> extends MapSchema {
    * @param schemaDefiner
    * @param clazz
    */
-  public CosmosSchema(Schema parentSchema, String name, Expression expression, T schemaDefiner, Class<? extends AccumuloTable<?>> clazz) {
+  public TableSchema(Schema parentSchema, String name, Expression expression, T schemaDefiner, Class<? extends DataTable<?>> clazz) {
     super(parentSchema, name, expression);
     metaData = schemaDefiner;
-    // let's maek a cyclic dependency
+    // let's make a cyclic dependency
     metaData.register(this);
   }
 
   /**
    * Returns the table associated with the class
    */
-  public AccumuloTable<?> getTable(String name) {
+  public DataTable<?> getTable(String name) {
 
     if (metaData instanceof TableDefiner) {
       return ((TableDefiner) metaData).getTable(name);
     } else
-      return (AccumuloTable<?>) tableMap.get(name).getTable(Class.class);
+      return (DataTable<?>) tableMap.get(name).getTable(Class.class);
   }
 
   @SuppressWarnings("unchecked")
