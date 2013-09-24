@@ -49,7 +49,6 @@ import com.google.common.io.Files;
 import cosmos.Cosmos;
 import cosmos.IntegrationTests;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.Store;
 import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.results.CloseableIterable;
@@ -57,6 +56,7 @@ import cosmos.results.Column;
 import cosmos.results.QueryResult;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.store.Store;
 
 /**
  * 

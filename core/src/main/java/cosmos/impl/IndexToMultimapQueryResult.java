@@ -33,6 +33,7 @@ import cosmos.Cosmos;
 import cosmos.UnexpectedStateException;
 import cosmos.options.Defaults;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.store.Store;
 
 /**
  * 

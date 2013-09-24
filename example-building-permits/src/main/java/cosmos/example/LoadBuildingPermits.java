@@ -20,11 +20,11 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 
 import cosmos.Cosmos;
-import cosmos.impl.Store;
 import cosmos.options.Defaults;
 import cosmos.results.Column;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.store.Store;
 
 public class LoadBuildingPermits implements Runnable {
   private static final Logger log = LoggerFactory.getLogger(LoadBuildingPermits.class);

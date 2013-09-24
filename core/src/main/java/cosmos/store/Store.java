@@ -17,7 +17,7 @@
  *  Copyright 2013 Josh Elser
  *
  */
-package cosmos.impl;
+package cosmos.store;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.UUID.randomUUID;
@@ -359,7 +359,7 @@ public class Store {
     }
   }
   
-  protected void addColumnsToIndex(Collection<Index> columns) {
+  public void addColumnsToIndex(Collection<Index> columns) {
     checkNotNull(columns);
     
     if (IdentitySet.class.isAssignableFrom(columns.getClass())) {

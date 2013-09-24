@@ -44,14 +44,14 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import cosmos.Cosmos;
-import cosmos.SortingMetadata;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.Store;
 import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.options.Order;
 import cosmos.options.Paging;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.store.PersistedStores;
+import cosmos.store.Store;
 import cosmos.util.IdentitySet;
 
 @RunWith(JUnit4.class)
@@ -454,7 +454,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     BatchScanner bs = c.createBatchScanner(id.metadataTable(), id.auths(), 1);
     bs.setRanges(Collections.singleton(Range.exact(id.uuid())));
-    bs.fetchColumnFamily(SortingMetadata.COLUMN_COLFAM);
+    bs.fetchColumnFamily(PersistedStores.COLUMN_COLFAM);
     
     long count = 0;
     for (Entry<Key,Value> e : bs) {

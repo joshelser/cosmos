@@ -17,7 +17,7 @@
  *  Copyright 2013 Josh Elser
  *
  */
-package cosmos;
+package cosmos.store;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -43,11 +43,11 @@ import org.apache.hadoop.io.Text;
 import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
 
-import cosmos.impl.Store;
+import cosmos.Cosmos;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
 
-public class SortingMetadata {
+public class PersistedStores {
   public static final Text EMPTY_TEXT = new Text("");
   public static final Text STATE_COLFAM = new Text("state");
   public static final Text COLUMN_COLFAM = new Text("column");
@@ -161,5 +161,17 @@ public class SortingMetadata {
       }
       
     }, id.tracer(), description, sw);
+  }
+  
+  public static Value serialize(Store id) {
+    checkNotNull(id);
+    
+    return null;
+  }
+  
+  public static Store deserialize(Value v) {
+    checkNotNull(v);
+    
+    return null;
   }
 }

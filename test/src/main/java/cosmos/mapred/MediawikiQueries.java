@@ -62,7 +62,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.Store;
 import cosmos.mediawiki.MediawikiPage.Page;
 import cosmos.mediawiki.MediawikiPage.Page.Revision;
 import cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor;
@@ -73,6 +72,7 @@ import cosmos.results.Column;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
 import cosmos.results.integration.CosmosIntegrationSetup;
+import cosmos.store.Store;
 import cosmos.util.IdentitySet;
 
 /**

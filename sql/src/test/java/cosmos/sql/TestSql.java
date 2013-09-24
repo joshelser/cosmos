@@ -82,7 +82,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import cosmos.IntegrationTests;
 import cosmos.UnexpectedStateException;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.Store;
 import cosmos.mediawiki.MediawikiPage.Page;
 import cosmos.mediawiki.MediawikiPage.Page.Revision;
 import cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor;
@@ -91,6 +90,7 @@ import cosmos.results.Column;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
 import cosmos.sql.impl.CosmosSql;
+import cosmos.store.Store;
 
 @Category(IntegrationTests.class)
 public class TestSql {

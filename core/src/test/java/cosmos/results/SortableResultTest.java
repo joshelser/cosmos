@@ -14,8 +14,8 @@ import org.junit.Test;
 
 import com.google.common.collect.Sets;
 
-import cosmos.impl.Store;
 import cosmos.options.Index;
+import cosmos.store.Store;
 
 public class SortableResultTest {
   

@@ -27,7 +27,6 @@ import org.apache.accumulo.core.client.TableNotFoundException;
 
 import com.google.common.collect.Ordering;
 
-import cosmos.impl.Store;
 import cosmos.options.Index;
 import cosmos.options.Paging;
 import cosmos.results.CloseableIterable;
@@ -36,6 +35,7 @@ import cosmos.results.PagedQueryResult;
 import cosmos.results.QueryResult;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.store.Store;
 
 public interface Cosmos {
   

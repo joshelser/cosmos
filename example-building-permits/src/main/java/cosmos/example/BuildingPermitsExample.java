@@ -45,11 +45,11 @@ import com.google.common.io.Files;
 
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.Store;
 import cosmos.options.Index;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
 import cosmos.results.SValue;
+import cosmos.store.Store;
 import cosmos.util.AscendingIndexIdentitySet;
 import cosmos.util.IdentitySet;
 

@@ -43,7 +43,6 @@ import com.google.common.hash.Hashing;
 import cosmos.Cosmos;
 import cosmos.UnexpectedStateException;
 import cosmos.UnindexedColumnException;
-import cosmos.impl.Store;
 import cosmos.results.Column;
 import cosmos.results.impl.MultimapQueryResult;
 import cosmos.sql.call.ChildVisitor;
@@ -53,6 +52,7 @@ import cosmos.sql.call.Pair;
 import cosmos.sql.call.impl.FieldEquality;
 import cosmos.sql.call.impl.operators.AndOperator;
 import cosmos.sql.call.impl.operators.OrOperator;
+import cosmos.store.Store;
 
 public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQueryResult>> {
 

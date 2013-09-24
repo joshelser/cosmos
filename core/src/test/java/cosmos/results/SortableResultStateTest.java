@@ -28,11 +28,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import cosmos.Cosmos;
-import cosmos.SortingMetadata;
-import cosmos.SortingMetadata.State;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.Store;
 import cosmos.options.Index;
+import cosmos.store.PersistedStores;
+import cosmos.store.Store;
+import cosmos.store.PersistedStores.State;
 
 /**
  * 
@@ -44,21 +44,21 @@ public class SortableResultStateTest extends AbstractSortableTest {
   public void test() throws Exception {
     Store id = Store.create(c, Constants.NO_AUTHS, Collections.<Index> emptySet());
     
-    Assert.assertEquals(State.UNKNOWN, SortingMetadata.getState(id));
+    Assert.assertEquals(State.UNKNOWN, PersistedStores.getState(id));
         
     Cosmos s = new CosmosImpl(zk.getConnectString());
     s.register(id);
     
-    Assert.assertEquals(State.LOADING, SortingMetadata.getState(id));
+    Assert.assertEquals(State.LOADING, PersistedStores.getState(id));
     
     s.finalize(id);
     
-    Assert.assertEquals(State.LOADED, SortingMetadata.getState(id));
+    Assert.assertEquals(State.LOADED, PersistedStores.getState(id));
     
     // Would be State.DELETING during this call
     s.delete(id);
     
-    Assert.assertEquals(State.UNKNOWN, SortingMetadata.getState(id));
+    Assert.assertEquals(State.UNKNOWN, PersistedStores.getState(id));
     
     s.close();
   }

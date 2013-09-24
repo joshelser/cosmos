@@ -21,22 +21,22 @@ public final class MediawikiPage {
      */
     long getId();
 
-    // optional .sorts.mediawiki.Page.Revision revision = 2;
+    // optional .cosmos.mediawiki.Page.Revision revision = 2;
     /**
-     * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+     * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
      */
     boolean hasRevision();
     /**
-     * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+     * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
      */
     cosmos.mediawiki.MediawikiPage.Page.Revision getRevision();
     /**
-     * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+     * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
      */
     cosmos.mediawiki.MediawikiPage.Page.RevisionOrBuilder getRevisionOrBuilder();
   }
   /**
-   * Protobuf type {@code sorts.mediawiki.Page}
+   * Protobuf type {@code cosmos.mediawiki.Page}
    */
   public static final class Page extends
       com.google.protobuf.GeneratedMessage
@@ -118,12 +118,12 @@ public final class MediawikiPage {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_descriptor;
+      return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_fieldAccessorTable
+      return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               cosmos.mediawiki.MediawikiPage.Page.class, cosmos.mediawiki.MediawikiPage.Page.Builder.class);
     }
@@ -171,17 +171,17 @@ public final class MediawikiPage {
       com.google.protobuf.ByteString
           getTimestampBytes();
 
-      // optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;
+      // optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
        */
       boolean hasContributor();
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
        */
       cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor getContributor();
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
        */
       cosmos.mediawiki.MediawikiPage.Page.Revision.ContributorOrBuilder getContributorOrBuilder();
 
@@ -196,7 +196,7 @@ public final class MediawikiPage {
       boolean getMinor();
     }
     /**
-     * Protobuf type {@code sorts.mediawiki.Page.Revision}
+     * Protobuf type {@code cosmos.mediawiki.Page.Revision}
      */
     public static final class Revision extends
         com.google.protobuf.GeneratedMessage
@@ -288,12 +288,12 @@ public final class MediawikiPage {
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_Revision_descriptor;
+        return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_Revision_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_Revision_fieldAccessorTable
+        return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_Revision_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 cosmos.mediawiki.MediawikiPage.Page.Revision.class, cosmos.mediawiki.MediawikiPage.Page.Revision.Builder.class);
       }
@@ -342,7 +342,7 @@ public final class MediawikiPage {
         long getId();
       }
       /**
-       * Protobuf type {@code sorts.mediawiki.Page.Revision.Contributor}
+       * Protobuf type {@code cosmos.mediawiki.Page.Revision.Contributor}
        */
       public static final class Contributor extends
           com.google.protobuf.GeneratedMessage
@@ -416,12 +416,12 @@ public final class MediawikiPage {
         }
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
-          return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_Revision_Contributor_descriptor;
+          return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_Revision_Contributor_descriptor;
         }
 
         protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_Revision_Contributor_fieldAccessorTable
+          return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_Revision_Contributor_fieldAccessorTable
               .ensureFieldAccessorsInitialized(
                   cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor.class, cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor.Builder.class);
         }
@@ -619,24 +619,24 @@ public final class MediawikiPage {
           return builder;
         }
         /**
-         * Protobuf type {@code sorts.mediawiki.Page.Revision.Contributor}
+         * Protobuf type {@code cosmos.mediawiki.Page.Revision.Contributor}
          */
         public static final class Builder extends
             com.google.protobuf.GeneratedMessage.Builder<Builder>
            implements cosmos.mediawiki.MediawikiPage.Page.Revision.ContributorOrBuilder {
           public static final com.google.protobuf.Descriptors.Descriptor
               getDescriptor() {
-            return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_Revision_Contributor_descriptor;
+            return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_Revision_Contributor_descriptor;
           }
 
           protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
               internalGetFieldAccessorTable() {
-            return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_Revision_Contributor_fieldAccessorTable
+            return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_Revision_Contributor_fieldAccessorTable
                 .ensureFieldAccessorsInitialized(
                     cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor.class, cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor.Builder.class);
           }
 
-          // Construct using sorts.mediawiki.MediawikiPage.Page.Revision.Contributor.newBuilder()
+          // Construct using cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor.newBuilder()
           private Builder() {
             maybeForceBuilderInitialization();
           }
@@ -669,7 +669,7 @@ public final class MediawikiPage {
 
           public com.google.protobuf.Descriptors.Descriptor
               getDescriptorForType() {
-            return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_Revision_Contributor_descriptor;
+            return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_Revision_Contributor_descriptor;
           }
 
           public cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor getDefaultInstanceForType() {
@@ -854,7 +854,7 @@ public final class MediawikiPage {
             return this;
           }
 
-          // @@protoc_insertion_point(builder_scope:sorts.mediawiki.Page.Revision.Contributor)
+          // @@protoc_insertion_point(builder_scope:cosmos.mediawiki.Page.Revision.Contributor)
         }
 
         static {
@@ -862,7 +862,7 @@ public final class MediawikiPage {
           defaultInstance.initFields();
         }
 
-        // @@protoc_insertion_point(class_scope:sorts.mediawiki.Page.Revision.Contributor)
+        // @@protoc_insertion_point(class_scope:cosmos.mediawiki.Page.Revision.Contributor)
       }
 
       private int bitField0_;
@@ -925,23 +925,23 @@ public final class MediawikiPage {
         }
       }
 
-      // optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;
+      // optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;
       public static final int CONTRIBUTOR_FIELD_NUMBER = 3;
       private cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor contributor_;
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
        */
       public boolean hasContributor() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
        */
       public cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor getContributor() {
         return contributor_;
       }
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
        */
       public cosmos.mediawiki.MediawikiPage.Page.Revision.ContributorOrBuilder getContributorOrBuilder() {
         return contributor_;
@@ -1105,24 +1105,24 @@ public final class MediawikiPage {
         return builder;
       }
       /**
-       * Protobuf type {@code sorts.mediawiki.Page.Revision}
+       * Protobuf type {@code cosmos.mediawiki.Page.Revision}
        */
       public static final class Builder extends
           com.google.protobuf.GeneratedMessage.Builder<Builder>
          implements cosmos.mediawiki.MediawikiPage.Page.RevisionOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
-          return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_Revision_descriptor;
+          return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_Revision_descriptor;
         }
 
         protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_Revision_fieldAccessorTable
+          return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_Revision_fieldAccessorTable
               .ensureFieldAccessorsInitialized(
                   cosmos.mediawiki.MediawikiPage.Page.Revision.class, cosmos.mediawiki.MediawikiPage.Page.Revision.Builder.class);
         }
 
-        // Construct using sorts.mediawiki.MediawikiPage.Page.Revision.newBuilder()
+        // Construct using cosmos.mediawiki.MediawikiPage.Page.Revision.newBuilder()
         private Builder() {
           maybeForceBuilderInitialization();
         }
@@ -1164,7 +1164,7 @@ public final class MediawikiPage {
 
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_Revision_descriptor;
+          return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_Revision_descriptor;
         }
 
         public cosmos.mediawiki.MediawikiPage.Page.Revision getDefaultInstanceForType() {
@@ -1375,18 +1375,18 @@ public final class MediawikiPage {
           return this;
         }
 
-        // optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;
+        // optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;
         private cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor contributor_ = cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor.getDefaultInstance();
         private com.google.protobuf.SingleFieldBuilder<
             cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor, cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor.Builder, cosmos.mediawiki.MediawikiPage.Page.Revision.ContributorOrBuilder> contributorBuilder_;
         /**
-         * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+         * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
          */
         public boolean hasContributor() {
           return ((bitField0_ & 0x00000004) == 0x00000004);
         }
         /**
-         * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+         * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
          */
         public cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor getContributor() {
           if (contributorBuilder_ == null) {
@@ -1396,7 +1396,7 @@ public final class MediawikiPage {
           }
         }
         /**
-         * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+         * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
          */
         public Builder setContributor(cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor value) {
           if (contributorBuilder_ == null) {
@@ -1412,7 +1412,7 @@ public final class MediawikiPage {
           return this;
         }
         /**
-         * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+         * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
          */
         public Builder setContributor(
             cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor.Builder builderForValue) {
@@ -1426,7 +1426,7 @@ public final class MediawikiPage {
           return this;
         }
         /**
-         * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+         * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
          */
         public Builder mergeContributor(cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor value) {
           if (contributorBuilder_ == null) {
@@ -1445,7 +1445,7 @@ public final class MediawikiPage {
           return this;
         }
         /**
-         * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+         * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
          */
         public Builder clearContributor() {
           if (contributorBuilder_ == null) {
@@ -1458,7 +1458,7 @@ public final class MediawikiPage {
           return this;
         }
         /**
-         * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+         * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
          */
         public cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor.Builder getContributorBuilder() {
           bitField0_ |= 0x00000004;
@@ -1466,7 +1466,7 @@ public final class MediawikiPage {
           return getContributorFieldBuilder().getBuilder();
         }
         /**
-         * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+         * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
          */
         public cosmos.mediawiki.MediawikiPage.Page.Revision.ContributorOrBuilder getContributorOrBuilder() {
           if (contributorBuilder_ != null) {
@@ -1476,7 +1476,7 @@ public final class MediawikiPage {
           }
         }
         /**
-         * <code>optional .sorts.mediawiki.Page.Revision.Contributor contributor = 3;</code>
+         * <code>optional .cosmos.mediawiki.Page.Revision.Contributor contributor = 3;</code>
          */
         private com.google.protobuf.SingleFieldBuilder<
             cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor, cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor.Builder, cosmos.mediawiki.MediawikiPage.Page.Revision.ContributorOrBuilder> 
@@ -1525,7 +1525,7 @@ public final class MediawikiPage {
           return this;
         }
 
-        // @@protoc_insertion_point(builder_scope:sorts.mediawiki.Page.Revision)
+        // @@protoc_insertion_point(builder_scope:cosmos.mediawiki.Page.Revision)
       }
 
       static {
@@ -1533,7 +1533,7 @@ public final class MediawikiPage {
         defaultInstance.initFields();
       }
 
-      // @@protoc_insertion_point(class_scope:sorts.mediawiki.Page.Revision)
+      // @@protoc_insertion_point(class_scope:cosmos.mediawiki.Page.Revision)
     }
 
     private int bitField0_;
@@ -1553,23 +1553,23 @@ public final class MediawikiPage {
       return id_;
     }
 
-    // optional .sorts.mediawiki.Page.Revision revision = 2;
+    // optional .cosmos.mediawiki.Page.Revision revision = 2;
     public static final int REVISION_FIELD_NUMBER = 2;
     private cosmos.mediawiki.MediawikiPage.Page.Revision revision_;
     /**
-     * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+     * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
      */
     public boolean hasRevision() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+     * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
      */
     public cosmos.mediawiki.MediawikiPage.Page.Revision getRevision() {
       return revision_;
     }
     /**
-     * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+     * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
      */
     public cosmos.mediawiki.MediawikiPage.Page.RevisionOrBuilder getRevisionOrBuilder() {
       return revision_;
@@ -1703,24 +1703,24 @@ public final class MediawikiPage {
       return builder;
     }
     /**
-     * Protobuf type {@code sorts.mediawiki.Page}
+     * Protobuf type {@code cosmos.mediawiki.Page}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements cosmos.mediawiki.MediawikiPage.PageOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_descriptor;
+        return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_fieldAccessorTable
+        return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 cosmos.mediawiki.MediawikiPage.Page.class, cosmos.mediawiki.MediawikiPage.Page.Builder.class);
       }
 
-      // Construct using sorts.mediawiki.MediawikiPage.Page.newBuilder()
+      // Construct using cosmos.mediawiki.MediawikiPage.Page.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -1758,7 +1758,7 @@ public final class MediawikiPage {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return cosmos.mediawiki.MediawikiPage.internal_static_sorts_mediawiki_Page_descriptor;
+        return cosmos.mediawiki.MediawikiPage.internal_static_cosmos_mediawiki_Page_descriptor;
       }
 
       public cosmos.mediawiki.MediawikiPage.Page getDefaultInstanceForType() {
@@ -1881,18 +1881,18 @@ public final class MediawikiPage {
         return this;
       }
 
-      // optional .sorts.mediawiki.Page.Revision revision = 2;
+      // optional .cosmos.mediawiki.Page.Revision revision = 2;
       private cosmos.mediawiki.MediawikiPage.Page.Revision revision_ = cosmos.mediawiki.MediawikiPage.Page.Revision.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           cosmos.mediawiki.MediawikiPage.Page.Revision, cosmos.mediawiki.MediawikiPage.Page.Revision.Builder, cosmos.mediawiki.MediawikiPage.Page.RevisionOrBuilder> revisionBuilder_;
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
        */
       public boolean hasRevision() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
        */
       public cosmos.mediawiki.MediawikiPage.Page.Revision getRevision() {
         if (revisionBuilder_ == null) {
@@ -1902,7 +1902,7 @@ public final class MediawikiPage {
         }
       }
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
        */
       public Builder setRevision(cosmos.mediawiki.MediawikiPage.Page.Revision value) {
         if (revisionBuilder_ == null) {
@@ -1918,7 +1918,7 @@ public final class MediawikiPage {
         return this;
       }
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
        */
       public Builder setRevision(
           cosmos.mediawiki.MediawikiPage.Page.Revision.Builder builderForValue) {
@@ -1932,7 +1932,7 @@ public final class MediawikiPage {
         return this;
       }
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
        */
       public Builder mergeRevision(cosmos.mediawiki.MediawikiPage.Page.Revision value) {
         if (revisionBuilder_ == null) {
@@ -1951,7 +1951,7 @@ public final class MediawikiPage {
         return this;
       }
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
        */
       public Builder clearRevision() {
         if (revisionBuilder_ == null) {
@@ -1964,7 +1964,7 @@ public final class MediawikiPage {
         return this;
       }
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
        */
       public cosmos.mediawiki.MediawikiPage.Page.Revision.Builder getRevisionBuilder() {
         bitField0_ |= 0x00000002;
@@ -1972,7 +1972,7 @@ public final class MediawikiPage {
         return getRevisionFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
        */
       public cosmos.mediawiki.MediawikiPage.Page.RevisionOrBuilder getRevisionOrBuilder() {
         if (revisionBuilder_ != null) {
@@ -1982,7 +1982,7 @@ public final class MediawikiPage {
         }
       }
       /**
-       * <code>optional .sorts.mediawiki.Page.Revision revision = 2;</code>
+       * <code>optional .cosmos.mediawiki.Page.Revision revision = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           cosmos.mediawiki.MediawikiPage.Page.Revision, cosmos.mediawiki.MediawikiPage.Page.Revision.Builder, cosmos.mediawiki.MediawikiPage.Page.RevisionOrBuilder> 
@@ -1998,7 +1998,7 @@ public final class MediawikiPage {
         return revisionBuilder_;
       }
 
-      // @@protoc_insertion_point(builder_scope:sorts.mediawiki.Page)
+      // @@protoc_insertion_point(builder_scope:cosmos.mediawiki.Page)
     }
 
     static {
@@ -2006,24 +2006,24 @@ public final class MediawikiPage {
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:sorts.mediawiki.Page)
+    // @@protoc_insertion_point(class_scope:cosmos.mediawiki.Page)
   }
 
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_sorts_mediawiki_Page_descriptor;
+    internal_static_cosmos_mediawiki_Page_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_sorts_mediawiki_Page_fieldAccessorTable;
+      internal_static_cosmos_mediawiki_Page_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_sorts_mediawiki_Page_Revision_descriptor;
+    internal_static_cosmos_mediawiki_Page_Revision_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_sorts_mediawiki_Page_Revision_fieldAccessorTable;
+      internal_static_cosmos_mediawiki_Page_Revision_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_sorts_mediawiki_Page_Revision_Contributor_descriptor;
+    internal_static_cosmos_mediawiki_Page_Revision_Contributor_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_sorts_mediawiki_Page_Revision_Contributor_fieldAccessorTable;
+      internal_static_cosmos_mediawiki_Page_Revision_Contributor_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -2033,37 +2033,37 @@ public final class MediawikiPage {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\npage.proto\022\017sorts.mediawiki\"\355\001\n\004Page\022\n" +
-      "\n\002id\030\001 \002(\004\0220\n\010revision\030\002 \001(\0132\036.sorts.med" +
-      "iawiki.Page.Revision\032\246\001\n\010Revision\022\n\n\002id\030" +
-      "\001 \002(\004\022\021\n\ttimestamp\030\002 \002(\t\022?\n\013contributor\030" +
-      "\003 \001(\0132*.sorts.mediawiki.Page.Revision.Co" +
-      "ntributor\022\r\n\005minor\030\004 \001(\010\032+\n\013Contributor\022" +
-      "\020\n\010username\030\001 \001(\t\022\n\n\002id\030\002 \001(\004B\021B\rMediawi" +
-      "kiPageH\001"
+      "\n\npage.proto\022\020cosmos.mediawiki\"\357\001\n\004Page\022" +
+      "\n\n\002id\030\001 \002(\004\0221\n\010revision\030\002 \001(\0132\037.cosmos.m" +
+      "ediawiki.Page.Revision\032\247\001\n\010Revision\022\n\n\002i" +
+      "d\030\001 \002(\004\022\021\n\ttimestamp\030\002 \002(\t\022@\n\013contributo" +
+      "r\030\003 \001(\0132+.cosmos.mediawiki.Page.Revision" +
+      ".Contributor\022\r\n\005minor\030\004 \001(\010\032+\n\013Contribut" +
+      "or\022\020\n\010username\030\001 \001(\t\022\n\n\002id\030\002 \001(\004B\021B\rMedi" +
+      "awikiPageH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
         public com.google.protobuf.ExtensionRegistry assignDescriptors(
             com.google.protobuf.Descriptors.FileDescriptor root) {
           descriptor = root;
-          internal_static_sorts_mediawiki_Page_descriptor =
+          internal_static_cosmos_mediawiki_Page_descriptor =
             getDescriptor().getMessageTypes().get(0);
-          internal_static_sorts_mediawiki_Page_fieldAccessorTable = new
+          internal_static_cosmos_mediawiki_Page_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_sorts_mediawiki_Page_descriptor,
+              internal_static_cosmos_mediawiki_Page_descriptor,
               new java.lang.String[] { "Id", "Revision", });
-          internal_static_sorts_mediawiki_Page_Revision_descriptor =
-            internal_static_sorts_mediawiki_Page_descriptor.getNestedTypes().get(0);
-          internal_static_sorts_mediawiki_Page_Revision_fieldAccessorTable = new
+          internal_static_cosmos_mediawiki_Page_Revision_descriptor =
+            internal_static_cosmos_mediawiki_Page_descriptor.getNestedTypes().get(0);
+          internal_static_cosmos_mediawiki_Page_Revision_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_sorts_mediawiki_Page_Revision_descriptor,
+              internal_static_cosmos_mediawiki_Page_Revision_descriptor,
               new java.lang.String[] { "Id", "Timestamp", "Contributor", "Minor", });
-          internal_static_sorts_mediawiki_Page_Revision_Contributor_descriptor =
-            internal_static_sorts_mediawiki_Page_Revision_descriptor.getNestedTypes().get(0);
-          internal_static_sorts_mediawiki_Page_Revision_Contributor_fieldAccessorTable = new
+          internal_static_cosmos_mediawiki_Page_Revision_Contributor_descriptor =
+            internal_static_cosmos_mediawiki_Page_Revision_descriptor.getNestedTypes().get(0);
+          internal_static_cosmos_mediawiki_Page_Revision_Contributor_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_sorts_mediawiki_Page_Revision_Contributor_descriptor,
+              internal_static_cosmos_mediawiki_Page_Revision_Contributor_descriptor,
               new java.lang.String[] { "Username", "Id", });
           return null;
         }

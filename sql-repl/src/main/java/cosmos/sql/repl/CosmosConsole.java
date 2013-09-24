@@ -38,7 +38,6 @@ import com.google.common.io.Files;
 
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.Store;
 import cosmos.options.Index;
 import cosmos.results.Column;
 import cosmos.results.QueryResult;
@@ -46,6 +45,7 @@ import cosmos.results.SValue;
 import cosmos.results.integration.CosmosIntegrationSetup;
 import cosmos.sql.CosmosDriver;
 import cosmos.sql.impl.CosmosSql;
+import cosmos.store.Store;
 
 public class CosmosConsole {
   private static final Logger log = LoggerFactory.getLogger(CosmosConsole.class);

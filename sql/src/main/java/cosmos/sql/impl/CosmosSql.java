@@ -50,7 +50,6 @@ import com.google.common.collect.Maps;
 import cosmos.Cosmos;
 import cosmos.UnexpectedStateException;
 import cosmos.UnindexedColumnException;
-import cosmos.impl.Store;
 import cosmos.options.Index;
 import cosmos.results.Column;
 import cosmos.results.SValue;
@@ -68,6 +67,7 @@ import cosmos.sql.call.Field;
 import cosmos.sql.call.Fields;
 import cosmos.sql.call.impl.Filter;
 import cosmos.sql.impl.functions.FieldLimiter;
+import cosmos.store.Store;
 
 /**
  * Cosmos SQL defines a table and a schema, therefore it is capable of returning an iterator of results for a given expression

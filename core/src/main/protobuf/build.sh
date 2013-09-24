@@ -1,3 +1,3 @@
 #!/bin/sh
 
-protoc --java_out ../java page.proto
+protoc --java_out ../java *.proto

@@ -62,8 +62,6 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 
 import cosmos.Cosmos;
-import cosmos.SortingMetadata;
-import cosmos.SortingMetadata.State;
 import cosmos.UnexpectedStateException;
 import cosmos.UnindexedColumnException;
 import cosmos.accumulo.GroupByRowSuffixIterator;
@@ -78,6 +76,9 @@ import cosmos.results.PagedQueryResult;
 import cosmos.results.QueryResult;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.store.PersistedStores;
+import cosmos.store.Store;
+import cosmos.store.PersistedStores.State;
 import cosmos.util.IndexHelper;
 import cosmos.util.Single;
 
@@ -148,7 +149,7 @@ public class CosmosImpl implements Cosmos{
     sortableResultMap.put(id.uuid(), id);
     
     try {
-      State s = SortingMetadata.getState(id);
+      State s = PersistedStores.getState(id);
       
       if (!State.UNKNOWN.equals(s)) {
         UnexpectedStateException e = unexpectedState(id, State.UNKNOWN, s);
@@ -160,7 +161,7 @@ public class CosmosImpl implements Cosmos{
       
       log.debug("Setting state for {} from {} to {}", new Object[] {id, s, targetState});
       
-      SortingMetadata.setState(id, targetState);
+      PersistedStores.setState(id, targetState);
     } finally {
       sw.stop();
       id.tracer().addTiming("Cosmos:register", sw.elapsed(TimeUnit.MILLISECONDS));
@@ -187,7 +188,7 @@ public class CosmosImpl implements Cosmos{
     
     Stopwatch sw = new Stopwatch().start();
     try {
-      State s = SortingMetadata.getState(id);
+      State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s)) {
         // stopwatch closed in finally
@@ -254,7 +255,7 @@ public class CosmosImpl implements Cosmos{
           
           if (!columnsAlreadyIndexed.contains(c)) {
             holder.set(c.name());
-            columnMutation.put(SortingMetadata.COLUMN_COLFAM, holder, Defaults.EMPTY_VALUE);
+            columnMutation.put(PersistedStores.COLUMN_COLFAM, holder, Defaults.EMPTY_VALUE);
             columnsAlreadyIndexed.add(c);
             newColumnIndexed = true;
           }
@@ -304,7 +305,7 @@ public class CosmosImpl implements Cosmos{
     Stopwatch sw = new Stopwatch().start();
     
     try {
-      State s = SortingMetadata.getState(id);
+      State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s)) {
         throw unexpectedState(id, State.LOADING, s);
@@ -314,7 +315,7 @@ public class CosmosImpl implements Cosmos{
       
       log.debug("Changing state for {} from {} to {}", new Object[] {id, s, desiredState});
       
-      SortingMetadata.setState(id, desiredState);
+      PersistedStores.setState(id, desiredState);
     } finally {
       sw.stop();
       id.tracer().addTiming("Cosmos:finalize", sw.elapsed(TimeUnit.MILLISECONDS));
@@ -329,7 +330,7 @@ public class CosmosImpl implements Cosmos{
     Stopwatch sw = new Stopwatch().start();
     
     try {
-      State s = SortingMetadata.getState(id);
+      State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
         // stopwatch stopped by finally
@@ -342,7 +343,7 @@ public class CosmosImpl implements Cosmos{
       int count = 1;
       
       // Only perform locking when the client requests it
-      if (id.lockOnUpdates) {
+      if (id.lockOnUpdates()) {
         while (!locked && count < 4) {
           if (locked = lock.acquire(10, TimeUnit.SECONDS)) {
             try {
@@ -461,14 +462,14 @@ public class CosmosImpl implements Cosmos{
     Stopwatch sw = new Stopwatch().start();
     
     try {
-      State s = SortingMetadata.getState(id);
+      State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
         // Stopwatch stopped by finally
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
-      return SortingMetadata.columns(id, description, sw);
+      return PersistedStores.columns(id, description, sw);
     } catch (TableNotFoundException e) {
       sw.stop();
       id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
@@ -488,7 +489,7 @@ public class CosmosImpl implements Cosmos{
     Stopwatch sw = new Stopwatch().start();
     
     try {
-      State s = SortingMetadata.getState(id);
+      State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
         sw.stop();
@@ -541,7 +542,7 @@ public class CosmosImpl implements Cosmos{
     Stopwatch sw = new Stopwatch().start();
     
     try {
-      State s = SortingMetadata.getState(id);
+      State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
         sw.stop();
@@ -605,7 +606,7 @@ public class CosmosImpl implements Cosmos{
     Stopwatch sw = new Stopwatch().start();
     
     try {
-      State s = SortingMetadata.getState(id);
+      State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
         sw.stop();
@@ -678,7 +679,7 @@ public class CosmosImpl implements Cosmos{
     final String description = "Cosmos:groupResults";
     
     try {
-      State s = SortingMetadata.getState(id);
+      State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
         sw.stop();
@@ -738,7 +739,7 @@ public class CosmosImpl implements Cosmos{
     
     // Omit tracing here just due to sheer magnitude of these calls.
     
-    State s = SortingMetadata.getState(id);
+    State s = PersistedStores.getState(id);
     
     if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
       throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
@@ -769,7 +770,7 @@ public class CosmosImpl implements Cosmos{
     
 
     try {
-      State s = SortingMetadata.getState(id);
+      State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
@@ -779,7 +780,7 @@ public class CosmosImpl implements Cosmos{
       
       log.debug("Changing state for {} from {} to {}", new Object[] {id, s, desiredState});
       
-      SortingMetadata.setState(id, desiredState);
+      PersistedStores.setState(id, desiredState);
       
       // Delete of the Keys
       BatchDeleter bd = null;
@@ -796,7 +797,7 @@ public class CosmosImpl implements Cosmos{
       
       log.debug("Removing state for {}", id);
       
-      SortingMetadata.remove(id);
+      PersistedStores.remove(id);
     } finally {
       sw.stop();
       id.tracer().addTiming("Cosmos:delete", sw.elapsed(TimeUnit.MILLISECONDS));
