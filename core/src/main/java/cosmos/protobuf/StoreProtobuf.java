@@ -90,466 +90,104 @@ public final class StoreProtobuf {
     // @@protoc_insertion_point(enum_scope:cosmos.protobuf.Order)
   }
 
-  public interface AuthorizationsOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-
-    // repeated bytes auths = 1;
-    /**
-     * <code>repeated bytes auths = 1;</code>
-     */
-    java.util.List<com.google.protobuf.ByteString> getAuthsList();
-    /**
-     * <code>repeated bytes auths = 1;</code>
-     */
-    int getAuthsCount();
-    /**
-     * <code>repeated bytes auths = 1;</code>
-     */
-    com.google.protobuf.ByteString getAuths(int index);
-  }
   /**
-   * Protobuf type {@code cosmos.protobuf.Authorizations}
+   * Protobuf enum {@code cosmos.protobuf.IndexSpec}
    */
-  public static final class Authorizations extends
-      com.google.protobuf.GeneratedMessage
-      implements AuthorizationsOrBuilder {
-    // Use Authorizations.newBuilder() to construct.
-    private Authorizations(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-      super(builder);
-      this.unknownFields = builder.getUnknownFields();
-    }
-    private Authorizations(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+  public enum IndexSpec
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>IDENTITY = 1;</code>
+     */
+    IDENTITY(0, 1),
+    /**
+     * <code>ASCENDING_IDENTITY = 2;</code>
+     */
+    ASCENDING_IDENTITY(1, 2),
+    /**
+     * <code>DESCENDING_IDENTITY = 3;</code>
+     */
+    DESCENDING_IDENTITY(2, 3),
+    /**
+     * <code>OTHER = 4;</code>
+     */
+    OTHER(3, 4),
+    ;
 
-    private static final Authorizations defaultInstance;
-    public static Authorizations getDefaultInstance() {
-      return defaultInstance;
-    }
+    /**
+     * <code>IDENTITY = 1;</code>
+     */
+    public static final int IDENTITY_VALUE = 1;
+    /**
+     * <code>ASCENDING_IDENTITY = 2;</code>
+     */
+    public static final int ASCENDING_IDENTITY_VALUE = 2;
+    /**
+     * <code>DESCENDING_IDENTITY = 3;</code>
+     */
+    public static final int DESCENDING_IDENTITY_VALUE = 3;
+    /**
+     * <code>OTHER = 4;</code>
+     */
+    public static final int OTHER_VALUE = 4;
 
-    public Authorizations getDefaultInstanceForType() {
-      return defaultInstance;
-    }
 
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private Authorizations(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                auths_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              auths_.add(input.readBytes());
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          auths_ = java.util.Collections.unmodifiableList(auths_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
+    public final int getNumber() { return value; }
+
+    public static IndexSpec valueOf(int value) {
+      switch (value) {
+        case 1: return IDENTITY;
+        case 2: return ASCENDING_IDENTITY;
+        case 3: return DESCENDING_IDENTITY;
+        case 4: return OTHER;
+        default: return null;
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
+
+    public static com.google.protobuf.Internal.EnumLiteMap<IndexSpec>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static com.google.protobuf.Internal.EnumLiteMap<IndexSpec>
+        internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<IndexSpec>() {
+            public IndexSpec findValueByNumber(int number) {
+              return IndexSpec.valueOf(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(index);
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return cosmos.protobuf.StoreProtobuf.internal_static_cosmos_protobuf_Authorizations_descriptor;
+      return cosmos.protobuf.StoreProtobuf.getDescriptor().getEnumTypes().get(1);
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return cosmos.protobuf.StoreProtobuf.internal_static_cosmos_protobuf_Authorizations_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              cosmos.protobuf.StoreProtobuf.Authorizations.class, cosmos.protobuf.StoreProtobuf.Authorizations.Builder.class);
+    private static final IndexSpec[] VALUES = values();
+
+    public static IndexSpec valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
     }
 
-    public static com.google.protobuf.Parser<Authorizations> PARSER =
-        new com.google.protobuf.AbstractParser<Authorizations>() {
-      public Authorizations parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Authorizations(input, extensionRegistry);
-      }
-    };
+    private final int index;
+    private final int value;
 
-    @java.lang.Override
-    public com.google.protobuf.Parser<Authorizations> getParserForType() {
-      return PARSER;
+    private IndexSpec(int index, int value) {
+      this.index = index;
+      this.value = value;
     }
 
-    // repeated bytes auths = 1;
-    public static final int AUTHS_FIELD_NUMBER = 1;
-    private java.util.List<com.google.protobuf.ByteString> auths_;
-    /**
-     * <code>repeated bytes auths = 1;</code>
-     */
-    public java.util.List<com.google.protobuf.ByteString>
-        getAuthsList() {
-      return auths_;
-    }
-    /**
-     * <code>repeated bytes auths = 1;</code>
-     */
-    public int getAuthsCount() {
-      return auths_.size();
-    }
-    /**
-     * <code>repeated bytes auths = 1;</code>
-     */
-    public com.google.protobuf.ByteString getAuths(int index) {
-      return auths_.get(index);
-    }
-
-    private void initFields() {
-      auths_ = java.util.Collections.emptyList();
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      for (int i = 0; i < auths_.size(); i++) {
-        output.writeBytes(1, auths_.get(i));
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      {
-        int dataSize = 0;
-        for (int i = 0; i < auths_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeBytesSizeNoTag(auths_.get(i));
-        }
-        size += dataSize;
-        size += 1 * getAuthsList().size();
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
-    public static cosmos.protobuf.StoreProtobuf.Authorizations parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static cosmos.protobuf.StoreProtobuf.Authorizations parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static cosmos.protobuf.StoreProtobuf.Authorizations parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static cosmos.protobuf.StoreProtobuf.Authorizations parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static cosmos.protobuf.StoreProtobuf.Authorizations parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static cosmos.protobuf.StoreProtobuf.Authorizations parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-    public static cosmos.protobuf.StoreProtobuf.Authorizations parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
-    }
-    public static cosmos.protobuf.StoreProtobuf.Authorizations parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
-    }
-    public static cosmos.protobuf.StoreProtobuf.Authorizations parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static cosmos.protobuf.StoreProtobuf.Authorizations parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(cosmos.protobuf.StoreProtobuf.Authorizations prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code cosmos.protobuf.Authorizations}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements cosmos.protobuf.StoreProtobuf.AuthorizationsOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return cosmos.protobuf.StoreProtobuf.internal_static_cosmos_protobuf_Authorizations_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return cosmos.protobuf.StoreProtobuf.internal_static_cosmos_protobuf_Authorizations_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                cosmos.protobuf.StoreProtobuf.Authorizations.class, cosmos.protobuf.StoreProtobuf.Authorizations.Builder.class);
-      }
-
-      // Construct using cosmos.protobuf.StoreProtobuf.Authorizations.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-
-      public Builder clear() {
-        super.clear();
-        auths_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
-        return this;
-      }
-
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return cosmos.protobuf.StoreProtobuf.internal_static_cosmos_protobuf_Authorizations_descriptor;
-      }
-
-      public cosmos.protobuf.StoreProtobuf.Authorizations getDefaultInstanceForType() {
-        return cosmos.protobuf.StoreProtobuf.Authorizations.getDefaultInstance();
-      }
-
-      public cosmos.protobuf.StoreProtobuf.Authorizations build() {
-        cosmos.protobuf.StoreProtobuf.Authorizations result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public cosmos.protobuf.StoreProtobuf.Authorizations buildPartial() {
-        cosmos.protobuf.StoreProtobuf.Authorizations result = new cosmos.protobuf.StoreProtobuf.Authorizations(this);
-        int from_bitField0_ = bitField0_;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          auths_ = java.util.Collections.unmodifiableList(auths_);
-          bitField0_ = (bitField0_ & ~0x00000001);
-        }
-        result.auths_ = auths_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof cosmos.protobuf.StoreProtobuf.Authorizations) {
-          return mergeFrom((cosmos.protobuf.StoreProtobuf.Authorizations)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(cosmos.protobuf.StoreProtobuf.Authorizations other) {
-        if (other == cosmos.protobuf.StoreProtobuf.Authorizations.getDefaultInstance()) return this;
-        if (!other.auths_.isEmpty()) {
-          if (auths_.isEmpty()) {
-            auths_ = other.auths_;
-            bitField0_ = (bitField0_ & ~0x00000001);
-          } else {
-            ensureAuthsIsMutable();
-            auths_.addAll(other.auths_);
-          }
-          onChanged();
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        cosmos.protobuf.StoreProtobuf.Authorizations parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (cosmos.protobuf.StoreProtobuf.Authorizations) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      // repeated bytes auths = 1;
-      private java.util.List<com.google.protobuf.ByteString> auths_ = java.util.Collections.emptyList();
-      private void ensureAuthsIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          auths_ = new java.util.ArrayList<com.google.protobuf.ByteString>(auths_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-      /**
-       * <code>repeated bytes auths = 1;</code>
-       */
-      public java.util.List<com.google.protobuf.ByteString>
-          getAuthsList() {
-        return java.util.Collections.unmodifiableList(auths_);
-      }
-      /**
-       * <code>repeated bytes auths = 1;</code>
-       */
-      public int getAuthsCount() {
-        return auths_.size();
-      }
-      /**
-       * <code>repeated bytes auths = 1;</code>
-       */
-      public com.google.protobuf.ByteString getAuths(int index) {
-        return auths_.get(index);
-      }
-      /**
-       * <code>repeated bytes auths = 1;</code>
-       */
-      public Builder setAuths(
-          int index, com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureAuthsIsMutable();
-        auths_.set(index, value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated bytes auths = 1;</code>
-       */
-      public Builder addAuths(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureAuthsIsMutable();
-        auths_.add(value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated bytes auths = 1;</code>
-       */
-      public Builder addAllAuths(
-          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
-        ensureAuthsIsMutable();
-        super.addAll(values, auths_);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated bytes auths = 1;</code>
-       */
-      public Builder clearAuths() {
-        auths_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
-        onChanged();
-        return this;
-      }
-
-      // @@protoc_insertion_point(builder_scope:cosmos.protobuf.Authorizations)
-    }
-
-    static {
-      defaultInstance = new Authorizations(true);
-      defaultInstance.initFields();
-    }
-
-    // @@protoc_insertion_point(class_scope:cosmos.protobuf.Authorizations)
+    // @@protoc_insertion_point(enum_scope:cosmos.protobuf.IndexSpec)
   }
 
   public interface IndexOrBuilder
@@ -1311,19 +949,20 @@ public final class StoreProtobuf {
     com.google.protobuf.ByteString
         getUniqueIdBytes();
 
-    // required .cosmos.protobuf.Authorizations auths = 2;
+    // required string auths = 2;
     /**
-     * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
+     * <code>required string auths = 2;</code>
      */
     boolean hasAuths();
     /**
-     * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
+     * <code>required string auths = 2;</code>
      */
-    cosmos.protobuf.StoreProtobuf.Authorizations getAuths();
+    java.lang.String getAuths();
     /**
-     * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
+     * <code>required string auths = 2;</code>
      */
-    cosmos.protobuf.StoreProtobuf.AuthorizationsOrBuilder getAuthsOrBuilder();
+    com.google.protobuf.ByteString
+        getAuthsBytes();
 
     // required string data_table = 3;
     /**
@@ -1355,38 +994,48 @@ public final class StoreProtobuf {
     com.google.protobuf.ByteString
         getMetadataTableBytes();
 
-    // repeated .cosmos.protobuf.Index indexes = 5;
+    // required .cosmos.protobuf.IndexSpec index_spec = 5;
     /**
-     * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+     * <code>required .cosmos.protobuf.IndexSpec index_spec = 5;</code>
+     */
+    boolean hasIndexSpec();
+    /**
+     * <code>required .cosmos.protobuf.IndexSpec index_spec = 5;</code>
+     */
+    cosmos.protobuf.StoreProtobuf.IndexSpec getIndexSpec();
+
+    // repeated .cosmos.protobuf.Index indexes = 6;
+    /**
+     * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
      */
     java.util.List<cosmos.protobuf.StoreProtobuf.Index> 
         getIndexesList();
     /**
-     * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+     * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
      */
     cosmos.protobuf.StoreProtobuf.Index getIndexes(int index);
     /**
-     * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+     * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
      */
     int getIndexesCount();
     /**
-     * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+     * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
      */
     java.util.List<? extends cosmos.protobuf.StoreProtobuf.IndexOrBuilder> 
         getIndexesOrBuilderList();
     /**
-     * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+     * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
      */
     cosmos.protobuf.StoreProtobuf.IndexOrBuilder getIndexesOrBuilder(
         int index);
 
-    // optional bool lock_on_updates = 6;
+    // optional bool lock_on_updates = 7;
     /**
-     * <code>optional bool lock_on_updates = 6;</code>
+     * <code>optional bool lock_on_updates = 7;</code>
      */
     boolean hasLockOnUpdates();
     /**
-     * <code>optional bool lock_on_updates = 6;</code>
+     * <code>optional bool lock_on_updates = 7;</code>
      */
     boolean getLockOnUpdates();
   }
@@ -1447,16 +1096,8 @@ public final class StoreProtobuf {
               break;
             }
             case 18: {
-              cosmos.protobuf.StoreProtobuf.Authorizations.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000002) == 0x00000002)) {
-                subBuilder = auths_.toBuilder();
-              }
-              auths_ = input.readMessage(cosmos.protobuf.StoreProtobuf.Authorizations.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(auths_);
-                auths_ = subBuilder.buildPartial();
-              }
               bitField0_ |= 0x00000002;
+              auths_ = input.readBytes();
               break;
             }
             case 26: {
@@ -1469,16 +1110,27 @@ public final class StoreProtobuf {
               metadataTable_ = input.readBytes();
               break;
             }
-            case 42: {
-              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+            case 40: {
+              int rawValue = input.readEnum();
+              cosmos.protobuf.StoreProtobuf.IndexSpec value = cosmos.protobuf.StoreProtobuf.IndexSpec.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(5, rawValue);
+              } else {
+                bitField0_ |= 0x00000010;
+                indexSpec_ = value;
+              }
+              break;
+            }
+            case 50: {
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
                 indexes_ = new java.util.ArrayList<cosmos.protobuf.StoreProtobuf.Index>();
-                mutable_bitField0_ |= 0x00000010;
+                mutable_bitField0_ |= 0x00000020;
               }
               indexes_.add(input.readMessage(cosmos.protobuf.StoreProtobuf.Index.PARSER, extensionRegistry));
               break;
             }
-            case 48: {
-              bitField0_ |= 0x00000010;
+            case 56: {
+              bitField0_ |= 0x00000020;
               lockOnUpdates_ = input.readBool();
               break;
             }
@@ -1490,7 +1142,7 @@ public final class StoreProtobuf {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+        if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
           indexes_ = java.util.Collections.unmodifiableList(indexes_);
         }
         this.unknownFields = unknownFields.build();
@@ -1568,26 +1220,47 @@ public final class StoreProtobuf {
       }
     }
 
-    // required .cosmos.protobuf.Authorizations auths = 2;
+    // required string auths = 2;
     public static final int AUTHS_FIELD_NUMBER = 2;
-    private cosmos.protobuf.StoreProtobuf.Authorizations auths_;
+    private java.lang.Object auths_;
     /**
-     * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
+     * <code>required string auths = 2;</code>
      */
     public boolean hasAuths() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
+     * <code>required string auths = 2;</code>
      */
-    public cosmos.protobuf.StoreProtobuf.Authorizations getAuths() {
-      return auths_;
+    public java.lang.String getAuths() {
+      java.lang.Object ref = auths_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          auths_ = s;
+        }
+        return s;
+      }
     }
     /**
-     * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
+     * <code>required string auths = 2;</code>
      */
-    public cosmos.protobuf.StoreProtobuf.AuthorizationsOrBuilder getAuthsOrBuilder() {
-      return auths_;
+    public com.google.protobuf.ByteString
+        getAuthsBytes() {
+      java.lang.Object ref = auths_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        auths_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     // required string data_table = 3;
@@ -1676,53 +1349,69 @@ public final class StoreProtobuf {
       }
     }
 
-    // repeated .cosmos.protobuf.Index indexes = 5;
-    public static final int INDEXES_FIELD_NUMBER = 5;
+    // required .cosmos.protobuf.IndexSpec index_spec = 5;
+    public static final int INDEX_SPEC_FIELD_NUMBER = 5;
+    private cosmos.protobuf.StoreProtobuf.IndexSpec indexSpec_;
+    /**
+     * <code>required .cosmos.protobuf.IndexSpec index_spec = 5;</code>
+     */
+    public boolean hasIndexSpec() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>required .cosmos.protobuf.IndexSpec index_spec = 5;</code>
+     */
+    public cosmos.protobuf.StoreProtobuf.IndexSpec getIndexSpec() {
+      return indexSpec_;
+    }
+
+    // repeated .cosmos.protobuf.Index indexes = 6;
+    public static final int INDEXES_FIELD_NUMBER = 6;
     private java.util.List<cosmos.protobuf.StoreProtobuf.Index> indexes_;
     /**
-     * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+     * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
      */
     public java.util.List<cosmos.protobuf.StoreProtobuf.Index> getIndexesList() {
       return indexes_;
     }
     /**
-     * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+     * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
      */
     public java.util.List<? extends cosmos.protobuf.StoreProtobuf.IndexOrBuilder> 
         getIndexesOrBuilderList() {
       return indexes_;
     }
     /**
-     * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+     * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
      */
     public int getIndexesCount() {
       return indexes_.size();
     }
     /**
-     * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+     * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
      */
     public cosmos.protobuf.StoreProtobuf.Index getIndexes(int index) {
       return indexes_.get(index);
     }
     /**
-     * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+     * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
      */
     public cosmos.protobuf.StoreProtobuf.IndexOrBuilder getIndexesOrBuilder(
         int index) {
       return indexes_.get(index);
     }
 
-    // optional bool lock_on_updates = 6;
-    public static final int LOCK_ON_UPDATES_FIELD_NUMBER = 6;
+    // optional bool lock_on_updates = 7;
+    public static final int LOCK_ON_UPDATES_FIELD_NUMBER = 7;
     private boolean lockOnUpdates_;
     /**
-     * <code>optional bool lock_on_updates = 6;</code>
+     * <code>optional bool lock_on_updates = 7;</code>
      */
     public boolean hasLockOnUpdates() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
+      return ((bitField0_ & 0x00000020) == 0x00000020);
     }
     /**
-     * <code>optional bool lock_on_updates = 6;</code>
+     * <code>optional bool lock_on_updates = 7;</code>
      */
     public boolean getLockOnUpdates() {
       return lockOnUpdates_;
@@ -1730,9 +1419,10 @@ public final class StoreProtobuf {
 
     private void initFields() {
       uniqueId_ = "";
-      auths_ = cosmos.protobuf.StoreProtobuf.Authorizations.getDefaultInstance();
+      auths_ = "";
       dataTable_ = "";
       metadataTable_ = "";
+      indexSpec_ = cosmos.protobuf.StoreProtobuf.IndexSpec.IDENTITY;
       indexes_ = java.util.Collections.emptyList();
       lockOnUpdates_ = false;
     }
@@ -1757,6 +1447,10 @@ public final class StoreProtobuf {
         memoizedIsInitialized = 0;
         return false;
       }
+      if (!hasIndexSpec()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       for (int i = 0; i < getIndexesCount(); i++) {
         if (!getIndexes(i).isInitialized()) {
           memoizedIsInitialized = 0;
@@ -1774,7 +1468,7 @@ public final class StoreProtobuf {
         output.writeBytes(1, getUniqueIdBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeMessage(2, auths_);
+        output.writeBytes(2, getAuthsBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeBytes(3, getDataTableBytes());
@@ -1782,11 +1476,14 @@ public final class StoreProtobuf {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeBytes(4, getMetadataTableBytes());
       }
-      for (int i = 0; i < indexes_.size(); i++) {
-        output.writeMessage(5, indexes_.get(i));
-      }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeBool(6, lockOnUpdates_);
+        output.writeEnum(5, indexSpec_.getNumber());
+      }
+      for (int i = 0; i < indexes_.size(); i++) {
+        output.writeMessage(6, indexes_.get(i));
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeBool(7, lockOnUpdates_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1803,7 +1500,7 @@ public final class StoreProtobuf {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, auths_);
+          .computeBytesSize(2, getAuthsBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
@@ -1813,13 +1510,17 @@ public final class StoreProtobuf {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, getMetadataTableBytes());
       }
-      for (int i = 0; i < indexes_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, indexes_.get(i));
-      }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(6, lockOnUpdates_);
+          .computeEnumSize(5, indexSpec_.getNumber());
+      }
+      for (int i = 0; i < indexes_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, indexes_.get(i));
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(7, lockOnUpdates_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1929,7 +1630,6 @@ public final class StoreProtobuf {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getAuthsFieldBuilder();
           getIndexesFieldBuilder();
         }
       }
@@ -1941,24 +1641,22 @@ public final class StoreProtobuf {
         super.clear();
         uniqueId_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
-        if (authsBuilder_ == null) {
-          auths_ = cosmos.protobuf.StoreProtobuf.Authorizations.getDefaultInstance();
-        } else {
-          authsBuilder_.clear();
-        }
+        auths_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
         dataTable_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
         metadataTable_ = "";
         bitField0_ = (bitField0_ & ~0x00000008);
+        indexSpec_ = cosmos.protobuf.StoreProtobuf.IndexSpec.IDENTITY;
+        bitField0_ = (bitField0_ & ~0x00000010);
         if (indexesBuilder_ == null) {
           indexes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000020);
         } else {
           indexesBuilder_.clear();
         }
         lockOnUpdates_ = false;
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
 
@@ -1994,11 +1692,7 @@ public final class StoreProtobuf {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        if (authsBuilder_ == null) {
-          result.auths_ = auths_;
-        } else {
-          result.auths_ = authsBuilder_.build();
-        }
+        result.auths_ = auths_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
@@ -2007,17 +1701,21 @@ public final class StoreProtobuf {
           to_bitField0_ |= 0x00000008;
         }
         result.metadataTable_ = metadataTable_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.indexSpec_ = indexSpec_;
         if (indexesBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          if (((bitField0_ & 0x00000020) == 0x00000020)) {
             indexes_ = java.util.Collections.unmodifiableList(indexes_);
-            bitField0_ = (bitField0_ & ~0x00000010);
+            bitField0_ = (bitField0_ & ~0x00000020);
           }
           result.indexes_ = indexes_;
         } else {
           result.indexes_ = indexesBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
-          to_bitField0_ |= 0x00000010;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000020;
         }
         result.lockOnUpdates_ = lockOnUpdates_;
         result.bitField0_ = to_bitField0_;
@@ -2042,7 +1740,9 @@ public final class StoreProtobuf {
           onChanged();
         }
         if (other.hasAuths()) {
-          mergeAuths(other.getAuths());
+          bitField0_ |= 0x00000002;
+          auths_ = other.auths_;
+          onChanged();
         }
         if (other.hasDataTable()) {
           bitField0_ |= 0x00000004;
@@ -2054,11 +1754,14 @@ public final class StoreProtobuf {
           metadataTable_ = other.metadataTable_;
           onChanged();
         }
+        if (other.hasIndexSpec()) {
+          setIndexSpec(other.getIndexSpec());
+        }
         if (indexesBuilder_ == null) {
           if (!other.indexes_.isEmpty()) {
             if (indexes_.isEmpty()) {
               indexes_ = other.indexes_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000020);
             } else {
               ensureIndexesIsMutable();
               indexes_.addAll(other.indexes_);
@@ -2071,7 +1774,7 @@ public final class StoreProtobuf {
               indexesBuilder_.dispose();
               indexesBuilder_ = null;
               indexes_ = other.indexes_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000020);
               indexesBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getIndexesFieldBuilder() : null;
@@ -2101,6 +1804,10 @@ public final class StoreProtobuf {
           return false;
         }
         if (!hasMetadataTable()) {
+          
+          return false;
+        }
+        if (!hasIndexSpec()) {
           
           return false;
         }
@@ -2206,121 +1913,78 @@ public final class StoreProtobuf {
         return this;
       }
 
-      // required .cosmos.protobuf.Authorizations auths = 2;
-      private cosmos.protobuf.StoreProtobuf.Authorizations auths_ = cosmos.protobuf.StoreProtobuf.Authorizations.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          cosmos.protobuf.StoreProtobuf.Authorizations, cosmos.protobuf.StoreProtobuf.Authorizations.Builder, cosmos.protobuf.StoreProtobuf.AuthorizationsOrBuilder> authsBuilder_;
+      // required string auths = 2;
+      private java.lang.Object auths_ = "";
       /**
-       * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
+       * <code>required string auths = 2;</code>
        */
       public boolean hasAuths() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
+       * <code>required string auths = 2;</code>
        */
-      public cosmos.protobuf.StoreProtobuf.Authorizations getAuths() {
-        if (authsBuilder_ == null) {
-          return auths_;
+      public java.lang.String getAuths() {
+        java.lang.Object ref = auths_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          auths_ = s;
+          return s;
         } else {
-          return authsBuilder_.getMessage();
+          return (java.lang.String) ref;
         }
       }
       /**
-       * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
+       * <code>required string auths = 2;</code>
        */
-      public Builder setAuths(cosmos.protobuf.StoreProtobuf.Authorizations value) {
-        if (authsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          auths_ = value;
-          onChanged();
+      public com.google.protobuf.ByteString
+          getAuthsBytes() {
+        java.lang.Object ref = auths_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          auths_ = b;
+          return b;
         } else {
-          authsBuilder_.setMessage(value);
+          return (com.google.protobuf.ByteString) ref;
         }
-        bitField0_ |= 0x00000002;
-        return this;
       }
       /**
-       * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
+       * <code>required string auths = 2;</code>
        */
       public Builder setAuths(
-          cosmos.protobuf.StoreProtobuf.Authorizations.Builder builderForValue) {
-        if (authsBuilder_ == null) {
-          auths_ = builderForValue.build();
-          onChanged();
-        } else {
-          authsBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000002;
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        auths_ = value;
+        onChanged();
         return this;
       }
       /**
-       * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
-       */
-      public Builder mergeAuths(cosmos.protobuf.StoreProtobuf.Authorizations value) {
-        if (authsBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002) &&
-              auths_ != cosmos.protobuf.StoreProtobuf.Authorizations.getDefaultInstance()) {
-            auths_ =
-              cosmos.protobuf.StoreProtobuf.Authorizations.newBuilder(auths_).mergeFrom(value).buildPartial();
-          } else {
-            auths_ = value;
-          }
-          onChanged();
-        } else {
-          authsBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000002;
-        return this;
-      }
-      /**
-       * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
+       * <code>required string auths = 2;</code>
        */
       public Builder clearAuths() {
-        if (authsBuilder_ == null) {
-          auths_ = cosmos.protobuf.StoreProtobuf.Authorizations.getDefaultInstance();
-          onChanged();
-        } else {
-          authsBuilder_.clear();
-        }
         bitField0_ = (bitField0_ & ~0x00000002);
+        auths_ = getDefaultInstance().getAuths();
+        onChanged();
         return this;
       }
       /**
-       * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
+       * <code>required string auths = 2;</code>
        */
-      public cosmos.protobuf.StoreProtobuf.Authorizations.Builder getAuthsBuilder() {
-        bitField0_ |= 0x00000002;
+      public Builder setAuthsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        auths_ = value;
         onChanged();
-        return getAuthsFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
-       */
-      public cosmos.protobuf.StoreProtobuf.AuthorizationsOrBuilder getAuthsOrBuilder() {
-        if (authsBuilder_ != null) {
-          return authsBuilder_.getMessageOrBuilder();
-        } else {
-          return auths_;
-        }
-      }
-      /**
-       * <code>required .cosmos.protobuf.Authorizations auths = 2;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          cosmos.protobuf.StoreProtobuf.Authorizations, cosmos.protobuf.StoreProtobuf.Authorizations.Builder, cosmos.protobuf.StoreProtobuf.AuthorizationsOrBuilder> 
-          getAuthsFieldBuilder() {
-        if (authsBuilder_ == null) {
-          authsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              cosmos.protobuf.StoreProtobuf.Authorizations, cosmos.protobuf.StoreProtobuf.Authorizations.Builder, cosmos.protobuf.StoreProtobuf.AuthorizationsOrBuilder>(
-                  auths_,
-                  getParentForChildren(),
-                  isClean());
-          auths_ = null;
-        }
-        return authsBuilder_;
+        return this;
       }
 
       // required string data_table = 3;
@@ -2471,13 +2135,49 @@ public final class StoreProtobuf {
         return this;
       }
 
-      // repeated .cosmos.protobuf.Index indexes = 5;
+      // required .cosmos.protobuf.IndexSpec index_spec = 5;
+      private cosmos.protobuf.StoreProtobuf.IndexSpec indexSpec_ = cosmos.protobuf.StoreProtobuf.IndexSpec.IDENTITY;
+      /**
+       * <code>required .cosmos.protobuf.IndexSpec index_spec = 5;</code>
+       */
+      public boolean hasIndexSpec() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>required .cosmos.protobuf.IndexSpec index_spec = 5;</code>
+       */
+      public cosmos.protobuf.StoreProtobuf.IndexSpec getIndexSpec() {
+        return indexSpec_;
+      }
+      /**
+       * <code>required .cosmos.protobuf.IndexSpec index_spec = 5;</code>
+       */
+      public Builder setIndexSpec(cosmos.protobuf.StoreProtobuf.IndexSpec value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000010;
+        indexSpec_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required .cosmos.protobuf.IndexSpec index_spec = 5;</code>
+       */
+      public Builder clearIndexSpec() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        indexSpec_ = cosmos.protobuf.StoreProtobuf.IndexSpec.IDENTITY;
+        onChanged();
+        return this;
+      }
+
+      // repeated .cosmos.protobuf.Index indexes = 6;
       private java.util.List<cosmos.protobuf.StoreProtobuf.Index> indexes_ =
         java.util.Collections.emptyList();
       private void ensureIndexesIsMutable() {
-        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+        if (!((bitField0_ & 0x00000020) == 0x00000020)) {
           indexes_ = new java.util.ArrayList<cosmos.protobuf.StoreProtobuf.Index>(indexes_);
-          bitField0_ |= 0x00000010;
+          bitField0_ |= 0x00000020;
          }
       }
 
@@ -2485,7 +2185,7 @@ public final class StoreProtobuf {
           cosmos.protobuf.StoreProtobuf.Index, cosmos.protobuf.StoreProtobuf.Index.Builder, cosmos.protobuf.StoreProtobuf.IndexOrBuilder> indexesBuilder_;
 
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public java.util.List<cosmos.protobuf.StoreProtobuf.Index> getIndexesList() {
         if (indexesBuilder_ == null) {
@@ -2495,7 +2195,7 @@ public final class StoreProtobuf {
         }
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public int getIndexesCount() {
         if (indexesBuilder_ == null) {
@@ -2505,7 +2205,7 @@ public final class StoreProtobuf {
         }
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public cosmos.protobuf.StoreProtobuf.Index getIndexes(int index) {
         if (indexesBuilder_ == null) {
@@ -2515,7 +2215,7 @@ public final class StoreProtobuf {
         }
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public Builder setIndexes(
           int index, cosmos.protobuf.StoreProtobuf.Index value) {
@@ -2532,7 +2232,7 @@ public final class StoreProtobuf {
         return this;
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public Builder setIndexes(
           int index, cosmos.protobuf.StoreProtobuf.Index.Builder builderForValue) {
@@ -2546,7 +2246,7 @@ public final class StoreProtobuf {
         return this;
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public Builder addIndexes(cosmos.protobuf.StoreProtobuf.Index value) {
         if (indexesBuilder_ == null) {
@@ -2562,7 +2262,7 @@ public final class StoreProtobuf {
         return this;
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public Builder addIndexes(
           int index, cosmos.protobuf.StoreProtobuf.Index value) {
@@ -2579,7 +2279,7 @@ public final class StoreProtobuf {
         return this;
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public Builder addIndexes(
           cosmos.protobuf.StoreProtobuf.Index.Builder builderForValue) {
@@ -2593,7 +2293,7 @@ public final class StoreProtobuf {
         return this;
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public Builder addIndexes(
           int index, cosmos.protobuf.StoreProtobuf.Index.Builder builderForValue) {
@@ -2607,7 +2307,7 @@ public final class StoreProtobuf {
         return this;
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public Builder addAllIndexes(
           java.lang.Iterable<? extends cosmos.protobuf.StoreProtobuf.Index> values) {
@@ -2621,12 +2321,12 @@ public final class StoreProtobuf {
         return this;
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public Builder clearIndexes() {
         if (indexesBuilder_ == null) {
           indexes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000020);
           onChanged();
         } else {
           indexesBuilder_.clear();
@@ -2634,7 +2334,7 @@ public final class StoreProtobuf {
         return this;
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public Builder removeIndexes(int index) {
         if (indexesBuilder_ == null) {
@@ -2647,14 +2347,14 @@ public final class StoreProtobuf {
         return this;
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public cosmos.protobuf.StoreProtobuf.Index.Builder getIndexesBuilder(
           int index) {
         return getIndexesFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public cosmos.protobuf.StoreProtobuf.IndexOrBuilder getIndexesOrBuilder(
           int index) {
@@ -2664,7 +2364,7 @@ public final class StoreProtobuf {
         }
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public java.util.List<? extends cosmos.protobuf.StoreProtobuf.IndexOrBuilder> 
            getIndexesOrBuilderList() {
@@ -2675,14 +2375,14 @@ public final class StoreProtobuf {
         }
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public cosmos.protobuf.StoreProtobuf.Index.Builder addIndexesBuilder() {
         return getIndexesFieldBuilder().addBuilder(
             cosmos.protobuf.StoreProtobuf.Index.getDefaultInstance());
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public cosmos.protobuf.StoreProtobuf.Index.Builder addIndexesBuilder(
           int index) {
@@ -2690,7 +2390,7 @@ public final class StoreProtobuf {
             index, cosmos.protobuf.StoreProtobuf.Index.getDefaultInstance());
       }
       /**
-       * <code>repeated .cosmos.protobuf.Index indexes = 5;</code>
+       * <code>repeated .cosmos.protobuf.Index indexes = 6;</code>
        */
       public java.util.List<cosmos.protobuf.StoreProtobuf.Index.Builder> 
            getIndexesBuilderList() {
@@ -2703,7 +2403,7 @@ public final class StoreProtobuf {
           indexesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               cosmos.protobuf.StoreProtobuf.Index, cosmos.protobuf.StoreProtobuf.Index.Builder, cosmos.protobuf.StoreProtobuf.IndexOrBuilder>(
                   indexes_,
-                  ((bitField0_ & 0x00000010) == 0x00000010),
+                  ((bitField0_ & 0x00000020) == 0x00000020),
                   getParentForChildren(),
                   isClean());
           indexes_ = null;
@@ -2711,34 +2411,34 @@ public final class StoreProtobuf {
         return indexesBuilder_;
       }
 
-      // optional bool lock_on_updates = 6;
+      // optional bool lock_on_updates = 7;
       private boolean lockOnUpdates_ ;
       /**
-       * <code>optional bool lock_on_updates = 6;</code>
+       * <code>optional bool lock_on_updates = 7;</code>
        */
       public boolean hasLockOnUpdates() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
+        return ((bitField0_ & 0x00000040) == 0x00000040);
       }
       /**
-       * <code>optional bool lock_on_updates = 6;</code>
+       * <code>optional bool lock_on_updates = 7;</code>
        */
       public boolean getLockOnUpdates() {
         return lockOnUpdates_;
       }
       /**
-       * <code>optional bool lock_on_updates = 6;</code>
+       * <code>optional bool lock_on_updates = 7;</code>
        */
       public Builder setLockOnUpdates(boolean value) {
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000040;
         lockOnUpdates_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bool lock_on_updates = 6;</code>
+       * <code>optional bool lock_on_updates = 7;</code>
        */
       public Builder clearLockOnUpdates() {
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000040);
         lockOnUpdates_ = false;
         onChanged();
         return this;
@@ -2755,11 +2455,6 @@ public final class StoreProtobuf {
     // @@protoc_insertion_point(class_scope:cosmos.protobuf.Store)
   }
 
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_cosmos_protobuf_Authorizations_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_cosmos_protobuf_Authorizations_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_cosmos_protobuf_Index_descriptor;
   private static
@@ -2779,40 +2474,36 @@ public final class StoreProtobuf {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\013store.proto\022\017cosmos.protobuf\"\037\n\016Author" +
-      "izations\022\r\n\005auths\030\001 \003(\014\"L\n\005Index\022\016\n\006colu" +
-      "mn\030\001 \002(\t\022%\n\005order\030\002 \002(\0162\026.cosmos.protobu" +
-      "f.Order\022\014\n\004type\030\003 \002(\t\"\270\001\n\005Store\022\021\n\tuniqu" +
-      "e_id\030\001 \002(\t\022.\n\005auths\030\002 \002(\0132\037.cosmos.proto" +
-      "buf.Authorizations\022\022\n\ndata_table\030\003 \002(\t\022\026" +
-      "\n\016metadata_table\030\004 \002(\t\022\'\n\007indexes\030\005 \003(\0132" +
-      "\026.cosmos.protobuf.Index\022\027\n\017lock_on_updat" +
-      "es\030\006 \001(\010*&\n\005Order\022\r\n\tASCENDING\020\001\022\016\n\nDESC" +
-      "ENDING\020\002B\021B\rStoreProtobufH\001"
+      "\n\013store.proto\022\017cosmos.protobuf\"L\n\005Index\022" +
+      "\016\n\006column\030\001 \002(\t\022%\n\005order\030\002 \002(\0162\026.cosmos." +
+      "protobuf.Order\022\014\n\004type\030\003 \002(\t\"\307\001\n\005Store\022\021" +
+      "\n\tunique_id\030\001 \002(\t\022\r\n\005auths\030\002 \002(\t\022\022\n\ndata" +
+      "_table\030\003 \002(\t\022\026\n\016metadata_table\030\004 \002(\t\022.\n\n" +
+      "index_spec\030\005 \002(\0162\032.cosmos.protobuf.Index" +
+      "Spec\022\'\n\007indexes\030\006 \003(\0132\026.cosmos.protobuf." +
+      "Index\022\027\n\017lock_on_updates\030\007 \001(\010*&\n\005Order\022" +
+      "\r\n\tASCENDING\020\001\022\016\n\nDESCENDING\020\002*U\n\tIndexS" +
+      "pec\022\014\n\010IDENTITY\020\001\022\026\n\022ASCENDING_IDENTITY\020",
+      "\002\022\027\n\023DESCENDING_IDENTITY\020\003\022\t\n\005OTHER\020\004B\021B" +
+      "\rStoreProtobufH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
         public com.google.protobuf.ExtensionRegistry assignDescriptors(
             com.google.protobuf.Descriptors.FileDescriptor root) {
           descriptor = root;
-          internal_static_cosmos_protobuf_Authorizations_descriptor =
-            getDescriptor().getMessageTypes().get(0);
-          internal_static_cosmos_protobuf_Authorizations_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_cosmos_protobuf_Authorizations_descriptor,
-              new java.lang.String[] { "Auths", });
           internal_static_cosmos_protobuf_Index_descriptor =
-            getDescriptor().getMessageTypes().get(1);
+            getDescriptor().getMessageTypes().get(0);
           internal_static_cosmos_protobuf_Index_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_cosmos_protobuf_Index_descriptor,
               new java.lang.String[] { "Column", "Order", "Type", });
           internal_static_cosmos_protobuf_Store_descriptor =
-            getDescriptor().getMessageTypes().get(2);
+            getDescriptor().getMessageTypes().get(1);
           internal_static_cosmos_protobuf_Store_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_cosmos_protobuf_Store_descriptor,
-              new java.lang.String[] { "UniqueId", "Auths", "DataTable", "MetadataTable", "Indexes", "LockOnUpdates", });
+              new java.lang.String[] { "UniqueId", "Auths", "DataTable", "MetadataTable", "IndexSpec", "Indexes", "LockOnUpdates", });
           return null;
         }
       };

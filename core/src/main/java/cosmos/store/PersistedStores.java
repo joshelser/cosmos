@@ -23,7 +23,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.accumulo.core.Constants;
 import org.apache.accumulo.core.client.BatchDeleter;
@@ -38,16 +41,45 @@ import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
+import org.apache.accumulo.core.security.Authorizations;
 import org.apache.hadoop.io.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Sets;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import cosmos.Cosmos;
+import cosmos.options.Index;
+import cosmos.options.Order;
+import cosmos.protobuf.StoreProtobuf;
+import cosmos.protobuf.StoreProtobuf.IndexSpec;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
+import cosmos.util.AscendingIndexIdentitySet;
+import cosmos.util.DescendingIndexIdentitySet;
+import cosmos.util.IdentitySet;
 
 public class PersistedStores {
+  private static final Logger log = LoggerFactory.getLogger(PersistedStores.class);
+  private static final LoadingCache<String,Class<?>> CLASS_CACHE = CacheBuilder.newBuilder().build(new CacheLoader<String,Class<?>>() {
+    
+    @Override
+    public Class<?> load(String typeClassName) throws ExecutionException {
+      try {
+        return Class.forName(typeClassName);
+      } catch (ClassNotFoundException e) {
+        throw new ExecutionException("Could not load type class for " + typeClassName, e);
+      }
+    }
+    
+  });
+  
   public static final Text EMPTY_TEXT = new Text("");
   public static final Text STATE_COLFAM = new Text("state");
   public static final Text COLUMN_COLFAM = new Text("column");
@@ -57,8 +89,8 @@ public class PersistedStores {
    * 
    * <p>
    * {@code LOADING} means that new records are actively being loaded and queries can start; however, only the columns specified as being indexed when the
-   * {@link Store} was defined can be guaranteed to exist. Meaning, calls to {@link Cosmos#index(Store, Iterable)} will not block queries from
-   * running while the index is being updated. Obviously, queries in this state are not guaranteed to be the column result set for a {@link Store}
+   * {@link Store} was defined can be guaranteed to exist. Meaning, calls to {@link Cosmos#index(Store, Iterable)} will not block queries from running while the
+   * index is being updated. Obviously, queries in this state are not guaranteed to be the column result set for a {@link Store}
    * 
    * <p>
    * {@code LOADED} means that the {@link Cosmos} client writing results has completed.
@@ -166,12 +198,110 @@ public class PersistedStores {
   public static Value serialize(Store id) {
     checkNotNull(id);
     
-    return null;
+    StoreProtobuf.Store.Builder storeBuilder = StoreProtobuf.Store.newBuilder();
+    
+    storeBuilder.setDataTable(id.dataTable());
+    storeBuilder.setMetadataTable(id.metadataTable());
+    storeBuilder.setUniqueId(id.uuid());
+    storeBuilder.setAuths(id.auths().serialize());
+    storeBuilder.setLockOnUpdates(id.lockOnUpdates());
+    
+    Set<Index> indexes = id.columnsToIndex();
+    
+    // Check for the Ascending/Descending identity sets first
+    if (indexes instanceof AscendingIndexIdentitySet) {
+      storeBuilder.setIndexSpec(IndexSpec.ASCENDING_IDENTITY);
+    } else if (indexes instanceof DescendingIndexIdentitySet) {
+      storeBuilder.setIndexSpec(IndexSpec.DESCENDING_IDENTITY);
+    } else if (IdentitySet.class.isAssignableFrom(indexes.getClass())) {
+      // Check if it's still an identity set.
+      // If so, log that if it's something more specific than what we know about
+      // (we may lose some information encapsulated in the implementation)
+      if (!(indexes instanceof IdentitySet)) {
+        log.warn("Found unrecognized IdentitySet implementation {} in {}, treating as IdentitySet", indexes.getClass(), id);
+      }
+      
+      storeBuilder.setIndexSpec(IndexSpec.IDENTITY);
+    } else {
+      // If it's not one of the IdentitySets, treat it as a regular Set
+      storeBuilder.setIndexSpec(IndexSpec.OTHER);
+      
+      for (Index i : id.columnsToIndex()) {
+        StoreProtobuf.Index protobufIndex = i.toProtobufIndex();
+        storeBuilder.addIndexes(protobufIndex);
+      }
+    }
+    
+    return new Value(storeBuilder.build().toByteArray());
   }
   
-  public static Store deserialize(Value v) {
-    checkNotNull(v);
+  public static Store deserialize(Connector connector, Value value) throws InvalidProtocolBufferException {
+    checkNotNull(connector);
+    checkNotNull(value);
     
-    return null;
+    StoreProtobuf.Store store = StoreProtobuf.Store.parseFrom(value.get());
+    
+    Set<Index> columnsToIndex;
+    
+    // Using the IndexSpec, determine what information to read from the message
+    // to appropriate create the columnsToIndex Set
+    switch (store.getIndexSpec()) {
+      case ASCENDING_IDENTITY: {
+        columnsToIndex = AscendingIndexIdentitySet.create();
+        break;
+      }
+      case DESCENDING_IDENTITY: {
+        columnsToIndex = DescendingIndexIdentitySet.create();
+        break;
+      }
+      case IDENTITY: {
+        columnsToIndex = IdentitySet.<Index> create();
+        break;
+      }
+      case OTHER: {
+        // If we don't have an IdentitySet of some kind, assume it's a "regular"
+        // concretely-backed Set
+        List<StoreProtobuf.Index> serializedIndexes = store.getIndexesList();
+        columnsToIndex = Sets.newHashSetWithExpectedSize(serializedIndexes.size());
+        for (StoreProtobuf.Index i : serializedIndexes) {
+          Column column = Column.create(i.getColumn());
+          String typeClassName = i.getType();
+          
+          Order order;
+          switch (i.getOrder()) {
+            case ASCENDING: {
+              order = Order.ASCENDING;
+              break;
+            }
+            case DESCENDING: {
+              order = Order.DESCENDING;
+              break;
+            }
+            default: {
+              throw new RuntimeException("Found unknown order: " + i.getOrder());
+            }
+          }
+          
+          // Load the class, hitting a cache when we can
+          Class<?> typeClass;
+          try {
+            typeClass = CLASS_CACHE.get(typeClassName);
+          } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+          }
+          
+          columnsToIndex.add(Index.define(column, order, typeClass));
+        }
+        
+        break;
+      }
+      default: {
+        throw new RuntimeException("Unable to process unknown Index specification: " + store.getIndexSpec());
+      }
+    }
+    
+    Authorizations auths = new Authorizations(store.getAuths().getBytes());
+    
+    return Store.create(connector, auths, store.getUniqueId(), columnsToIndex, store.getLockOnUpdates(), store.getDataTable(), store.getMetadataTable());
   }
 }

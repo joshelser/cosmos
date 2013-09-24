@@ -3,13 +3,16 @@ package cosmos.protobuf;
 option java_outer_classname = "StoreProtobuf";
 option optimize_for = SPEED;
 
-message Authorizations {
-  repeated bytes auths = 1;
-}
-
 enum Order {
   ASCENDING = 1;
   DESCENDING = 2;
+}
+
+enum IndexSpec {
+  IDENTITY = 1;
+  ASCENDING_IDENTITY = 2;
+  DESCENDING_IDENTITY = 3;
+  OTHER = 4;
 }
 
 message Index {
@@ -20,11 +23,12 @@ message Index {
    
 message Store {
   required string unique_id = 1;
-  required Authorizations auths = 2;
+  required string auths = 2;
   required string data_table = 3;
   required string metadata_table = 4;
+  
+  required IndexSpec index_spec = 5;
+  repeated Index indexes = 6;
 
-  repeated Index indexes = 5;
-
-  optional bool lock_on_updates = 6;
+  optional bool lock_on_updates = 7;
 }
