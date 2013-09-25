@@ -36,6 +36,7 @@ public abstract class Defaults {
   
   public static final String DOCID_FIELD_NAME = "COSMOS_DOCID";
   public static final Text DOCID_FIELD_NAME_TEXT = new Text(DOCID_FIELD_NAME);
+  public static final Text EMPTY_TEXT = new Text();
   public static final Value EMPTY_VALUE = new Value(new byte[0]);
   public static final String CURATOR_PREFIX = "/cosmos/";
   

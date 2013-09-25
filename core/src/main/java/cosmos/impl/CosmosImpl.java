@@ -91,16 +91,10 @@ public class CosmosImpl implements Cosmos{
   private final CuratorFramework curator;
   private final ReverseLexicoder<String> revLex = new ReverseLexicoder<String>(new StringLexicoder());
   
-  /**
-   * TODO: store this in accumulo?
-   */
-  protected Map<String,Store> sortableResultMap;
-  
   public CosmosImpl(String zookeepers) {
     RetryPolicy retryPolicy = new ExponentialBackoffRetry(2000, 3);
     curator = CuratorFrameworkFactory.newClient(zookeepers, retryPolicy);
     curator.start();
-    sortableResultMap = Maps.newHashMap();
     
     // TODO http://curator.incubator.apache.org/curator-recipes/shared-reentrant-lock.html
     // "Error handling: ... strongly recommended that you add a ConnectionStateListener and
@@ -145,8 +139,6 @@ public class CosmosImpl implements Cosmos{
     checkNotNull(id);
     
     Stopwatch sw = new Stopwatch().start();
-    
-    sortableResultMap.put(id.uuid(), id);
     
     try {
       State s = PersistedStores.getState(id);
@@ -845,12 +837,5 @@ public class CosmosImpl implements Cosmos{
   protected final InterProcessMutex getMutex(Store id) {
     return new InterProcessMutex(curator, Defaults.CURATOR_PREFIX + id.uuid());
   }
-
-@Override
-public Store fetch(String uuid) throws UnexpectedStateException {
-	
-	return sortableResultMap.get(uuid);
-}
-
   
 }

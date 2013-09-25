@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -55,6 +56,7 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import cosmos.Cosmos;
+import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.options.Order;
 import cosmos.protobuf.StoreProtobuf;
@@ -83,6 +85,7 @@ public class PersistedStores {
   public static final Text EMPTY_TEXT = new Text("");
   public static final Text STATE_COLFAM = new Text("state");
   public static final Text COLUMN_COLFAM = new Text("column");
+  public static final Text SERIALIZED_STORE_COLFAM = new Text("store");
   
   /**
    * A {@link State} determines the lifecycle phases of a {@link Store} in Accumulo.
@@ -193,6 +196,58 @@ public class PersistedStores {
       }
       
     }, id.tracer(), description, sw);
+  }
+  
+  /**
+   * Serialize this store to the metadata table as defined in the {@link Store}
+   * 
+   * @param id
+   * @param connector
+   * @throws TableNotFoundException
+   * @throws MutationsRejectedException
+   */
+  public static void store(Store id) throws TableNotFoundException, MutationsRejectedException {
+    checkNotNull(id);
+    
+    Mutation m = new Mutation(id.uuid());
+    m.put(SERIALIZED_STORE_COLFAM, Defaults.EMPTY_TEXT, serialize(id));
+    
+    BatchWriter bw = null;
+    try {
+      bw = id.connector().createBatchWriter(id.metadataTable(), new BatchWriterConfig());
+      bw.addMutation(m);
+    } finally {
+      if (null != bw) {
+        bw.close();
+      }
+    }
+  }
+  
+  /**
+   * Given a {@link Connector}, some {@link Authorizations}, a uuid and a table name, try to reconstitute
+   * a {@link Store} serialized in said table.
+   * @param connector
+   * @param metadataTable
+   * @param auths
+   * @param uuid
+   * @return
+   * @throws TableNotFoundException
+   * @throws InvalidProtocolBufferException
+   */
+  public static Store retrieve(Connector connector, String metadataTable, Authorizations auths, String uuid) throws TableNotFoundException, InvalidProtocolBufferException {
+    checkNotNull(connector);
+    checkNotNull(uuid);
+    
+    Scanner s = connector.createScanner(metadataTable, auths);
+    s.fetchColumnFamily(SERIALIZED_STORE_COLFAM);
+    s.setRange(Range.exact(uuid));
+    
+    Iterator<Entry<Key,Value>> iter = s.iterator();
+    if (!iter.hasNext()) {
+      throw new NoSuchElementException(uuid);
+    }
+    
+    return deserialize(connector, iter.next().getValue());
   }
   
   public static Value serialize(Store id) {

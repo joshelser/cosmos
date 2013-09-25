@@ -156,13 +156,6 @@ public interface Cosmos {
   public PagedQueryResult<MultimapQueryResult> fetch(Store id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
-   * Fetches the SortableResult reference per the UUID.
-   * @param uuid UUID to extract.
-   * @return
-   * @throws UnexpectedStateException
-   */
-  public Store fetch(final String uuid) throws UnexpectedStateException;  
-  /**
    * Return counts for unique values in the given column
    * 
    * @param id
