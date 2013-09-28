@@ -22,6 +22,7 @@ package cosmos.results.integration;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
@@ -38,6 +39,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mediawiki.xml.export_0.MediaWikiType;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -113,12 +115,24 @@ public class CosmosIntegrationTest extends CosmosIntegrationSetup {
   public void testWiki1() throws Exception {
     // Get the same wiki 3 times
     List<Thread> threads = Lists.newArrayList();
+    final List<Long> timings = Lists.newArrayList();
+    
+    // Preload
+    Stopwatch sw = new Stopwatch();
+    sw.start();
+    getWiki1();
+    sw.stop();
+    long origLength = sw.elapsed(TimeUnit.MICROSECONDS);
     
     for (int i = 0; i < 3; i++) {
       threads.add(new Thread(new Runnable() {
         public void run() {
           try {
+            Stopwatch sw = new Stopwatch();
+            sw.start();
             getWiki1();
+            sw.stop();
+            timings.add(sw.elapsed(TimeUnit.MICROSECONDS));
           } catch (Exception e) {
             throw new RuntimeException(e);
           }
@@ -138,8 +152,9 @@ public class CosmosIntegrationTest extends CosmosIntegrationSetup {
     
     long end = System.currentTimeMillis();
     
-    // We should only have to wait on one to parse the xml
-    Assert.assertTrue("Took more than 8s: "+ (end - start) / 1000, (end - start) < 8000);
+    for (Long duration : timings) {
+      Assert.assertTrue(origLength > duration);
+    }
   }
   
   @Test

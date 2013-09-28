@@ -30,8 +30,10 @@ import java.util.concurrent.TimeUnit;
 
 import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 
+import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.TableNotFoundException;
+import org.apache.accumulo.core.security.Authorizations;
 import org.eigenbase.reltype.RelDataType;
 import org.eigenbase.reltype.RelDataTypeFactory;
 import org.eigenbase.reltype.RelDataTypeFactory.FieldInfoBuilder;
@@ -57,9 +59,9 @@ import cosmos.results.impl.MultimapQueryResult;
 import cosmos.sql.BaseIterable;
 import cosmos.sql.CosmosRelNode;
 import cosmos.sql.DataTable;
-import cosmos.sql.TableSchema;
 import cosmos.sql.SchemaDefiner;
 import cosmos.sql.TableDefiner;
+import cosmos.sql.TableSchema;
 import cosmos.sql.call.BaseVisitor;
 import cosmos.sql.call.CallIfc;
 import cosmos.sql.call.ChildVisitor;
@@ -67,6 +69,7 @@ import cosmos.sql.call.Field;
 import cosmos.sql.call.Fields;
 import cosmos.sql.call.impl.Filter;
 import cosmos.sql.impl.functions.FieldLimiter;
+import cosmos.store.PersistedStores;
 import cosmos.store.Store;
 
 /**
@@ -82,6 +85,10 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
   protected Iterable<MultimapQueryResult> iter;
 
   protected Collection<Iterable<MultimapQueryResult>> plannedParentHood;
+  
+  protected Connector connector;
+  protected String metadataTable;
+  protected Authorizations auths;
 
   /**
    * Iterator reference
@@ -100,13 +107,15 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
    * Constructor
    */
 
-  public CosmosSql(Cosmos cosmosImpl) throws MutationsRejectedException, TableNotFoundException, UnexpectedStateException {
+  public CosmosSql(Cosmos cosmosImpl, Connector connector, String metadataTable, Authorizations auths) throws MutationsRejectedException, TableNotFoundException, UnexpectedStateException {
     Preconditions.checkNotNull(cosmosImpl);
     
     plannedParentHood = Lists.newArrayList();
     iter = Collections.emptyList();
     this.cosmos = cosmosImpl;
-
+    this.connector = connector;
+    this.metadataTable = metadataTable;
+    this.auths = auths;
   }
 
   @Override
@@ -134,7 +143,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
     Store res;
     try {
 
-      res = cosmos.fetch(table);
+      res = PersistedStores.retrieve(connector, metadataTable, auths, table);
       if (aggregatePlan == null) {
     	  
 
@@ -262,7 +271,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
 
       if (table == null) {
     	  
-        Store sort = cosmos.fetch(name);
+        Store sort = PersistedStores.retrieve(connector, metadataTable, auths, name);
 
         FieldInfoBuilder builder = new RelDataTypeFactory.FieldInfoBuilder();
 
@@ -282,7 +291,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
         }
       }
 
-    } catch (UnexpectedStateException e) {
+    } catch (TableNotFoundException e) {
       log.error("Couldn't find result in Cosmos", e);
 
     }
@@ -294,13 +303,13 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
   public Set<Index> getIndexColumns(String table) {
     Store sort;
     try {
-      sort = cosmos.fetch(table);
+      sort = PersistedStores.retrieve(connector, metadataTable, auths, table);
 
       if (sort != null) {
         return sort.columnsToIndex();
       }
 
-    } catch (UnexpectedStateException e) {
+    } catch (TableNotFoundException e) {
       log.error("Could not find result in Cosmos", e);
     }
     return Collections.emptySet();

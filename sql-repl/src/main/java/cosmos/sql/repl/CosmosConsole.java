@@ -38,6 +38,7 @@ import com.google.common.io.Files;
 
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
+import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.results.Column;
 import cosmos.results.QueryResult;
@@ -243,6 +244,8 @@ public class CosmosConsole {
       Store id = null;
       Connector connector = null;
       
+      Authorizations auths = new Authorizations("en");
+      
       if (null == consoleOptions.uuid) {
         log.info("Starting Accumulo MiniCluster");
         
@@ -267,7 +270,7 @@ public class CosmosConsole {
         connector = instance.getConnector("root", new PasswordToken(passwd));
         
         // Set this since we know we need it for the wiki test data
-        connector.securityOperations().changeUserAuthorizations("root", new Authorizations("en"));
+        connector.securityOperations().changeUserAuthorizations("root", auths);
         
         id = new Store(connector, connector.securityOperations().getUserAuthorizations("root"), CosmosIntegrationSetup.ALL_INDEXES);
         
@@ -292,7 +295,7 @@ public class CosmosConsole {
         log.info("Using pre-loaded data in {}", consoleOptions.uuid);
       }
       
-      cosmosSql = new CosmosSql(cosmos);
+      cosmosSql = new CosmosSql(cosmos, connector, Defaults.METADATA_TABLE, auths);
       
       CosmosDriver driver = new CosmosDriver(cosmosSql, "cosmos");
       

@@ -234,7 +234,7 @@ public class PersistedStores {
    * @throws TableNotFoundException
    * @throws InvalidProtocolBufferException
    */
-  public static Store retrieve(Connector connector, String metadataTable, Authorizations auths, String uuid) throws TableNotFoundException, InvalidProtocolBufferException {
+  public static Store retrieve(Connector connector, String metadataTable, Authorizations auths, String uuid) throws TableNotFoundException {
     checkNotNull(connector);
     checkNotNull(uuid);
     
@@ -247,7 +247,11 @@ public class PersistedStores {
       throw new NoSuchElementException(uuid);
     }
     
-    return deserialize(connector, iter.next().getValue());
+    try {
+      return deserialize(connector, iter.next().getValue());
+    } catch (InvalidProtocolBufferException e) {
+      throw new RuntimeException("Could not deserialize protocol buffer for Store " + uuid, e);
+    }
   }
   
   public static Value serialize(Store id) {

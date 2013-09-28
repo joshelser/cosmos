@@ -85,11 +85,13 @@ import cosmos.impl.CosmosImpl;
 import cosmos.mediawiki.MediawikiPage.Page;
 import cosmos.mediawiki.MediawikiPage.Page.Revision;
 import cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor;
+import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.results.Column;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
 import cosmos.sql.impl.CosmosSql;
+import cosmos.store.PersistedStores;
 import cosmos.store.Store;
 
 @Category(IntegrationTests.class)
@@ -124,6 +126,8 @@ public class TestSql {
   
   private static CosmosImpl impl;
   
+  private static Authorizations auths = new Authorizations("en");
+  
   @BeforeClass
   public static void setup() throws Exception {
     macConfig = new MiniAccumuloConfig(tmp, "root");
@@ -137,7 +141,7 @@ public class TestSql {
     
     connector = instance.getConnector("root", new PasswordToken(macConfig.getRootPassword()));
     
-    connector.securityOperations().changeUserAuthorizations("root", new Authorizations("en"));
+    connector.securityOperations().changeUserAuthorizations("root", auths);
     
     columns = Sets.newHashSet();
     columns.add(new Index(PAGE_ID));
@@ -147,7 +151,7 @@ public class TestSql {
     
     impl = new CosmosImpl(mac.getZooKeepers());
     
-    cosmosSql = new CosmosSql(impl);
+    cosmosSql = new CosmosSql(impl, connector, Defaults.METADATA_TABLE, auths);
     
     new CosmosDriver(cosmosSql, "cosmos");
     
@@ -224,6 +228,9 @@ public class TestSql {
       impl.register(meataData);
       
       impl.addResults(meataData, tformSource);
+      
+      // Serialize this Store into Accumulo so we can re-use it later
+      PersistedStores.store(meataData);
     } finally {
       if (null != bs) {
         bs.close();
@@ -467,7 +474,6 @@ public class TestSql {
       int resultsFound = 0;
       while (resultSet.next()) {
         assertEquals(metaData.getColumnName(1), "PAGE_ID");
-        @SuppressWarnings("unchecked")
         Object value = resultSet.getObject("PAGE_ID");
         
         

@@ -153,7 +153,7 @@ public class PersistedStoresTest {
     
     // Test that we properly recreate the members that we didn't actually serialize
     // into the Accumulo Value
-    Assert.assertEquals(a.tracer(), b.tracer());
+    Assert.assertEquals(a.tracer().getUUID(), b.tracer().getUUID());
     Assert.assertEquals(connector, b.connector());
   }
   
