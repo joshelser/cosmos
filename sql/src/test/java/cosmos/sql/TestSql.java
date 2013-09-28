@@ -446,6 +446,39 @@ public class TestSql {
     }
   }
   
+ // @Test
+  public void testDistinct() throws SQLException {
+    loadDriverClass();
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      Properties info = new Properties();
+      info.put("url", JDBC_URL);
+      info.put("user", USER);
+      info.put("password", PASSWORD);
+      connection = DriverManager.getConnection("jdbc:accumulo:cosmos//localhost", info);
+      statement = connection.createStatement();
+      final ResultSet resultSet = statement.executeQuery("select DISTINCT \"PAGE_ID\" from \"" + CosmosDriver.COSMOS + "\".\"" + meataData.uuid() + "\"");
+      final ResultSetMetaData metaData = resultSet.getMetaData();
+      final int columnCount = metaData.getColumnCount();
+      
+      assertEquals(columnCount, 1);
+      
+      int resultsFound = 0;
+      while (resultSet.next()) {
+        assertEquals(metaData.getColumnName(1), "PAGE_ID");
+        @SuppressWarnings("unchecked")
+        Object value = resultSet.getObject("PAGE_ID");
+        
+        
+      }
+      
+      assertEquals(resultsFound, 2);
+    } finally {
+      close(connection, statement);
+    }
+  }
+  
   @Test
   public void testNoLimit() throws SQLException {
     loadDriverClass();

@@ -84,23 +84,17 @@ public class CosmosDriver extends UnregisteredDriver {
     final MutableSchema rootSchema = optiqConnection.getRootSchema();
     
     try {
-      schema = new TableSchema<CosmosSql>(rootSchema, "cosmos", rootSchema.getSubSchemaExpression(COSMOS, TableSchema.class),
+    	
+      schema = new TableSchema<CosmosSql>(rootSchema, COSMOS, rootSchema.getSubSchemaExpression(COSMOS, TableSchema.class),
           (CosmosSql) definer, CosmosTable.class);
       
       schema.initialize();
       rootSchema.addSchema(COSMOS, schema);
       
-      //TODO Pass through the user management operations through Cosmos to Accumulo
-      //     given that I don't want to reimplement crap like kerberos/ldap
-      // Map<String,Object> users = Maps.newHashMap();
-      // users.put("admin", "changeme");
-      //
-      // BasicDataSource dataSource = new BasicDataSource();
-      // dataSource.setUrl(getConnectStringPrefix() + "//" + url);
-      // dataSource.setUsername("admin");
-      // dataSource.setPassword("changeme");
+     
       
     } catch (Exception e) {
+    	e.printStackTrace();
       throw new RuntimeException(e);
     }
     

@@ -55,7 +55,6 @@ public class TableSchema<T extends SchemaDefiner<?>> extends MapSchema {
    * Returns the table associated with the class
    */
   public DataTable<?> getTable(String name) {
-
     if (metaData instanceof TableDefiner) {
       return ((TableDefiner) metaData).getTable(name);
     } else

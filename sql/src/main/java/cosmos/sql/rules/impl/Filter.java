@@ -52,6 +52,9 @@ public class Filter extends FilterRelBase implements CosmosRelNode {
   
   @Override
   public RelOptCost computeSelfCost(RelOptPlanner planner) {
+	  /**
+	   * At this point we don't have schema statistics
+	   */
     return super.computeSelfCost(planner).multiplyBy(0.1);
   }
   

@@ -136,6 +136,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
 
       res = cosmos.fetch(table);
       if (aggregatePlan == null) {
+    	  
 
         if (res != null) {
           if (filters.size() > 0) {
@@ -163,7 +164,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
             Fields fieldList = (Fields) fiel;
             fieldsUserWants.addAll(fieldList.getFields());
           }
-
+          
           baseIter = iter.iterator();
           baseIter = Iterators.transform(baseIter, new FieldLimiter(fieldsUserWants));
 
@@ -215,7 +216,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
     public Object[] apply(MultimapQueryResult document) {
 
       Object[] results = new List[fields.size()];
-
+     
       for (int i = 0; i < fields.size(); i++) {
         String field = fields.get(i);
         Column col = new Column(field);
@@ -247,7 +248,6 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
       Object[] results = new Object[2];
       results[0] = result.getKey();
       results[1] = result.getValue();
-
       return results;
 
     }
@@ -256,20 +256,23 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
 
   @Override
   public DataTable<?> getTable(String name) {
+	  
     CosmosTable table = tableCache.getIfPresent(name);
     try {
 
       if (table == null) {
+    	  
         Store sort = cosmos.fetch(name);
 
         FieldInfoBuilder builder = new RelDataTypeFactory.FieldInfoBuilder();
 
         for (Index indexField : sort.columnsToIndex()) {
           builder.add(indexField.column().name(), typeFactory.createType(indexField.getIndexTyped()));
-        }
+        } 
 
         final RelDataType rowType = typeFactory.createStructType(builder);
 
+        
         try {
           table = new CosmosTable(schema, this, typeFactory, rowType, name);
 

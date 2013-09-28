@@ -70,7 +70,6 @@ public class EnumerableRelation extends SingleRel implements EnumerableRel {
     super(cluster, traitSet, input);
     factory = (JavaTypeFactory) cluster.getTypeFactory();
     assert getConvention() instanceof EnumerableConvention;
-    assert input.getConvention() == CosmosRelNode.CONVENTION;
     physType = PhysTypeImpl.of((JavaTypeFactory) cluster.getTypeFactory(), input.getRowType(), JavaRowFormat.ARRAY);
     
   }

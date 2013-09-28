@@ -41,6 +41,10 @@ public class CosmosTable extends DataTable<Object[]> {
     
     super(meataSchema, table, typeFactory);
     
+    super.table = table;
+    
+    super.rowType = rowType;
+    
   }
   
   

@@ -89,12 +89,8 @@ public class DataTable<T> extends AbstractQueryable<T> implements
 		aggregationPlans = Queues.newPriorityQueue();
 		resultSet = new BaseIterable<T>();
 		javaFactory = typeFactory;
+		this.metadata = schema.metaData;
 
-		this.metadata = metadata;
-
-		this.rowType = rowType;
-
-		this.table = table;
 
 	}
 

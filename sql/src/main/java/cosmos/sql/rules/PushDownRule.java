@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import cosmos.sql.CosmosRelNode;
 import cosmos.sql.DataTable;
-import cosmos.sql.impl.CosmosTable;
 import cosmos.sql.rules.impl.Filter;
 import cosmos.sql.rules.impl.GroupBy;
 import cosmos.sql.rules.impl.Projection;
@@ -39,6 +38,8 @@ public class PushDownRule extends RuleBase {
   public void onMatch(RelOptRuleCall call) {
     
     RelNode node = call.rel(0);
+    
+    
     
     if (node instanceof ProjectRel) {
       final ProjectRel project = (ProjectRel) node;
