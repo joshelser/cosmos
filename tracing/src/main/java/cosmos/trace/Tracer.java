@@ -183,4 +183,13 @@ public class Tracer {
     return false;
   }
   
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(32);
+    
+    sb.append("Tracer:").append(this.uuid).append(", Begin:").append(this.begin).append(", timings:").append(this.timings);
+    
+    return sb.toString();
+  }
+  
 }
