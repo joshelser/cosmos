@@ -250,7 +250,7 @@ public class CosmosConsole {
         log.info("Starting Accumulo MiniCluster");
         
         MiniAccumuloConfig macConf = new MiniAccumuloConfig(tmp, passwd);
-        macConf.setNumTservers(1);
+        macConf.setNumTservers(2);
         
         mac = new MiniAccumuloCluster(macConf);
         

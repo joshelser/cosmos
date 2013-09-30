@@ -323,22 +323,18 @@
             <id>integration-test</id>
             <goals>
               <goal>integration-test</goal>
+              <goal>verify</goal>
             </goals>
             <configuration>
               <includes>
                 <include>**/*.class</include>
               </includes>
               <parallel>classes</parallel>
-              <threadCount>2</threadCount>
+              <threadCount>1</threadCount>
               <perCoreThreadCount>true</perCoreThreadCount>
               <redirectTestOutputToFile>true</redirectTestOutputToFile>
+			  <forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
             </configuration>
-          </execution>
-          <execution>
-            <id>verify</id>
-            <goals>
-              <goal>verify</goal>
-            </goals>
           </execution>
         </executions>
         <configuration>

@@ -22,13 +22,10 @@ import com.google.common.base.Preconditions;
 
 
 public class Paging {
-  protected final Integer pageSize;
-  protected final Long maxResults;
+  protected final int pageSize;
+  protected final int maxResults;
   
-  public Paging(Integer pageSize, Long maxResults) {
-    Preconditions.checkNotNull(pageSize);
-    Preconditions.checkNotNull(maxResults);
-    
+  public Paging(int pageSize, int maxResults) {    
     Preconditions.checkArgument(0 < pageSize);
     Preconditions.checkArgument(0 < maxResults);
     
@@ -39,18 +36,22 @@ public class Paging {
   /**
    * @return the pageSize
    */
-  public Integer pageSize() {
+  public int pageSize() {
     return pageSize;
   }
 
   /**
    * @return the maxResults
    */
-  public Long maxResults() {
+  public int maxResults() {
     return maxResults;
   }
  
-  public static Paging create(Integer pageSize, Long maxResults) {
+  public static Paging create(int pageSize, int maxResults) {
+    return new Paging(pageSize, maxResults);
+  }
+ 
+  public static Paging create(Integer pageSize, Integer maxResults) {
     return new Paging(pageSize, maxResults);
   }
 }

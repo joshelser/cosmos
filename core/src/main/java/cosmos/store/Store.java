@@ -417,7 +417,7 @@ public class Store {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder(256);
-    sb.append("SortableResult:").append(uuid()).append(",").append(dataTable()).append(",").append(metadataTable());
+    sb.append("Store:").append(uuid()).append(",").append(dataTable()).append(",").append(metadataTable());
     return sb.toString();
   }
   

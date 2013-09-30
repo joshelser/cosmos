@@ -484,8 +484,6 @@ public class CosmosImpl implements Cosmos{
       State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-        sw.stop();
-        id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
@@ -537,9 +535,6 @@ public class CosmosImpl implements Cosmos{
       State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-        sw.stop();
-        id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
-        
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
@@ -601,7 +596,6 @@ public class CosmosImpl implements Cosmos{
       State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-        sw.stop();
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
@@ -609,9 +603,6 @@ public class CosmosImpl implements Cosmos{
       
       if (!id.columnsToIndex().contains(ordering)) {
         log.error("{} is not indexed by {}", ordering, id);
-        
-        sw.stop();
-        id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
         
         throw new UnindexedColumnException();
       }

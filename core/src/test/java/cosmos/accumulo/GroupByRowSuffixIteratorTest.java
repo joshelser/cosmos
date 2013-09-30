@@ -77,6 +77,7 @@ public class GroupByRowSuffixIteratorTest {
   @BeforeClass
   public static void setup() throws IOException, InterruptedException {
     macConfig = new MiniAccumuloConfig(tmp, "root");
+    macConfig.setNumTservers(2);
     mac = new MiniAccumuloCluster(macConfig);
     
     mac.start();

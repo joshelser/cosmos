@@ -78,6 +78,7 @@ public class GroupByIntegrationTest {
     File tmp = Files.createTempDir();
     tmp.deleteOnExit();
     conf = new MiniAccumuloConfig(tmp, "foo");
+    conf.setNumTservers(2);
     mac = new MiniAccumuloCluster(conf);
     mac.start();
 

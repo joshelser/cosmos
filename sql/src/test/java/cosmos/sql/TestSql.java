@@ -131,7 +131,7 @@ public class TestSql {
   @BeforeClass
   public static void setup() throws Exception {
     macConfig = new MiniAccumuloConfig(tmp, "root");
-    macConfig.setNumTservers(1);
+    macConfig.setNumTservers(2);
     
     mac = new MiniAccumuloCluster(macConfig);
     
