@@ -20,18 +20,36 @@
 package cosmos.sql;
 
 import java.util.Collection;
+import java.util.List;
 
 import net.hydromatic.linq4j.expressions.Expression;
 import net.hydromatic.optiq.Schema;
 import net.hydromatic.optiq.Table;
+import net.hydromatic.optiq.impl.TableInSchemaImpl;
 import net.hydromatic.optiq.impl.java.MapSchema;
+
+import org.apache.accumulo.core.client.Connector;
+import org.apache.accumulo.core.client.TableNotFoundException;
+import org.apache.accumulo.core.security.Authorizations;
+import org.eigenbase.reltype.RelDataType;
+import org.eigenbase.reltype.RelDataTypeFactory;
+import org.eigenbase.reltype.RelDataTypeFactory.FieldInfoBuilder;
 
 import com.google.common.collect.Lists;
 
+import cosmos.options.Index;
+import cosmos.results.CloseableIterable;
+import cosmos.sql.impl.CosmosTable;
+import cosmos.store.PersistedStores;
+import cosmos.store.Store;
+
 public class TableSchema<T extends SchemaDefiner<?>> extends MapSchema {
-
+  
   protected T metaData;
-
+  protected Connector connector;
+  protected Authorizations auths;
+  protected String metadataTable;
+  
   /**
    * Constructor to define a cosmos schema
    * 
@@ -44,13 +62,18 @@ public class TableSchema<T extends SchemaDefiner<?>> extends MapSchema {
    * @param schemaDefiner
    * @param clazz
    */
-  public TableSchema(Schema parentSchema, String name, Expression expression, T schemaDefiner, Class<? extends DataTable<?>> clazz) {
+  public TableSchema(Schema parentSchema, String name, Expression expression, T schemaDefiner, Class<? extends DataTable<?>> clazz,
+      Connector c, Authorizations auths, String metadataTable) {
     super(parentSchema, name, expression);
     metaData = schemaDefiner;
     // let's make a cyclic dependency
     metaData.register(this);
+    
+    this.connector = c;
+    this.auths = auths;
+    this.metadataTable = metadataTable;
   }
-
+  
   /**
    * Returns the table associated with the class
    */
@@ -60,16 +83,41 @@ public class TableSchema<T extends SchemaDefiner<?>> extends MapSchema {
     } else
       return (DataTable<?>) tableMap.get(name).getTable(Class.class);
   }
-
+  
   @SuppressWarnings("unchecked")
   @Override
   public <E> Table<E> getTable(String name, Class<E> elementType) {
     return (Table<E>) getTable(name);
   }
-
+  
   @Override
   protected Collection<TableInSchema> initialTables() {
-    return Lists.newArrayList();
+    try {
+      CloseableIterable<Store> stores = PersistedStores.list(connector, auths, metadataTable);
+      
+      List<TableInSchema> tables = Lists.newArrayList();
+      for (Store store : stores) {
+        FieldInfoBuilder builder = new RelDataTypeFactory.FieldInfoBuilder();
+  
+        for (Index indexField : store.columnsToIndex()) {
+          builder.add(indexField.column().name(), typeFactory.createType(indexField.getIndexTyped()));
+        } 
+  
+        final RelDataType rowType = typeFactory.createStructType(builder);
+  
+        CosmosTable table = new CosmosTable(this, metaData, typeFactory, rowType, store.uuid());
+        
+        TableInSchema tas = new TableInSchemaImpl(this, store.uuid(), TableType.TABLE, table);
+        
+        tables.add(tas);
+      }
+      
+      stores.close();
 
+      return tables;
+      
+    } catch (TableNotFoundException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

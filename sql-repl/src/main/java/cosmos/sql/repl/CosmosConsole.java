@@ -297,7 +297,7 @@ public class CosmosConsole {
       
       cosmosSql = new CosmosSql(cosmos, connector, Defaults.METADATA_TABLE, auths);
       
-      CosmosDriver driver = new CosmosDriver(cosmosSql, "cosmos");
+      CosmosDriver driver = new CosmosDriver(cosmosSql, "cosmos", connector, auths, Defaults.METADATA_TABLE);
       
       Connection connection = DriverManager.getConnection(CosmosDriver.jdbcConnectionString(driver) + "//localhost", new Properties());
       
