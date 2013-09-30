@@ -63,6 +63,7 @@ import cosmos.protobuf.StoreProtobuf;
 import cosmos.protobuf.StoreProtobuf.IndexSpec;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
+import cosmos.trace.NullTracer;
 import cosmos.util.AscendingIndexIdentitySet;
 import cosmos.util.DescendingIndexIdentitySet;
 import cosmos.util.IdentitySet;
@@ -196,6 +197,29 @@ public class PersistedStores {
       }
       
     }, id.tracer(), description, sw);
+  }
+  
+  public static CloseableIterable<Store> list(final Connector c, Authorizations auths, String metadataTable) throws TableNotFoundException {
+    checkNotNull(c);
+    checkNotNull(auths);
+    checkNotNull(metadataTable);
+    
+    BatchScanner bs = c.createBatchScanner(metadataTable, auths, 4);
+    bs.setRanges(Collections.singleton(new Range()));
+    bs.fetchColumnFamily(SERIALIZED_STORE_COLFAM);
+    
+    return CloseableIterable.transform(bs, new Function<Entry<Key,Value>,Store>() {
+
+      @Override
+      public Store apply(Entry<Key,Value> input) {
+        try {
+          return deserialize(c, input.getValue());
+        } catch (InvalidProtocolBufferException e) {
+          throw new RuntimeException(e);
+        }
+      }
+      
+    }, NullTracer.instance(), "List Stores", new Stopwatch());
   }
   
   /**
