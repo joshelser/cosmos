@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -39,13 +40,13 @@ import com.google.common.io.Files;
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
 import cosmos.options.Defaults;
-import cosmos.options.Index;
 import cosmos.results.Column;
 import cosmos.results.QueryResult;
 import cosmos.results.SValue;
 import cosmos.results.integration.CosmosIntegrationSetup;
 import cosmos.sql.CosmosDriver;
 import cosmos.sql.impl.CosmosSql;
+import cosmos.store.PersistedStores;
 import cosmos.store.Store;
 
 public class CosmosConsole {
@@ -54,9 +55,22 @@ public class CosmosConsole {
   private static final String PROMPT = "cosmos> ";
   
   public static class CosmosConsoleOptions {
-    @Parameter(names = {"--id", "-s"}, description = "The UUID of the SortableResult to use")
-    public String uuid;
+    @Parameter(names = {"--use-mini", "-m"}, description = "Start an Accumulo MiniCluster")
+    public boolean useMiniCluster = false;
     
+    @Parameter(names = {"--use-real", "-r"}, description = "Connecto to a live Accumulo instance")
+    public boolean useRealInstance = false;
+    
+    @Parameter(names = {"--loaddata", "-l"}, description = "Load some data into the Accumulo instance")
+    public boolean loadData = false;
+    
+    @Parameter(names = {"--help", "-h"}, description = "Prints a help message", help = true)
+    public boolean help = false;
+    
+    public CosmosConsoleOptions() {}
+  }
+  
+  public static class AccumuloInstanceOptions {
     @Parameter(names = {"--zookeepers", "-z"}, description = "CSV of zookeepers to use")
     public String zookeepers;
     
@@ -69,7 +83,8 @@ public class CosmosConsole {
     @Parameter(names = {"--password", "-p"}, description = "Accumulo user password")
     public String password;
     
-    public CosmosConsoleOptions() {} 
+    @Parameter(names = {"--id", "-s"}, description = "The UUID of the SortableResult to use")
+    public String uuid;
   }
   
   protected Cosmos cosmos;
@@ -237,16 +252,17 @@ public class CosmosConsole {
       throw new RuntimeException("driver not found", e);
     }
     
-    try { 
+    try {
       CosmosConsoleOptions consoleOptions = new CosmosConsoleOptions();
-      new JCommander(consoleOptions, args);
+      AccumuloInstanceOptions accumuloOptions = new AccumuloInstanceOptions();
+      new JCommander(new Object[] {consoleOptions, accumuloOptions}, args);
       
       Store id = null;
       Connector connector = null;
       
       Authorizations auths = new Authorizations("en");
       
-      if (null == consoleOptions.uuid) {
+      if (consoleOptions.useMiniCluster) {
         log.info("Starting Accumulo MiniCluster");
         
         MiniAccumuloConfig macConf = new MiniAccumuloConfig(tmp, passwd);
@@ -256,6 +272,30 @@ public class CosmosConsole {
         
         mac.start();
         
+        cosmos = new CosmosImpl(mac.getZooKeepers());
+        
+        ZooKeeperInstance instance = new ZooKeeperInstance(mac.getInstanceName(), mac.getZooKeepers());
+        connector = instance.getConnector("root", new PasswordToken(passwd));
+        
+        // Set this since we know we need it for the wiki test data
+        connector.securityOperations().changeUserAuthorizations("root", auths);
+      } else if (consoleOptions.useRealInstance) {
+        if (null == accumuloOptions.instanceName || null == accumuloOptions.zookeepers || null == accumuloOptions.username || null == accumuloOptions.password) {
+          log.error("If an ID for preloaded data is provided, connection information must also be provided");
+          System.exit(1);
+          return;
+        }
+        
+        ZooKeeperInstance instance = new ZooKeeperInstance(accumuloOptions.instanceName, accumuloOptions.zookeepers);
+        connector = instance.getConnector(accumuloOptions.username, new PasswordToken(accumuloOptions.password));
+        
+        cosmos = new CosmosImpl(accumuloOptions.zookeepers);
+      } else {
+        log.error("You must choose to use either an Accumulo minicluster or a real Accumulo instance");
+        System.exit(1);
+      }
+      
+      if (consoleOptions.loadData) {
         log.info("Loading wiki data");
         
         // Pre-load jaxb
@@ -264,14 +304,6 @@ public class CosmosConsole {
         MediaWikiType wiki1 = CosmosIntegrationSetup.getWiki1();
         List<QueryResult<?>> results1 = CosmosIntegrationSetup.wikiToMultimap(wiki1);
         
-        cosmos = new CosmosImpl(mac.getZooKeepers());
-        
-        ZooKeeperInstance instance = new ZooKeeperInstance(mac.getInstanceName(), mac.getZooKeepers());
-        connector = instance.getConnector("root", new PasswordToken(passwd));
-        
-        // Set this since we know we need it for the wiki test data
-        connector.securityOperations().changeUserAuthorizations("root", auths);
-        
         id = new Store(connector, connector.securityOperations().getUserAuthorizations("root"), CosmosIntegrationSetup.ALL_INDEXES);
         
         cosmos.register(id);
@@ -279,20 +311,9 @@ public class CosmosConsole {
         cosmos.finalize(id);
         
         log.info("Loaded wiki data with an id of {}", id.uuid());
-      } else {
-        if (null == consoleOptions.instanceName || null == consoleOptions.zookeepers || null == consoleOptions.username || null == consoleOptions.password) {
-          log.error("If an ID for preloaded data is provided, connection information must also be provided");
-          System.exit(1);
-          return;
-        }
         
-        ZooKeeperInstance instance = new ZooKeeperInstance(consoleOptions.instanceName, consoleOptions.zookeepers);
-        connector = instance.getConnector(consoleOptions.username, new PasswordToken(consoleOptions.password));
-        
-        cosmos = new CosmosImpl(consoleOptions.zookeepers);
-        
-        id = Store.create(connector, connector.securityOperations().getUserAuthorizations("root"), consoleOptions.uuid, CosmosIntegrationSetup.ALL_INDEXES);
-        log.info("Using pre-loaded data in {}", consoleOptions.uuid);
+        // Serialize this Store so we can reconstitute it again later
+        PersistedStores.store(id);
       }
       
       cosmosSql = new CosmosSql(cosmos, connector, Defaults.METADATA_TABLE, auths);
