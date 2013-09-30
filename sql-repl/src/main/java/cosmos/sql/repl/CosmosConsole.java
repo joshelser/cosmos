@@ -130,6 +130,7 @@ public class CosmosConsole {
   public void startRepl() {
     ConsoleReader reader = null;
     History history = null;
+    final TableOutputFormat tableOutput = new TableOutputFormat();
     
     try {
       reader = new ConsoleReader();
@@ -161,6 +162,8 @@ public class CosmosConsole {
           statement = connection.createStatement();
           
           final ResultSet resultSet = statement.executeQuery(line);
+          tableOutput.print(resultSet);
+          /*
           final ResultSetMetaData metadata = resultSet.getMetaData();
           final int columnCount = metadata.getColumnCount();
           
@@ -204,7 +207,7 @@ public class CosmosConsole {
           
           // Print out the header and then the body (we already have an extra newline on the body)
           sysout.println(header);
-          sysout.print(body);
+          sysout.print(body);*/
           
         } catch (SQLException e) {
           log.error("SQLException", e);
