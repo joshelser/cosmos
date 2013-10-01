@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.apache.accumulo.core.client.BatchScanner;
@@ -39,20 +41,21 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import cosmos.Cosmos;
-import cosmos.SortingMetadata;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.SortableResult;
 import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.options.Order;
 import cosmos.options.Paging;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.store.PersistedStores;
+import cosmos.store.Store;
 import cosmos.util.IdentitySet;
 
 @RunWith(JUnit4.class)
@@ -60,8 +63,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   protected List<Multimap<Column,SValue>> data;
   
-  // Accumulo 1.5 actually implements locGroups in Mock...
-  @Test(expected = NotImplementedException.class)
+  @Test
   public void test() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -72,7 +74,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Set<Index> columnsToIndex = Collections.singleton(Index.define("TEXT"));
     
-    SortableResult id = SortableResult.create(c, AUTHS, columnsToIndex);
+    Store id = Store.create(c, AUTHS, columnsToIndex);
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -113,9 +115,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.close();
   }
-  
-  // Accumulo 1.5 actually implements locGroups in Mock...
-  @Test(expected = NotImplementedException.class)
+
+  @Test
   public void totalDeletion() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -124,7 +125,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
     
-    SortableResult id = SortableResult.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
+    Store id = Store.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -151,8 +152,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.close();
   }
   
-  // Accumulo 1.5 actually implements locGroups in Mock...
-  @Test(expected = NotImplementedException.class)
+  @Test
   public void postIndex() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -161,7 +161,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
     
-    SortableResult id = SortableResult.create(c, AUTHS, Collections.<Index> emptySet());
+    Store id = Store.create(c, AUTHS, Collections.<Index> emptySet());
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -185,9 +185,8 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.close();
   }
-  
-  // Accumulo 1.5 actually implements locGroups in Mock...
-  @Test(expected = NotImplementedException.class)
+
+  @Test
   public void addResultsWithIndexOverSparseData() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -198,7 +197,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Set<Index> columnsToIndex = Sets.newHashSet(Index.define("TEXT"), Index.define("DOESNTEXIST"));
     
-    SortableResult id = SortableResult.create(c, AUTHS, columnsToIndex);
+    Store id = Store.create(c, AUTHS, columnsToIndex);
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -237,7 +236,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Set<Index> columnsToIndex = IdentitySet.<Index> create();
     
-    SortableResult id = SortableResult.create(c, AUTHS, columnsToIndex);
+    Store id = Store.create(c, AUTHS, columnsToIndex);
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -325,8 +324,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.close();
   }
   
-  // Accumulo 1.5 actually implements locGroups in Mock...
-  @Test(expected = NotImplementedException.class)
+  @Test
   public void postIndexSparseData() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -336,7 +334,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
     
-    SortableResult id = SortableResult.create(c, AUTHS, Collections.<Index> emptySet());
+    Store id = Store.create(c, AUTHS, Collections.<Index> emptySet());
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -361,8 +359,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.close();
   }
   
-  // Accumulo 1.5 actually implements locGroups in Mock...
-  @Test(expected = NotImplementedException.class)
+  @Test
   public void pagedResults() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -375,7 +372,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
       mqrs.add(new MultimapQueryResult(data, Integer.toString(i), VIZ));
     }
     
-    SortableResult id = SortableResult.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
+    Store id = Store.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -385,7 +382,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.finalize(id);
     
-    PagedQueryResult<MultimapQueryResult> pqr = s.fetch(id, Paging.create(5, 20l));
+    PagedQueryResult<MultimapQueryResult> pqr = s.fetch(id, Paging.create(5, 20));
     
     int pageCount = 0;
     int numRecords = 0;
@@ -401,7 +398,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals(16, numRecords);
     Assert.assertEquals(4, pageCount);
     
-    pqr = s.fetch(id, Paging.create(3, 10l));
+    pqr = s.fetch(id, Paging.create(3, 10));
     
     pageCount = 0;
     numRecords = 0;
@@ -420,10 +417,9 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.close();
   }
   
-  // Accumulo 1.5 actually implements locGroups in Mock...
-  @Test(expected = NotImplementedException.class)
+  @Test
   public void columns() throws Exception {
-    SortableResult id = SortableResult.create(c, AUTHS,
+    Store id = Store.create(c, AUTHS,
         Sets.newHashSet(Index.define("NAME"), Index.define("AGE"), Index.define("HEIGHT"), Index.define("WEIGHT")));
     
     Multimap<Column,SValue> data = HashMultimap.create();
@@ -462,7 +458,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     BatchScanner bs = c.createBatchScanner(id.metadataTable(), id.auths(), 1);
     bs.setRanges(Collections.singleton(Range.exact(id.uuid())));
-    bs.fetchColumnFamily(SortingMetadata.COLUMN_COLFAM);
+    bs.fetchColumnFamily(PersistedStores.COLUMN_COLFAM);
     
     long count = 0;
     for (Entry<Key,Value> e : bs) {
@@ -476,12 +472,11 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.close();
   }
   
-  // Accumulo 1.5 actually implements locGroups in Mock...
-  @Test(expected = NotImplementedException.class)
+  @Test
   public void projectToSingleValueInColumn() throws Exception {
     Column name = Column.create("NAME"), age = Column.create("AGE"), height = Column.create("HEIGHT"), weight = Column.create("WEIGHT");
     
-    SortableResult id = SortableResult.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
+    Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
     
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -542,6 +537,128 @@ public class BasicIndexingTest extends AbstractSortableTest {
   }
   
   @Test
+  public void groupResults() throws Exception {
+    Column name = Column.create("NAME"), age = Column.create("AGE"), height = Column.create("HEIGHT"), weight = Column.create("WEIGHT");
+    
+    Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
+    
+    Multimap<Column,SValue> data = HashMultimap.create();
+    
+    data.put(name, SValue.create("George", VIZ));
+    data.put(Column.create("AGE"), SValue.create("25", VIZ));
+    data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
+    
+    Cosmos s = new CosmosImpl(zkConnectString());
+    
+    s.register(id);
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "1", VIZ)));
+    
+    data.removeAll(name);
+    data.put(name, SValue.create("Steve", VIZ));
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "2", VIZ)));
+    
+    data.removeAll(name);
+    data.put(name, SValue.create("Frank", VIZ));
+    data.put(Column.create("WEIGHT"), SValue.create("100", VIZ));
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "3", VIZ)));
+    
+    // Plain groupBy over three records with unique values in said column
+    CloseableIterable<Entry<SValue,Long>> groups = s.groupResults(id, name);
+    Map<SValue,Long> expectedGroups = ImmutableMap.<SValue,Long>of(SValue.create("George", VIZ), 1l, SValue.create("Steve", VIZ), 1l, SValue.create("Frank", VIZ), 1l);
+    int count = 0;
+    for (Entry<SValue,Long> group : groups) {
+      Assert.assertTrue(expectedGroups.containsKey(group.getKey()));
+      Assert.assertEquals(expectedGroups.get(group.getKey()), group.getValue());
+      count++;
+    }
+    
+    groups.close();
+    
+    // Group by weight which only has one value
+    groups = s.groupResults(id, weight);
+    expectedGroups = ImmutableMap.<SValue,Long>of(SValue.create("100", VIZ), 1l);
+    count = 0;
+    for (Entry<SValue,Long> group : groups) {
+      Assert.assertTrue(expectedGroups.containsKey(group.getKey()));
+      Assert.assertEquals(expectedGroups.get(group.getKey()), group.getValue());
+      count++;
+    }
+    
+    groups.close();
+    
+    // Group by height which is the same for everyone
+    groups = s.groupResults(id, height);
+    expectedGroups = ImmutableMap.<SValue,Long>of(SValue.create("70", VIZ), 3l);
+    count = 0;
+    for (Entry<SValue,Long> group : groups) {
+      Assert.assertTrue(expectedGroups.containsKey(group.getKey()));
+      Assert.assertEquals(expectedGroups.get(group.getKey()), group.getValue());
+      count++;
+    }
+    
+    groups.close();
+    
+    Assert.assertEquals(expectedGroups.size(), count);
+    
+    s.close();
+  }
+  
+  @Test
+  public void pagedGroupResults() throws Exception {
+    Column name = Column.create("NAME"), age = Column.create("AGE"), height = Column.create("HEIGHT"), weight = Column.create("WEIGHT");
+    
+    Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
+    
+    Multimap<Column,SValue> data = HashMultimap.create();
+    
+    data.put(name, SValue.create("George", VIZ));
+    data.put(Column.create("AGE"), SValue.create("25", VIZ));
+    data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
+    
+    Cosmos s = new CosmosImpl(zkConnectString());
+    
+    s.register(id);
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "1", VIZ)));
+    
+    data.removeAll(name);
+    data.put(name, SValue.create("Steve", VIZ));
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "2", VIZ)));
+    
+    data.removeAll(name);
+    data.put(name, SValue.create("Frank", VIZ));
+    data.put(Column.create("WEIGHT"), SValue.create("100", VIZ));
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "3", VIZ)));
+    
+    int pageSize = 1;
+    
+    // Plain groupBy over three records with unique values in said column
+    PagedQueryResult<Entry<SValue,Long>> groups = s.groupResults(id, name, Paging.create(pageSize, Integer.MAX_VALUE));
+    Map<SValue,Long> expectedGroups = ImmutableMap.<SValue,Long>of(SValue.create("George", VIZ), 1l, SValue.create("Steve", VIZ), 1l, SValue.create("Frank", VIZ), 1l);
+    int count = 0;
+    for (List<Entry<SValue,Long>> groupPage : groups) {
+      Assert.assertEquals(pageSize, groupPage.size());
+      
+      for (Entry<SValue,Long> group : groupPage) {
+        Assert.assertTrue(expectedGroups.containsKey(group.getKey()));
+        Assert.assertEquals(expectedGroups.get(group.getKey()), group.getValue());
+        count++;
+      }
+    }
+    
+    groups.close();
+    
+    Assert.assertEquals(expectedGroups.size(), count);
+    
+    s.close();
+  }
+  
+  @Test
   public void reverseSorting() throws Exception {
     Multimap<Column,SValue> data = HashMultimap.create();
     
@@ -551,7 +668,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Set<Index> columnsToIndex = IdentitySet.<Index> create();
     
-    SortableResult id = SortableResult.create(c, AUTHS, columnsToIndex);
+    Store id = Store.create(c, AUTHS, columnsToIndex);
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
@@ -603,5 +720,68 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.delete(id);
     s.close();
+  }
+
+  @Test
+  public void addHighColumnCardinalityResults() throws Exception {
+    Multimap<Column,SValue> data = HashMultimap.create();
+    
+    for (int i = 0; i < 100; i++) { 
+      data.put(Column.create("TEXT" + i), SValue.create("foo", VIZ));
+    }
+    
+    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    
+    Set<Index> columnsToIndex = Sets.newHashSet(Index.define("TEXT0"), Index.define("TEXT1"), Index.define("TEXT2"));
+    
+    Store id = Store.create(c, AUTHS, Collections.<Index> emptySet());
+    
+    Cosmos s = new CosmosImpl(zkConnectString());
+    
+    s.register(id);
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    
+    // Trigger the case where our record has more columns than what we're indexing
+    s.index(id, columnsToIndex);
+    
+    for (int i = 0; i < 3; i++) {
+      Assert.assertEquals(1, Iterables.size(s.fetch(id, Index.define("TEXT" + i))));
+    }
+    
+    // Trigger the case where we have more columns than the record
+    s.index(id, IdentitySet.<Index> create());
+    
+    for (int i = 3; i < 100; i++) {
+      Assert.assertEquals(1, Iterables.size(s.fetch(id, Index.define("TEXT" + i))));
+    }
+    
+    s.close();
+  }
+  
+  @Test(expected = NoSuchElementException.class)
+  public void testNonExistentContent() throws Exception {
+    Column name = Column.create("NAME"), age = Column.create("AGE"), height = Column.create("HEIGHT"), weight = Column.create("WEIGHT");
+    
+    Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
+    
+    Multimap<Column,SValue> data = HashMultimap.create();
+    
+    data.put(name, SValue.create("George", VIZ));
+    data.put(Column.create("AGE"), SValue.create("25", VIZ));
+    data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
+    
+    Cosmos s = new CosmosImpl(zkConnectString());
+    
+    s.register(id);
+    
+    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "1", VIZ)));
+    
+    try {
+      // A different ID than what we just added
+      s.contents(id, "2");
+    } finally {
+      s.close();
+    }
   }
 }

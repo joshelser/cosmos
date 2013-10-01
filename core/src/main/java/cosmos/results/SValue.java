@@ -81,7 +81,7 @@ public class SValue implements Writable, Comparable<SValue> {
   
   @Override
   public String toString() {
-    return visibility + ": \"" + value + "\"";
+    return "\"" + value + "\" " + visibility;
   }
 
   public void write(DataOutput out) throws IOException {

@@ -2,23 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>cosmos</groupId>
-  <artifactId>cosmos-project</artifactId>
+  <artifactId>cosmos-project-accumulo1.4</artifactId>
   <version>0.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Cosmos</name>
   <modules>
     <module>core</module>
     <module>test</module>
+    <module>test-data</module>
+	<module>sql</module>
     <module>tracing</module>
     <module>tracing-web</module>
     <module>example-building-permits</module>
+    <module>sql-console</module>
   </modules>
-  <!-- Keep Maven from complaining about platform-dependent builds -->
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <version.accumulo>1.4.4</version.accumulo>
-  </properties>
   <distributionManagement>
     <site>
       <id>github</id>
@@ -26,31 +23,43 @@
       <url>http://joshelser.github.io/cosmos/site/</url>
     </site>
   </distributionManagement>
+  <!-- Keep Maven from complaining about platform-dependent builds -->
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <version.accumulo>1.4.4</version.accumulo>
+  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>cosmos</groupId>
-        <artifactId>cosmos-core</artifactId>
+        <artifactId>cosmos-core-accumulo1.4</artifactId>
         <version>${project.version}</version>
-        <classifier>accumulo1.4</classifier>
       </dependency>
       <dependency>
         <groupId>cosmos</groupId>
-        <artifactId>cosmos-test</artifactId>
+        <artifactId>cosmos-test-accumulo1.4</artifactId>
         <version>${project.version}</version>
-        <classifier>accumulo1.4</classifier>
       </dependency>
       <dependency>
         <groupId>cosmos</groupId>
-        <artifactId>cosmos-tracing</artifactId>
+        <artifactId>cosmos-test-data-accumulo1.4</artifactId>
         <version>${project.version}</version>
-        <classifier>accumulo1.4</classifier>
       </dependency>
       <dependency>
         <groupId>cosmos</groupId>
-        <artifactId>cosmos-tracing-web</artifactId>
+        <artifactId>cosmos-tracing-accumulo1.4</artifactId>
         <version>${project.version}</version>
-        <classifier>accumulo1.4</classifier>
+      </dependency>
+      <dependency>
+        <groupId>cosmos</groupId>
+        <artifactId>cosmos-sql-accumulo1.4</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>cosmos</groupId>
+        <artifactId>cosmos-tracing-web-accumulo1.4</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.accumulo</groupId>
@@ -163,28 +172,75 @@
         <artifactId>curator-test</artifactId>
         <version>2.0.1-incubating</version>
       </dependency>
-    <dependency>
-      <groupId>org.glassfish.jersey.core</groupId>
-      <artifactId>jersey-core</artifactId>
-      <version>2.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jersey.core</groupId>
-      <artifactId>jersey-server</artifactId>
-      <version>2.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jersey.media</groupId>
-      <artifactId>jersey-media-moxy</artifactId>
-      <version>2.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jersey.containers</groupId>
-      <artifactId>jersey-container-servlet-core</artifactId>
-      <version>2.2</version>
-    </dependency>
+      <dependency>
+        <groupId>net.hydromatic</groupId>
+        <artifactId>optiq</artifactId>
+        <version>0.4.11</version>
+      </dependency>
+      <dependency>
+        <groupId>net.hydromatic</groupId>
+        <artifactId>linq4j</artifactId>
+        <version>0.1.8</version>
+      </dependency>
+      <dependency>
+        <groupId>eigenbase</groupId>
+        <artifactId>eigenbase-properties</artifactId>
+        <version>1.1.2</version>
+      </dependency>
+      <dependency>
+        <groupId>sqlline</groupId>
+        <artifactId>sqlline</artifactId>
+        <version>1.1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-core</artifactId>
+        <version>2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-server</artifactId>
+        <version>2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jersey.media</groupId>
+        <artifactId>jersey-media-moxy</artifactId>
+        <version>2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jersey.containers</groupId>
+        <artifactId>jersey-container-servlet-core</artifactId>
+        <version>2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>jline</groupId>
+        <artifactId>jline</artifactId>
+        <version>2.11</version>
+      </dependency>
+      <dependency>
+        <groupId>com.beust</groupId>
+        <artifactId>jcommander</artifactId>
+        <version>1.32</version>
+      </dependency>
+      <dependency>
+        <groupId>xerces</groupId>
+        <artifactId>xercesImpl</artifactId>
+        <version>2.11.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
+  <repositories>
+    <repository>
+      <id>pentaho</id>
+      <name>Pentaho Repository</name>
+      <url>http://repository.pentaho.org/artifactory/repo</url>
+    </repository>
+    <repository>
+      <id>conjars</id>
+      <name>Concurrent Conjars repository</name>
+      <url>http://conjars.org/repo</url>
+    </repository>
+  </repositories>
   <build>
     <pluginManagement>
       <plugins>
@@ -197,35 +253,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
           <version>2.4</version>
-          <executions>
-            <execution>
-              <id>default-jar</id>
-              <phase>package</phase>
-              <goals>
-                <goal>jar</goal>
-              </goals>
-              <configuration>
-                <classifier>accumulo1.4</classifier>
-              </configuration>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-war-plugin</artifactId>
           <version>2.4</version>
-          <executions>
-            <execution>
-              <id>default-war</id>
-              <phase>package</phase>
-              <goals>
-                <goal>war</goal>
-              </goals>
-              <configuration>
-                <classifier>accumulo1.4</classifier>
-              </configuration>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -238,16 +270,16 @@
           <version>2.15</version>
         </plugin>
         <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>cobertura-maven-plugin</artifactId>
-            <version>2.5.2</version>
-            <configuration>
-              <formats>
-                <format>html</format>
-                <format>xml</format>
-              </formats>
-              <aggregate>true</aggregate>
-            </configuration>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>cobertura-maven-plugin</artifactId>
+          <version>2.5.2</version>
+          <configuration>
+            <formats>
+              <format>html</format>
+              <format>xml</format>
+            </formats>
+            <aggregate>true</aggregate>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -297,22 +329,18 @@
             <id>integration-test</id>
             <goals>
               <goal>integration-test</goal>
+              <goal>verify</goal>
             </goals>
             <configuration>
               <includes>
                 <include>**/*.class</include>
               </includes>
               <parallel>classes</parallel>
-              <threadCount>2</threadCount>
+              <threadCount>1</threadCount>
               <perCoreThreadCount>true</perCoreThreadCount>
               <redirectTestOutputToFile>true</redirectTestOutputToFile>
+			  <forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
             </configuration>
-          </execution>
-          <execution>
-            <id>verify</id>
-            <goals>
-              <goal>verify</goal>
-            </goals>
           </execution>
         </executions>
         <configuration>
@@ -324,7 +352,7 @@
         <artifactId>jetty-maven-plugin</artifactId>
         <version>8.1.12.v20130726</version>
         <configuration>
-            <!--scanIntervalSeconds>5</scanIntervalSeconds-->
+          <!--scanIntervalSeconds>5</scanIntervalSeconds -->
         </configuration>
       </plugin>
     </plugins>
@@ -383,11 +411,11 @@
         </configuration>
       </plugin>
       <plugin>
-         <artifactId>maven-project-info-reports-plugin</artifactId>
-         <version>2.7</version>
-         <configuration>
-            <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-         </configuration>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+        </configuration>
       </plugin>
     </plugins>
   </reporting>

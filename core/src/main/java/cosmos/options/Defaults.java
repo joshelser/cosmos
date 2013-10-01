@@ -27,6 +27,7 @@ public abstract class Defaults {
   public static final boolean LOCK_ON_UPDATES = false;
   public static final String DATA_TABLE = "cosmos";
   public static final String METADATA_TABLE = "metacosmos";
+  public static final String[] DEFAULT_TABLES = new String[] { DATA_TABLE, METADATA_TABLE };
   
   public static final String NULL_BYTE_STR = "\u0000";
   public static final String EIN_BYTE_STR = "\u0001";
@@ -35,6 +36,7 @@ public abstract class Defaults {
   
   public static final String DOCID_FIELD_NAME = "COSMOS_DOCID";
   public static final Text DOCID_FIELD_NAME_TEXT = new Text(DOCID_FIELD_NAME);
+  public static final Text EMPTY_TEXT = new Text();
   public static final Value EMPTY_VALUE = new Value(new byte[0]);
   public static final String CURATOR_PREFIX = "/cosmos/";
   

@@ -21,6 +21,7 @@ package cosmos.results.integration;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import javax.xml.bind.JAXBContext;
@@ -36,15 +37,17 @@ import org.mediawiki.xml.export_0.MediaWikiType;
 import org.mediawiki.xml.export_0.PageType;
 import org.mediawiki.xml.export_0.RevisionType;
 
-
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 import cosmos.IntegrationTests;
+import cosmos.options.Index;
 import cosmos.results.Column;
 import cosmos.results.QueryResult;
 import cosmos.results.SValue;
@@ -59,6 +62,12 @@ public class CosmosIntegrationSetup {
       CONTRIBUTOR_USERNAME = "CONTRIBUTOR_USERNAME", CONTRIBUTOR_ID = "CONTRIBUTOR_ID", CONTRIBUTOR_IP = "CONTRIBUTOR_IP", REVISION_ID = "REVISION_ID",
       REVISION_TIMESTAMP = "REVISION_TIMESTAMP", REVISION_COMMENT = "REVISION_COMMENT";
   
+  public static final Set<Index> ALL_INDEXES = ImmutableSet.<Index> builder().add(Index.define(CosmosIntegrationSetup.PAGE_ID), Index.define(CosmosIntegrationSetup.PAGE_TITLE),
+      Index.define(CosmosIntegrationSetup.PAGE_RESTRICTIONS), Index.define(CosmosIntegrationSetup.CONTRIBUTOR_IP),
+      Index.define(CosmosIntegrationSetup.CONTRIBUTOR_USERNAME), Index.define(CosmosIntegrationSetup.CONTRIBUTOR_ID),
+      Index.define(CosmosIntegrationSetup.REVISION_ID), Index.define(CosmosIntegrationSetup.REVISION_TIMESTAMP),
+      Index.define(CosmosIntegrationSetup.REVISION_COMMENT)).build();
+  
   public static final String ARTICLE_BASE = "/enwiki-20111201-metadata-articles-", ARTICLE_SUFFIX = ".xml.gz";
   
   private static final Cache<String,MediaWikiType> wikiCache = CacheBuilder.newBuilder().concurrencyLevel(5).build();
@@ -68,7 +77,9 @@ public class CosmosIntegrationSetup {
   
   @BeforeClass
   public static void initializeJaxb() throws Exception {
-    context = JAXBContext.newInstance("org.mediawiki.xml.export_0", ClassLoader.getSystemClassLoader());
+    if (null == context) {
+      context = JAXBContext.newInstance("org.mediawiki.xml.export_0", ClassLoader.getSystemClassLoader());
+    }
   }
   
   public static void clearCache() {
@@ -214,6 +225,8 @@ public class CosmosIntegrationSetup {
   
   @SuppressWarnings({"rawtypes", "unchecked"})
   protected static MediaWikiType loadWiki(int num) throws Exception {
+    initializeJaxb();
+    
     Unmarshaller unmarshaller = context.createUnmarshaller();
     
     InputStream is = CosmosIntegrationSetup.class.getResourceAsStream(ARTICLE_BASE + num + ARTICLE_SUFFIX);

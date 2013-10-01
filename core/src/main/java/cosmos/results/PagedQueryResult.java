@@ -41,7 +41,7 @@ public class PagedQueryResult<T> implements Results<List<T>> {
   
   public PagedQueryResult(CloseableIterable<T> results, Paging limits) {
     source = results;
-    pagedLimitedResults = Iterables.partition(Iterables.limit(results, limits.maxResults().intValue()), limits.pageSize());
+    pagedLimitedResults = Iterables.partition(Iterables.limit(results, limits.maxResults()), limits.pageSize());
   }
   
   @Override

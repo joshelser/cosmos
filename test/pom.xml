@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
+    <artifactId>cosmos-project-accumulo1.4</artifactId>
     <groupId>cosmos</groupId>
-    <artifactId>cosmos-project</artifactId>
     <version>0.3.0-SNAPSHOT</version>
   </parent>
-  <artifactId>cosmos-test</artifactId>
+  <artifactId>cosmos-test-accumulo1.4</artifactId>
   <name>Test</name>
   <!-- Keep Maven from complaining about platform-dependent builds -->
   <dependencies>
     <dependency>
       <groupId>cosmos</groupId>
-      <artifactId>cosmos-core</artifactId>
-      <classifier>accumulo1.4</classifier>
+      <artifactId>cosmos-core-accumulo1.4</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.accumulo</groupId>
@@ -75,6 +73,20 @@
     <dependency>
       <groupId>org.apache.curator</groupId>
       <artifactId>curator-recipes</artifactId>
+    </dependency>
+    <!-- Have to manually specify this to get the MiniCluster working as 
+    accumulo-start needs this version of jline, but doesn't have it listed 
+    as a dependency in 1.4.4 -->
+    <dependency>
+      <groupId>jline</groupId>
+      <artifactId>jline</artifactId>
+      <version>0.9.94</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>cosmos</groupId>
+      <artifactId>cosmos-test-data-accumulo1.4</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.curator</groupId>

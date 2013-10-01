@@ -48,7 +48,6 @@ import com.google.common.io.Files;
 import cosmos.Cosmos;
 import cosmos.IntegrationTests;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.SortableResult;
 import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.results.CloseableIterable;
@@ -56,6 +55,7 @@ import cosmos.results.Column;
 import cosmos.results.QueryResult;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.store.Store;
 
 /**
  * 
@@ -77,6 +77,7 @@ public class GroupByIntegrationTest {
     File tmp = Files.createTempDir();
     tmp.deleteOnExit();
     conf = new MiniAccumuloConfig(tmp, "foo");
+    conf.setNumTservers(2);
     mac = new MiniAccumuloCluster(conf);
     mac.start();
     
@@ -107,8 +108,8 @@ public class GroupByIntegrationTest {
   
   @Test
   public void simpleNonSparseRecordTest() throws Exception {
-    SortableResult id = SortableResult.create(con, new Authorizations(),
-        Sets.newHashSet(Index.define("NAME"), Index.define("AGE"), Index.define("STATE"), Index.define("COLOR")));
+    Store id = Store.create(con, new Authorizations(), Sets.newHashSet(Index.define("NAME"),
+        Index.define("AGE"), Index.define("STATE"), Index.define("COLOR")));
     
     // Register the ID with the implementation
     sorts.register(id);

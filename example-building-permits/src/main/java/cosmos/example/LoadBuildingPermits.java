@@ -20,11 +20,11 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 
 import cosmos.Cosmos;
-import cosmos.impl.SortableResult;
 import cosmos.options.Defaults;
 import cosmos.results.Column;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.store.Store;
 
 public class LoadBuildingPermits implements Runnable {
   private static final Logger log = LoggerFactory.getLogger(LoadBuildingPermits.class);
@@ -33,11 +33,11 @@ public class LoadBuildingPermits implements Runnable {
   public static final Long MAX_RESULTS = Long.MAX_VALUE;
   
   protected Cosmos cosmos;
-  protected SortableResult id;
+  protected Store id;
   protected File csvData;
   protected Long maxResultsToLoad;
   
-  public LoadBuildingPermits(Cosmos cosmos, SortableResult id, File csvData) {
+  public LoadBuildingPermits(Cosmos cosmos, Store id, File csvData) {
     checkNotNull(cosmos);
     checkNotNull(id);
     checkNotNull(csvData);

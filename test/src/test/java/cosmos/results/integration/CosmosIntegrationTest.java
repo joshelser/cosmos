@@ -23,6 +23,7 @@ package cosmos.results.integration;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
@@ -38,13 +39,13 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mediawiki.xml.export_0.MediaWikiType;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import cosmos.Cosmos;
 import cosmos.IntegrationTests;
 import cosmos.impl.CosmosImpl;
-import cosmos.impl.SortableResult;
 import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.results.CloseableIterable;
@@ -52,6 +53,7 @@ import cosmos.results.Column;
 import cosmos.results.QueryResult;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
+import cosmos.store.Store;
 
 /**
  * 
@@ -70,7 +72,7 @@ public class CosmosIntegrationTest extends CosmosIntegrationSetup {
     macDir.deleteOnExit();
     
     MiniAccumuloConfig config = new MiniAccumuloConfig(macDir, "");
-    config.setNumTservers(4);
+    config.setNumTservers(2);
     
     mac = new MiniAccumuloCluster(config);
     mac.start();
@@ -113,12 +115,24 @@ public class CosmosIntegrationTest extends CosmosIntegrationSetup {
   public void testWiki1() throws Exception {
     // Get the same wiki 3 times
     List<Thread> threads = Lists.newArrayList();
+    final List<Long> timings = Lists.newArrayList();
+    
+    // Preload
+    Stopwatch sw = new Stopwatch();
+    sw.start();
+    getWiki1();
+    sw.stop();
+    long origLength = sw.elapsed(TimeUnit.MICROSECONDS);
     
     for (int i = 0; i < 3; i++) {
       threads.add(new Thread(new Runnable() {
         public void run() {
           try {
+            Stopwatch sw = new Stopwatch();
+            sw.start();
             getWiki1();
+            sw.stop();
+            timings.add(sw.elapsed(TimeUnit.MICROSECONDS));
           } catch (Exception e) {
             throw new RuntimeException(e);
           }
@@ -138,8 +152,9 @@ public class CosmosIntegrationTest extends CosmosIntegrationSetup {
     
     long end = System.currentTimeMillis();
     
-    // We should only have to wait on one to parse the xml
-    Assert.assertTrue("Took more than 8s: " + (end - start) / 1000, (end - start) < 8000);
+    for (Long duration : timings) {
+      Assert.assertTrue(origLength > duration);
+    }
   }
   
   @Test
@@ -152,7 +167,8 @@ public class CosmosIntegrationTest extends CosmosIntegrationSetup {
     con.tableOperations().create(Defaults.DATA_TABLE);
     con.tableOperations().create(Defaults.METADATA_TABLE);
     
-    SortableResult id = SortableResult.create(con, new Authorizations("en"), Sets.newHashSet(Index.define(PAGE_ID)));
+    Store id = Store.create(con, new Authorizations("en"),
+        Sets.newHashSet(Index.define(PAGE_ID)));
     
     Cosmos s = new CosmosImpl(CosmosIntegrationTest.zk.getConnectString());
     
