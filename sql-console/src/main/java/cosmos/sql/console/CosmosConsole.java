@@ -159,52 +159,7 @@ public class CosmosConsole {
           timer.start();
           final ResultSet resultSet = statement.executeQuery(line);
           tableOutput.print(resultSet, timer);
-          /*
-          final ResultSetMetaData metadata = resultSet.getMetaData();
-          final int columnCount = metadata.getColumnCount();
-          
-          TreeSet<String> columns = Sets.newTreeSet();
-          StringBuilder header = new StringBuilder(256);
-          final String separator = "\t";
-          final String newline = "\n";
-          
-          for (int i = 1; i <= columnCount; i++) {
-            String columnName = metadata.getColumnName(i);
-            columns.add(columnName);
-            header.append(columnName);
-            if (i < columnCount) {
-              header.append(separator);
-            }
-          }
-          
-          final StringBuilder body = new StringBuilder(256);
-          while (resultSet.next()) {
-            for (String column : columns) {
-              List<Entry<Column,SValue>> sValues = (List<Entry<Column,SValue>>) resultSet.getObject(column);
-              
-              if (null != sValues && !sValues.isEmpty()) {
-                for (Entry<Column,SValue> values : sValues) {
-                  body.append(values.getValue().toString());
-                }
-              } else {
-                body.append(" ");
-              }
-              
-              body.append(separator);
-            }
-            
-            // If we inserted anything, remove the last separator
-            if (body.length() > 0) {
-              body.setLength(body.length() - separator.length());
-            }
-            
-            body.append(newline);
-          }
-          
-          // Print out the header and then the body (we already have an extra newline on the body)
-          sysout.println(header);
-          sysout.print(body);*/
-          
+
         } catch (SQLException e) {
           log.error("SQLException", e);
           sysout.println();
