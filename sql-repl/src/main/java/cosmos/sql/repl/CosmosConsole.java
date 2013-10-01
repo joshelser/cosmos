@@ -6,14 +6,10 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.TreeSet;
 
 import jline.console.ConsoleReader;
 import jline.console.history.FileHistory;
@@ -34,15 +30,13 @@ import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.google.common.collect.Sets;
+import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
 
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
 import cosmos.options.Defaults;
-import cosmos.results.Column;
 import cosmos.results.QueryResult;
-import cosmos.results.SValue;
 import cosmos.results.integration.CosmosIntegrationSetup;
 import cosmos.sql.CosmosDriver;
 import cosmos.sql.impl.CosmosSql;
@@ -161,8 +155,10 @@ public class CosmosConsole {
         try {
           statement = connection.createStatement();
           
+          Stopwatch timer = new Stopwatch();
+          timer.start();
           final ResultSet resultSet = statement.executeQuery(line);
-          tableOutput.print(resultSet);
+          tableOutput.print(resultSet, timer);
           /*
           final ResultSetMetaData metadata = resultSet.getMetaData();
           final int columnCount = metadata.getColumnCount();

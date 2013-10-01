@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
 import cosmos.results.Column;
@@ -15,7 +15,7 @@ import cosmos.results.SValue;
 public class TableOutputFormat {
   public static final String COLUMN_SEPARATOR = "|", CORNER = "+", SPACE = " ", HYPHEN = "-", NEWLINE = "\n";
   
-  public void print(ResultSet results) throws SQLException {
+  public void print(ResultSet results, Stopwatch timer) throws SQLException {
     final ResultSetMetaData metadata = results.getMetaData();
     final int columnCount = metadata.getColumnCount();
     List<String> columns = Lists.newArrayListWithExpectedSize(columnCount);
@@ -30,7 +30,7 @@ public class TableOutputFormat {
     
     final StringBuilder line = new StringBuilder(1024);
     final StringBuilder sb = new StringBuilder(256);
-    int linesWritten = 0;
+    long linesWritten = 0;
     while (results.next()) {
       for (int i = 0; i < columns.size(); i++) {
         String column = columns.get(i);
@@ -97,6 +97,8 @@ public class TableOutputFormat {
       line.setLength(0);
       linesWritten++;
     }
+    
+    timer.stop();
 
     for (Integer columnWidth : columnWidths) {
       line.append(CORNER);
@@ -110,6 +112,7 @@ public class TableOutputFormat {
     line.append(CORNER);
     
     System.out.println(line);
+    System.out.println(linesWritten + " rows in set (" + timer + ")\n");
     
     return;
   }
