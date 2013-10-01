@@ -209,6 +209,32 @@ public class Store {
       throw new RuntimeException(e);
     }
     
+    try {
+      Map<String,Set<Text>> localityGroups = tops.getLocalityGroups(tableName);
+      
+      // If we don't have a locality group specified with the expected name
+      // create one automatically
+      if (!localityGroups.containsKey(Defaults.DOCID_FIELD_NAME)) {
+        localityGroups.put(Defaults.DOCID_FIELD_NAME, Collections.singleton(Defaults.DOCID_FIELD_NAME_TEXT));
+        
+        tops.setLocalityGroups(tableName, localityGroups);
+      } else {
+        Set<Text> colfams = localityGroups.get(Defaults.DOCID_FIELD_NAME);
+        if (!colfams.contains(Defaults.DOCID_FIELD_NAME_TEXT)) {
+          log.warn("The {} locality group does not contain the expected column family {}", Defaults.DOCID_FIELD_NAME, Defaults.DOCID_FIELD_NAME_TEXT);
+        }
+      }
+    } catch (AccumuloException e) {
+      log.error("Could not add locality groups to table '{}'", tableName, e);
+      throw new RuntimeException(e);
+    } catch (AccumuloSecurityException e) {
+      log.error("Could not add locality groups to table '{}'", tableName, e);
+      throw new RuntimeException(e);
+    } catch (TableNotFoundException e) {
+      log.error("Could not add locality groups to table '{}'", tableName, e);
+      throw new RuntimeException(e);
+    }
+    
     Set<Index> columns = columnsToIndex();
     if (!(columns instanceof IdentitySet)) {
       try {
