@@ -1,4 +1,4 @@
-package cosmos.sql.repl;
+package cosmos.sql.console;
 
 import java.io.File;
 import java.io.IOException;
@@ -109,7 +109,7 @@ public class CosmosConsole {
       // Check for, and create if necessary, the directory for cosmos to use
       File historyDir = new File(homeDir, ".cosmos");
       if (!historyDir.exists() && !historyDir.mkdirs()) {
-        log.warn("Could not create directory for history at {}", historyDir);
+        log.warn("Could not create directory for history at {}, using temporary history.", historyDir);
       }
       
       // Get a file for jline history

@@ -1,4 +1,4 @@
-package cosmos.sql.repl;
+package cosmos.sql.console;
 
 import java.util.List;
 

@@ -5,8 +5,8 @@
     <artifactId>cosmos-project</artifactId>
     <version>0.3.0-SNAPSHOT</version>
   </parent>
-  <artifactId>cosmos-sql-repl</artifactId>
-  <name>SQL REPL</name>
+  <artifactId>cosmos-sql-console</artifactId>
+  <name>SQL Console</name>
   <!-- Some "reasonable" defaults" -->
   <properties>
 	<zookeepers>localhost:2181</zookeepers>

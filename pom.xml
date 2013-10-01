@@ -14,7 +14,7 @@
     <module>tracing</module>
     <module>tracing-web</module>
     <module>example-building-permits</module>
-    <module>sql-repl</module>
+    <module>sql-console</module>
   </modules>
   <distributionManagement>
     <site>

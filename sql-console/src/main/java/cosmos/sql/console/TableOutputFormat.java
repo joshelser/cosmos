@@ -1,4 +1,4 @@
-package cosmos.sql.repl;
+package cosmos.sql.console;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
