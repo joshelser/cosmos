@@ -66,6 +66,12 @@ public class Store {
   protected final Tracer tracer;
   
   protected Set<Index> columnsToIndex;
+  // 50M = 1024 * 1024 * 50
+  protected long maxWriteMemory = 52428800l;
+  // 120s = 2 * 60 * 1000l;
+  protected long maxWriteLatency = 120000l;
+  protected int maxWriteThreads = 3;
+  protected int readThreads = 10;
   
   public Store(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
     this(connector, auths, randomUUID().toString(), columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
@@ -385,6 +391,58 @@ public class Store {
   
   public Tracer tracer() {
     return this.tracer;
+  }
+  
+  /**
+   * A {@link BatchWriterConfig} instance to be used by Cosmos while processing data
+   * for this {@link Store}
+   * @return The {@link BatchWriterConfig} for this {@link Store}
+   */
+  public long maxWriteMemory() {
+    return this.maxWriteMemory;
+  }
+  
+  public long maxWriteLatency() {
+    return this.maxWriteLatency;
+  }
+  
+  public int maxWriteThreads() {
+    return this.maxWriteThreads;
+  }
+  
+  /**
+   * Allows the user to provide a {@link BatchWriterConfig} to control the amount of resources
+   * which Cosmos will use when processing data for the given {@link Store}.
+   * @param bwConfig
+   */
+  public void setMaxWriteMemory(long maxWriteMemory) {
+    this.maxWriteMemory = maxWriteMemory;
+  }
+  
+  public void setMaxWriteLatency(long maxWriteLatency) {
+    this.maxWriteLatency = maxWriteLatency;
+  }
+  
+  public void setMaxWriteThreads(int maxWriteThreads) {
+    this.maxWriteThreads = maxWriteThreads;
+  }
+  
+  /**
+   * Returns the number of threads to be used by Cosmos when scanning for data for this {@link Store} when
+   * order isn't important.This will more commonly be treated as an upper-bound given how Cosmos uses Accumulo.
+   * @return number of read threads
+   */
+  public int readThreads() {
+    return this.readThreads;
+  }
+  
+  /**
+   * Sets the number of threads to be used by Cosmos when scanning for data for this {@link Store} when order
+   * is not important. This will more commonly be treated as an upper-bound given how Cosmos uses Accumulo.
+   * @param readThreads The number of read threads to use
+   */
+  public void setReadThreads(int readThreads) {
+    this.readThreads = readThreads;
   }
   
   public void sendTraces() {

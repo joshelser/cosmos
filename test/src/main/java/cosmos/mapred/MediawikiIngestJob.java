@@ -80,8 +80,6 @@ public class MediawikiIngestJob extends Configured implements Tool {
     job.setInputFormatClass(MediawikiInputFormat.class);
     AccumuloOutputFormat.setZooKeeperInstance(conf, instanceName, zookeepers);
     AccumuloOutputFormat.setOutputInfo(conf, user, passwd.getBytes(), true, tablename);
-    AccumuloOutputFormat.setMaxMutationBufferSize(conf, CosmosImpl.DEFAULT_MAX_MEMORY);
-    AccumuloOutputFormat.setMaxLatency(conf, CosmosImpl.DEFAULT_MAX_LATENCY.intValue());
     
     return job.waitForCompletion(true) ? 0 : 1;
   }

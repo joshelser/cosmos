@@ -105,7 +105,8 @@ public class GroupByRowSuffixIteratorTest {
     
     BatchWriter bw = null;
     try {
-      bw = c.createBatchWriter(tableName, CosmosImpl.DEFAULT_MAX_MEMORY, CosmosImpl.DEFAULT_MAX_LATENCY, CosmosImpl.DEFAULT_MAX_WRITE_THREADS);
+      // 10M, 60s, 2threads
+      bw = c.createBatchWriter(tableName, 10485760l, 60000l, 2);
       
       Mutation m = new Mutation("1_a");
       m.put("a", "a", 0, "");
@@ -174,7 +175,8 @@ public class GroupByRowSuffixIteratorTest {
     
     BatchWriter bw = null;
     try {
-      bw = c.createBatchWriter(tableName, CosmosImpl.DEFAULT_MAX_MEMORY, CosmosImpl.DEFAULT_MAX_LATENCY, CosmosImpl.DEFAULT_MAX_WRITE_THREADS);
+      // 10M, 60s, 2threads
+      bw = c.createBatchWriter(tableName, 10485760l, 60000l, 2);
       
       for (int i = 1; i < 6; i++) {
         Mutation m = new Mutation(i + "_a");
@@ -247,7 +249,8 @@ public class GroupByRowSuffixIteratorTest {
     
     BatchWriter bw = null;
     try {
-      bw = c.createBatchWriter(tableName, CosmosImpl.DEFAULT_MAX_MEMORY, CosmosImpl.DEFAULT_MAX_LATENCY, CosmosImpl.DEFAULT_MAX_WRITE_THREADS);
+      // 10M, 60s, 2threads
+      bw = c.createBatchWriter(tableName, 10485760l, 60000l, 2);
       
       Mutation m = new Mutation("1_a");
       m.put("col1", "1", 0, "");
@@ -317,7 +320,8 @@ public class GroupByRowSuffixIteratorTest {
     
     BatchWriter bw = null;
     try {
-      bw = c.createBatchWriter(tableName, CosmosImpl.DEFAULT_MAX_MEMORY, CosmosImpl.DEFAULT_MAX_LATENCY, CosmosImpl.DEFAULT_MAX_WRITE_THREADS);
+      // 10M, 60s, 2threads
+      bw = c.createBatchWriter(tableName, 10485760l, 60000l, 2);
       
       for (int i = 1; i < 6; i++) {
         Mutation m = new Mutation(i + "_a");

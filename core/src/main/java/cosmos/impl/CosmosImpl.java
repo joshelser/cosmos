@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -56,7 +55,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 
@@ -76,8 +74,8 @@ import cosmos.results.QueryResult;
 import cosmos.results.SValue;
 import cosmos.results.impl.MultimapQueryResult;
 import cosmos.store.PersistedStores;
-import cosmos.store.Store;
 import cosmos.store.PersistedStores.State;
+import cosmos.store.Store;
 import cosmos.util.IndexHelper;
 import cosmos.util.Single;
 
@@ -85,10 +83,6 @@ public class CosmosImpl implements Cosmos{
   private static final Logger log = LoggerFactory.getLogger(CosmosImpl.class);
   
   public static final long LOCK_SECS = 10;
-  
-  public static final Long DEFAULT_MAX_MEMORY = 50 * 1024 * 1024l;
-  public static final Long DEFAULT_MAX_LATENCY = 2 * 60 * 1000l;
-  public static final Integer DEFAULT_MAX_WRITE_THREADS = 3;
   
   private final CuratorFramework curator;
   private final ReverseLexicoder<String> revLex = new ReverseLexicoder<String>(new StringLexicoder());
@@ -231,8 +225,8 @@ public class CosmosImpl implements Cosmos{
       // Add the values of columns to the sortableresult as we want
       Set<Index> columnsToIndex = id.columnsToIndex();
       
-      bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_MAX_MEMORY, DEFAULT_MAX_LATENCY, DEFAULT_MAX_WRITE_THREADS);
-      metadataBw = id.connector().createBatchWriter(id.metadataTable(), DEFAULT_MAX_MEMORY, DEFAULT_MAX_LATENCY, DEFAULT_MAX_WRITE_THREADS);
+      bw = id.connector().createBatchWriter(id.dataTable(), id.maxWriteMemory(), id.maxWriteLatency(), id.maxWriteThreads());
+      metadataBw = id.connector().createBatchWriter(id.metadataTable(), id.maxWriteMemory(), id.maxWriteLatency(), id.maxWriteThreads());
       
       final IndexHelper indexHelper = IndexHelper.create(columnsToIndex);
       final Text holder = new Text();
@@ -378,7 +372,7 @@ public class CosmosImpl implements Cosmos{
       // Get the results we have to update
       results = fetch(id);
       
-      bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_MAX_MEMORY, DEFAULT_MAX_LATENCY, DEFAULT_MAX_WRITE_THREADS);
+      bw = id.connector().createBatchWriter(id.dataTable(), id.maxWriteMemory(), id.maxWriteLatency(), id.maxWriteThreads());
       
       // Iterate over the results we have
       for (MultimapQueryResult result : results) {
@@ -489,7 +483,7 @@ public class CosmosImpl implements Cosmos{
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
-      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), id.readThreads());
       bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
       bs.fetchColumnFamily(Defaults.DOCID_FIELD_NAME_TEXT);
       
@@ -540,7 +534,7 @@ public class CosmosImpl implements Cosmos{
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
-      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), id.readThreads());
       bs.setRanges(Collections.singleton(Range.exact(id.uuid() + Defaults.NULL_BYTE_STR + value)));
       bs.fetchColumnFamily(new Text(column.name()));
       
@@ -675,7 +669,7 @@ public class CosmosImpl implements Cosmos{
       
       Text colf = new Text(column.name());
       
-      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), id.readThreads());
       bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
       bs.fetchColumnFamily(colf);
       
@@ -770,7 +764,7 @@ public class CosmosImpl implements Cosmos{
       // Delete of the Keys
       BatchDeleter bd = null;
       try {
-        bd = id.connector().createBatchDeleter(id.dataTable(), id.auths(), 4, DEFAULT_MAX_MEMORY, DEFAULT_MAX_LATENCY, DEFAULT_MAX_WRITE_THREADS);
+        bd = id.connector().createBatchDeleter(id.dataTable(), id.auths(), id.readThreads(), id.maxWriteMemory(), id.maxWriteLatency(), id.maxWriteThreads());
         bd.setRanges(Collections.singleton(Range.prefix(id.uuid())));
         
         bd.delete();
