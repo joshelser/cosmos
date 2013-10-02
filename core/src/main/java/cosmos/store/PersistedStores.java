@@ -159,7 +159,7 @@ public class PersistedStores {
     
     BatchDeleter bd = null;
     try {
-      bd = id.connector().createBatchDeleter(id.metadataTable(), id.auths(), 10, id.maxWriteMemory(), id.maxWriteLatency(), id.maxWriteThreads()); 
+      bd = id.connector().createBatchDeleter(id.metadataTable(), id.auths(), id.readThreads(), id.maxWriteMemory(), id.maxWriteLatency(), id.maxWriteThreads());
       bd.setRanges(Collections.singleton(Range.exact(id.uuid())));
       bd.delete();
     } finally {
