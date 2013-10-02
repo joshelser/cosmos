@@ -19,6 +19,8 @@
  */
 package cosmos.sql;
 
+import java.util.Collection;
+
 /**
  * Interface that defines an interface that enables us functionality in defining our referential schema.
  * 
@@ -28,4 +30,10 @@ package cosmos.sql;
 public interface TableDefiner {
 
   public DataTable<?> getTable(String name);
+  
+  /**
+   * Get the list of tables
+   * @return
+   */
+  public Collection<String> getTables();
 }

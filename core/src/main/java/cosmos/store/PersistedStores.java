@@ -21,6 +21,7 @@ package cosmos.store;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +53,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -111,6 +113,26 @@ public class PersistedStores {
    */
   public enum State {
     LOADING, LOADED, ERROR, DELETING, UNKNOWN
+  }
+  
+  public static Collection<Store> listStores(Connector connector, String metadataTable, Authorizations auths) throws InvalidProtocolBufferException, TableNotFoundException
+  {	    Scanner s = connector.createScanner(metadataTable,auths);
+	    
+	    s.setRange(new Range());
+	    
+	    s.fetchColumnFamily(SERIALIZED_STORE_COLFAM);
+	    
+	    Iterator<Entry<Key,Value>> iter = s.iterator();
+	    
+	    List<Store> stores = Lists.newArrayList();
+	    if (iter.hasNext()) {
+	      Entry<Key,Value> stateEntry = iter.next();
+	      stores.add(  deserialize(connector,stateEntry.getValue()) );
+	    }
+	    
+	    s.close();
+	    
+	  return stores;
   }
   
   public static State getState(Store id) throws TableNotFoundException {

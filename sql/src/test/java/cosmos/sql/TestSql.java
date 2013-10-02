@@ -453,6 +453,48 @@ public class TestSql {
     }
   }
   
+  @Test
+  public void testListTables() throws SQLException {
+    loadDriverClass();
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      Properties info = new Properties();
+      info.put("url", JDBC_URL);
+      info.put("user", USER);
+      info.put("password", PASSWORD);
+      connection = DriverManager.getConnection("jdbc:accumulo:cosmos//localhost", info);
+      statement = connection.createStatement();
+      final ResultSet resultSet = statement.executeQuery("show tables");
+      final ResultSetMetaData metaData = resultSet.getMetaData();
+      final int columnCount = metaData.getColumnCount();
+      while (resultSet.next()) {
+    	  System.out.println(resultSet.getString(1));
+      }
+      /*
+      assertEquals(columnCount, 1);
+      
+      int resultsFound = 0;
+      while (resultSet.next()) {
+        assertEquals(metaData.getColumnName(1), "PAGE_ID");
+        @SuppressWarnings("unchecked")
+        List<Entry<Column,SValue>> sValues = (List<Entry<Column,SValue>>) resultSet.getObject("PAGE_ID");
+        assertEquals(sValues.size(), 1);
+        SValue onlyValue = sValues.iterator().next().getValue();
+        assertEquals(onlyValue.visibility().toString(), "[en]");
+        
+        assertEquals(onlyValue.value(), Integer.valueOf(resultsFound).toString());
+        resultsFound++;
+        
+      }
+      
+      assertEquals(resultsFound, 2);
+      */
+    } finally {
+      close(connection, statement);
+    }
+  }
+  
  // @Test
   public void testDistinct() throws SQLException {
     loadDriverClass();

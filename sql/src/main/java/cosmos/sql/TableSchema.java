@@ -20,10 +20,12 @@
 package cosmos.sql;
 
 import java.util.Collection;
+import java.util.Map;
 
 import net.hydromatic.linq4j.expressions.Expression;
 import net.hydromatic.optiq.Schema;
 import net.hydromatic.optiq.Table;
+import net.hydromatic.optiq.Schema.TableInSchema;
 import net.hydromatic.optiq.impl.java.MapSchema;
 
 import com.google.common.collect.Lists;
@@ -49,6 +51,22 @@ public class TableSchema<T extends SchemaDefiner<?>> extends MapSchema {
     metaData = schemaDefiner;
     // let's make a cyclic dependency
     metaData.register(this);
+    
+    
+    if (metaData instanceof TableDefiner) {
+        Collection<String> tables = ((TableDefiner) metaData).getTables();
+        for(String table : tables)
+        {
+        	tableMap.put(table, new TableInSchema(parentSchema, table, null) {
+				
+				@Override
+				public <E> Table<E> getTable(Class<E> elementType) {
+					// TODO Auto-generated method stub
+					return null;
+				}
+			});
+        }
+    }
   }
 
   /**
@@ -66,10 +84,13 @@ public class TableSchema<T extends SchemaDefiner<?>> extends MapSchema {
   public <E> Table<E> getTable(String name, Class<E> elementType) {
     return (Table<E>) getTable(name);
   }
+  
+  
 
   @Override
   protected Collection<TableInSchema> initialTables() {
     return Lists.newArrayList();
 
   }
+  
 }

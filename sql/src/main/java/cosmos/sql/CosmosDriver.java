@@ -25,7 +25,10 @@ import java.util.Properties;
 
 import net.hydromatic.optiq.MutableSchema;
 import net.hydromatic.optiq.jdbc.DriverVersion;
+
+import net.hydromatic.optiq.jdbc.CosmosConnection;
 import net.hydromatic.optiq.jdbc.OptiqConnection;
+import net.hydromatic.optiq.jdbc.OptiqStatement;
 import net.hydromatic.optiq.jdbc.UnregisteredDriver;
 import cosmos.sql.impl.CosmosSql;
 import cosmos.sql.impl.CosmosTable;
@@ -79,7 +82,7 @@ public class CosmosDriver extends UnregisteredDriver {
   @Override
   public Connection connect(String url, Properties info) throws SQLException {
     Connection connection = super.connect(url, info);
-    OptiqConnection optiqConnection = (OptiqConnection) connection;
+    CosmosConnection optiqConnection = new CosmosConnection( (OptiqConnection) connection );
     
     final MutableSchema rootSchema = optiqConnection.getRootSchema();
     

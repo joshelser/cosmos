@@ -1,13 +1,15 @@
 package cosmos.statistics;
 
 import cosmos.options.Index;
+import cosmos.statistics.store.Cardinality;
+import cosmos.statistics.store.Count;
 import cosmos.store.Store;
 
 public class IndexStatistics extends ColumnStatistics{
 
-	protected long count;
+	protected Count count;
 	
-	protected long cardinality;
+	protected Cardinality cardinality;
 	// like we are not indexed
 	protected boolean hasStats;
 	IndexStatistics(Store store, Index index)
@@ -23,26 +25,26 @@ public class IndexStatistics extends ColumnStatistics{
 	@Override
 	public double selectivity() {
 		// remember your rules of math ... / then * ;)
-		return Math.ceil( cardinality() / countEstimate() * 100 ); 
+		return Math.ceil( cardinality().get() / countEstimate().get() * 100 ); 
 	}
 	
-	public void setCardinality(long cardinality)
+	public void setCardinality(Cardinality  cardinality)
 	{
 		this.cardinality = cardinality;
 	}
 
 	@Override
-	public long cardinality() {
+	public Cardinality cardinality() {
 		return cardinality;
 	}
 	
-	public void setCountEstimate(long estimate)
+	public void setCountEstimate(Count estimate)
 	{
 		this.count = estimate;
 	}
 
 	@Override
-	public long countEstimate() {
+	public Count countEstimate() {
 		return count;
 	}
 	

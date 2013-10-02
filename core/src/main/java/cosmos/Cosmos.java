@@ -19,6 +19,7 @@
  */
 package cosmos;
 
+import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -39,6 +40,13 @@ import cosmos.store.Store;
 
 public interface Cosmos {
   
+	/**
+	 * 
+	 * @param id
+	 * @throws TableNotFoundException
+	 * @throws MutationsRejectedException
+	 * @throws UnexpectedStateException
+	 */
   public void register(Store id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException;
   
   /**
@@ -191,9 +199,7 @@ public interface Cosmos {
    * @param id
    */
   public void delete(Store id) throws TableNotFoundException, MutationsRejectedException, UnexpectedStateException;
-  
-  
-  
+
   
   /**
    * Cleans up internal resources, such as the Curator/ZooKeeper connection, and should be called by the client

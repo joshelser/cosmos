@@ -48,6 +48,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import cosmos.Cosmos;
 import cosmos.UnexpectedStateException;
@@ -321,5 +322,28 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
     this.typeFactory = parentSchema.getTypeFactory();
 
   }
+
+/* (non-Javadoc)
+ * @see cosmos.sql.TableDefiner#getTables()
+ */
+@Override
+public Collection<String> getTables() {
+	Collection<String> tables = Lists.newArrayList();
+	try {
+		Collection<Store> stores = PersistedStores.listStores(connector, metadataTable, auths);
+		for(Store store : stores)
+		{
+			tables.add(store.uuid());
+		}
+	} catch (InvalidProtocolBufferException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (TableNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+
+	return tables;
+}
 
 }
