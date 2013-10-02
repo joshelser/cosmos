@@ -30,6 +30,7 @@ import java.util.SortedSet;
 
 import org.apache.accumulo.core.client.AccumuloException;
 import org.apache.accumulo.core.client.AccumuloSecurityException;
+import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.TableExistsException;
@@ -65,6 +66,8 @@ public class Store {
   protected final Tracer tracer;
   
   protected Set<Index> columnsToIndex;
+  protected BatchWriterConfig bwConfig = new BatchWriterConfig();
+  protected int readThreads = 10;
   
   public Store(Connector connector, Authorizations auths, Set<Index> columnsToIndex) {
     this(connector, auths, randomUUID().toString(), columnsToIndex, Defaults.LOCK_ON_UPDATES, Defaults.DATA_TABLE, Defaults.METADATA_TABLE);
@@ -376,6 +379,44 @@ public class Store {
   
   public Tracer tracer() {
     return this.tracer;
+  }
+  
+  /**
+   * A {@link BatchWriterConfig} instance to be used by Cosmos while processing data
+   * for this {@link Store}
+   * @return The {@link BatchWriterConfig} for this {@link Store}
+   */
+  public BatchWriterConfig writerConfig() {
+    return this.bwConfig;
+  }
+  
+  /**
+   * Allows the user to provide a {@link BatchWriterConfig} to control the amount of resources
+   * which Cosmos will use when processing data for the given {@link Store}.
+   * @param bwConfig
+   */
+  public void setWriterConfig(BatchWriterConfig bwConfig) {
+    checkNotNull(bwConfig);
+    
+    this.bwConfig = bwConfig;
+  }
+  
+  /**
+   * Returns the number of threads to be used by Cosmos when scanning for data for this {@link Store} when
+   * order isn't important.This will more commonly be treated as an upper-bound given how Cosmos uses Accumulo.
+   * @return number of read threads
+   */
+  public int readThreads() {
+    return this.readThreads;
+  }
+  
+  /**
+   * Sets the number of threads to be used by Cosmos when scanning for data for this {@link Store} when order
+   * is not important. This will more commonly be treated as an upper-bound given how Cosmos uses Accumulo.
+   * @param readThreads The number of read threads to use
+   */
+  public void setReadThreads(int readThreads) {
+    this.readThreads = readThreads;
   }
   
   public void sendTraces() {

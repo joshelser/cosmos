@@ -16,6 +16,7 @@ import jline.console.history.FileHistory;
 import jline.console.history.History;
 import jline.console.history.MemoryHistory;
 
+import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
 import cosmos.Cosmos;
@@ -159,7 +161,7 @@ public class CosmosConsole {
           timer.start();
           final ResultSet resultSet = statement.executeQuery(line);
           tableOutput.print(resultSet, timer);
-
+          
         } catch (SQLException e) {
           log.error("SQLException", e);
           sysout.println();
@@ -255,13 +257,24 @@ public class CosmosConsole {
         // Pre-load jaxb
         CosmosIntegrationSetup.initializeJaxb();
         
-        MediaWikiType wiki1 = CosmosIntegrationSetup.getWiki1();
-        List<QueryResult<?>> results1 = CosmosIntegrationSetup.wikiToMultimap(wiki1);
+        // Load all of the wikis.. they're not *that* big
+        List<QueryResult<?>> inputData = Lists.newArrayListWithExpectedSize(200000);
+        for (MediaWikiType wiki : Lists.newArrayList(CosmosIntegrationSetup.getWiki1(), CosmosIntegrationSetup.getWiki2(), CosmosIntegrationSetup.getWiki3(),
+            CosmosIntegrationSetup.getWiki4(), CosmosIntegrationSetup.getWiki5())) {
+          inputData.addAll(CosmosIntegrationSetup.wikiToMultimap(wiki));
+        }
         
         id = new Store(connector, connector.securityOperations().getUserAuthorizations("root"), CosmosIntegrationSetup.ALL_INDEXES);
         
+        // Override the default BatchWriterConfig (50M memory buffer)
+        // BatchWriterConfig bwConfig = new BatchWriterConfig();
+        // bwConfig.setMaxMemory(1024 * 1024 * 100);
+        // id.setWriterConfig(bwConfig);
+        
+        log.info("Sending data through Cosmos");
+        
         cosmos.register(id);
-        cosmos.addResults(id, results1);
+        cosmos.addResults(id, inputData);
         cosmos.finalize(id);
         
         log.info("Loaded wiki data with an id of {}", id.uuid());
