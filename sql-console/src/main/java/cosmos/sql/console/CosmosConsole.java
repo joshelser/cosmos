@@ -1,4 +1,4 @@
-package cosmos.sql.repl;
+package cosmos.sql.console;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,19 +6,17 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.TreeSet;
 
 import jline.console.ConsoleReader;
 import jline.console.history.FileHistory;
 import jline.console.history.History;
 import jline.console.history.MemoryHistory;
 
+import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
@@ -33,19 +31,18 @@ import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.google.common.collect.Sets;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
 import cosmos.options.Defaults;
-import cosmos.options.Index;
-import cosmos.results.Column;
 import cosmos.results.QueryResult;
-import cosmos.results.SValue;
 import cosmos.results.integration.CosmosIntegrationSetup;
 import cosmos.sql.CosmosDriver;
 import cosmos.sql.impl.CosmosSql;
+import cosmos.store.PersistedStores;
 import cosmos.store.Store;
 
 public class CosmosConsole {
@@ -54,9 +51,22 @@ public class CosmosConsole {
   private static final String PROMPT = "cosmos> ";
   
   public static class CosmosConsoleOptions {
-    @Parameter(names = {"--id", "-s"}, description = "The UUID of the SortableResult to use")
-    public String uuid;
+    @Parameter(names = {"--use-mini", "-m"}, description = "Start an Accumulo MiniCluster")
+    public boolean useMiniCluster = false;
     
+    @Parameter(names = {"--use-real", "-r"}, description = "Connecto to a live Accumulo instance")
+    public boolean useRealInstance = false;
+    
+    @Parameter(names = {"--loaddata", "-l"}, description = "Load some data into the Accumulo instance")
+    public boolean loadData = false;
+    
+    @Parameter(names = {"--help", "-h"}, description = "Prints a help message", help = true)
+    public boolean help = false;
+    
+    public CosmosConsoleOptions() {}
+  }
+  
+  public static class AccumuloInstanceOptions {
     @Parameter(names = {"--zookeepers", "-z"}, description = "CSV of zookeepers to use")
     public String zookeepers;
     
@@ -69,7 +79,8 @@ public class CosmosConsole {
     @Parameter(names = {"--password", "-p"}, description = "Accumulo user password")
     public String password;
     
-    public CosmosConsoleOptions() {} 
+    @Parameter(names = {"--id", "-s"}, description = "The UUID of the SortableResult to use")
+    public String uuid;
   }
   
   protected Cosmos cosmos;
@@ -100,7 +111,7 @@ public class CosmosConsole {
       // Check for, and create if necessary, the directory for cosmos to use
       File historyDir = new File(homeDir, ".cosmos");
       if (!historyDir.exists() && !historyDir.mkdirs()) {
-        log.warn("Could not create directory for history at {}", historyDir);
+        log.warn("Could not create directory for history at {}, using temporary history.", historyDir);
       }
       
       // Get a file for jline history
@@ -115,6 +126,7 @@ public class CosmosConsole {
   public void startRepl() {
     ConsoleReader reader = null;
     History history = null;
+    final TableOutputFormat tableOutput = new TableOutputFormat();
     
     try {
       reader = new ConsoleReader();
@@ -145,51 +157,10 @@ public class CosmosConsole {
         try {
           statement = connection.createStatement();
           
+          Stopwatch timer = new Stopwatch();
+          timer.start();
           final ResultSet resultSet = statement.executeQuery(line);
-          final ResultSetMetaData metadata = resultSet.getMetaData();
-          final int columnCount = metadata.getColumnCount();
-          
-          TreeSet<String> columns = Sets.newTreeSet();
-          StringBuilder header = new StringBuilder(256);
-          final String separator = "\t";
-          final String newline = "\n";
-          
-          for (int i = 1; i <= columnCount; i++) {
-            String columnName = metadata.getColumnName(i);
-            columns.add(columnName);
-            header.append(columnName);
-            if (i < columnCount) {
-              header.append(separator);
-            }
-          }
-          
-          final StringBuilder body = new StringBuilder(256);
-          while (resultSet.next()) {
-            for (String column : columns) {
-              List<Entry<Column,SValue>> sValues = (List<Entry<Column,SValue>>) resultSet.getObject(column);
-              
-              if (null != sValues && !sValues.isEmpty()) {
-                for (Entry<Column,SValue> values : sValues) {
-                  body.append(values.getValue().toString());
-                }
-              } else {
-                body.append(" ");
-              }
-              
-              body.append(separator);
-            }
-            
-            // If we inserted anything, remove the last separator
-            if (body.length() > 0) {
-              body.setLength(body.length() - separator.length());
-            }
-            
-            body.append(newline);
-          }
-          
-          // Print out the header and then the body (we already have an extra newline on the body)
-          sysout.println(header);
-          sysout.print(body);
+          tableOutput.print(resultSet, timer);
           
         } catch (SQLException e) {
           log.error("SQLException", e);
@@ -237,32 +208,25 @@ public class CosmosConsole {
       throw new RuntimeException("driver not found", e);
     }
     
-    try { 
+    try {
       CosmosConsoleOptions consoleOptions = new CosmosConsoleOptions();
-      new JCommander(consoleOptions, args);
+      AccumuloInstanceOptions accumuloOptions = new AccumuloInstanceOptions();
+      new JCommander(new Object[] {consoleOptions, accumuloOptions}, args);
       
       Store id = null;
       Connector connector = null;
       
       Authorizations auths = new Authorizations("en");
       
-      if (null == consoleOptions.uuid) {
+      if (consoleOptions.useMiniCluster) {
         log.info("Starting Accumulo MiniCluster");
         
         MiniAccumuloConfig macConf = new MiniAccumuloConfig(tmp, passwd);
-        macConf.setNumTservers(1);
+        macConf.setNumTservers(2);
         
         mac = new MiniAccumuloCluster(macConf);
         
         mac.start();
-        
-        log.info("Loading wiki data");
-        
-        // Pre-load jaxb
-        CosmosIntegrationSetup.initializeJaxb();
-        
-        MediaWikiType wiki1 = CosmosIntegrationSetup.getWiki1();
-        List<QueryResult<?>> results1 = CosmosIntegrationSetup.wikiToMultimap(wiki1);
         
         cosmos = new CosmosImpl(mac.getZooKeepers());
         
@@ -271,33 +235,57 @@ public class CosmosConsole {
         
         // Set this since we know we need it for the wiki test data
         connector.securityOperations().changeUserAuthorizations("root", auths);
-        
-        id = new Store(connector, connector.securityOperations().getUserAuthorizations("root"), CosmosIntegrationSetup.ALL_INDEXES);
-        
-        cosmos.register(id);
-        cosmos.addResults(id, results1);
-        cosmos.finalize(id);
-        
-        log.info("Loaded wiki data with an id of {}", id.uuid());
-      } else {
-        if (null == consoleOptions.instanceName || null == consoleOptions.zookeepers || null == consoleOptions.username || null == consoleOptions.password) {
+      } else if (consoleOptions.useRealInstance) {
+        if (null == accumuloOptions.instanceName || null == accumuloOptions.zookeepers || null == accumuloOptions.username || null == accumuloOptions.password) {
           log.error("If an ID for preloaded data is provided, connection information must also be provided");
           System.exit(1);
           return;
         }
         
-        ZooKeeperInstance instance = new ZooKeeperInstance(consoleOptions.instanceName, consoleOptions.zookeepers);
-        connector = instance.getConnector(consoleOptions.username, new PasswordToken(consoleOptions.password));
+        ZooKeeperInstance instance = new ZooKeeperInstance(accumuloOptions.instanceName, accumuloOptions.zookeepers);
+        connector = instance.getConnector(accumuloOptions.username, new PasswordToken(accumuloOptions.password));
         
-        cosmos = new CosmosImpl(consoleOptions.zookeepers);
+        cosmos = new CosmosImpl(accumuloOptions.zookeepers);
+      } else {
+        log.error("You must choose to use either an Accumulo minicluster or a real Accumulo instance");
+        System.exit(1);
+      }
+      
+      if (consoleOptions.loadData) {
+        log.info("Loading wiki data");
         
-        id = Store.create(connector, connector.securityOperations().getUserAuthorizations("root"), consoleOptions.uuid, CosmosIntegrationSetup.ALL_INDEXES);
-        log.info("Using pre-loaded data in {}", consoleOptions.uuid);
+        // Pre-load jaxb
+        CosmosIntegrationSetup.initializeJaxb();
+        
+        // Load all of the wikis.. they're not *that* big
+        List<QueryResult<?>> inputData = Lists.newArrayListWithExpectedSize(200000);
+        for (MediaWikiType wiki : Lists.newArrayList(CosmosIntegrationSetup.getWiki1(), CosmosIntegrationSetup.getWiki2(), CosmosIntegrationSetup.getWiki3(),
+            CosmosIntegrationSetup.getWiki4(), CosmosIntegrationSetup.getWiki5())) {
+          inputData.addAll(CosmosIntegrationSetup.wikiToMultimap(wiki));
+        }
+        
+        id = new Store(connector, connector.securityOperations().getUserAuthorizations("root"), CosmosIntegrationSetup.ALL_INDEXES);
+        
+        // Override the default BatchWriterConfig (50M memory buffer)
+        // BatchWriterConfig bwConfig = new BatchWriterConfig();
+        // bwConfig.setMaxMemory(1024 * 1024 * 100);
+        // id.setWriterConfig(bwConfig);
+        
+        log.info("Sending data through Cosmos");
+        
+        cosmos.register(id);
+        cosmos.addResults(id, inputData);
+        cosmos.finalize(id);
+        
+        log.info("Loaded wiki data with an id of {}", id.uuid());
+        
+        // Serialize this Store so we can reconstitute it again later
+        PersistedStores.store(id);
       }
       
       cosmosSql = new CosmosSql(cosmos, connector, Defaults.METADATA_TABLE, auths);
       
-      CosmosDriver driver = new CosmosDriver(cosmosSql, "cosmos");
+      CosmosDriver driver = new CosmosDriver(cosmosSql, "cosmos", connector, auths, Defaults.METADATA_TABLE);
       
       Connection connection = DriverManager.getConnection(CosmosDriver.jdbcConnectionString(driver) + "//localhost", new Properties());
       

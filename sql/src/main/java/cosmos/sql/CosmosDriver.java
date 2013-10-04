@@ -30,6 +30,10 @@ import net.hydromatic.optiq.jdbc.CosmosConnection;
 import net.hydromatic.optiq.jdbc.OptiqConnection;
 import net.hydromatic.optiq.jdbc.OptiqStatement;
 import net.hydromatic.optiq.jdbc.UnregisteredDriver;
+
+import org.apache.accumulo.core.client.Connector;
+import org.apache.accumulo.core.security.Authorizations;
+
 import cosmos.sql.impl.CosmosSql;
 import cosmos.sql.impl.CosmosTable;
 
@@ -45,15 +49,23 @@ public class CosmosDriver extends UnregisteredDriver {
   private TableSchema<CosmosSql> schema;
   
   protected String jdbcConnector = null;
+  protected Connector connector = null;
+  protected Authorizations auths = null;
+  protected String metadataTable = null;
   
   protected CosmosDriver(String connectorName) {
     super();
     jdbcConnector = connectorName;
   }
   
-  public CosmosDriver(SchemaDefiner<?> definer, String connectorPrefix) {
+  public CosmosDriver(SchemaDefiner<?> definer, String connectorPrefix, Connector connector, Authorizations auths, String metadataTable) {
     this(connectorPrefix);
     this.definer = definer;
+    
+    this.connector = connector;
+    this.auths = auths;
+    this.metadataTable = metadataTable;
+    
     register();
   }
   
@@ -89,7 +101,7 @@ public class CosmosDriver extends UnregisteredDriver {
     try {
     	
       schema = new TableSchema<CosmosSql>(rootSchema, COSMOS, rootSchema.getSubSchemaExpression(COSMOS, TableSchema.class),
-          (CosmosSql) definer, CosmosTable.class);
+          (CosmosSql) definer, CosmosTable.class, connector, auths, metadataTable);
       
       schema.initialize();
       rootSchema.addSchema(COSMOS, schema);

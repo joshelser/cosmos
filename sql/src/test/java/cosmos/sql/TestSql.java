@@ -131,7 +131,7 @@ public class TestSql {
   @BeforeClass
   public static void setup() throws Exception {
     macConfig = new MiniAccumuloConfig(tmp, "root");
-    macConfig.setNumTservers(1);
+    macConfig.setNumTservers(2);
     
     mac = new MiniAccumuloCluster(macConfig);
     
@@ -153,7 +153,7 @@ public class TestSql {
     
     cosmosSql = new CosmosSql(impl, connector, Defaults.METADATA_TABLE, auths);
     
-    new CosmosDriver(cosmosSql, "cosmos");
+    new CosmosDriver(cosmosSql, "cosmos", connector, auths, Defaults.METADATA_TABLE);
     
   }
   
@@ -310,8 +310,8 @@ public class TestSql {
       info.put("password", PASSWORD);
       connection = DriverManager.getConnection("jdbc:accumulo:cosmos//localhost", info);
       statement = connection.createStatement();
-      final ResultSet resultSet = statement
-          .executeQuery("select \"PAGE_ID\" from \"" + CosmosDriver.COSMOS + "\".\"" + meataData.uuid() + "\"  where PAGE_ID='9' or REVISION_ID='8'");
+      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"" + CosmosDriver.COSMOS + "\".\"" + meataData.uuid()
+          + "\"  where PAGE_ID='9' or REVISION_ID='8'");
       final ResultSetMetaData metaData = resultSet.getMetaData();
       final int columnCount = metaData.getColumnCount();
       
@@ -389,7 +389,8 @@ public class TestSql {
       info.put("password", PASSWORD);
       connection = DriverManager.getConnection("jdbc:accumulo:cosmos//localhost", info);
       statement = connection.createStatement();
-      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"" + CosmosDriver.COSMOS + "\".\"" + meataData.uuid() + "\"  limit 2 OFFSET 0");
+      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"" + CosmosDriver.COSMOS + "\".\"" + meataData.uuid()
+          + "\"  limit 2 OFFSET 0");
       final ResultSetMetaData metaData = resultSet.getMetaData();
       final int columnCount = metaData.getColumnCount();
       
@@ -427,7 +428,8 @@ public class TestSql {
       info.put("password", PASSWORD);
       connection = DriverManager.getConnection("jdbc:accumulo:cosmos//localhost", info);
       statement = connection.createStatement();
-      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"" + CosmosDriver.COSMOS + "\".\"" + meataData.uuid() + "\"  limit 2 OFFSET 0");
+      final ResultSet resultSet = statement.executeQuery("select \"PAGE_ID\" from \"" + CosmosDriver.COSMOS + "\".\"" + meataData.uuid()
+          + "\"  limit 2 OFFSET 0");
       final ResultSetMetaData metaData = resultSet.getMetaData();
       final int columnCount = metaData.getColumnCount();
       
@@ -453,6 +455,7 @@ public class TestSql {
     }
   }
   
+
   @Test
   public void testListTables() throws SQLException {
     loadDriverClass();
@@ -517,7 +520,6 @@ public class TestSql {
       while (resultSet.next()) {
         assertEquals(metaData.getColumnName(1), "PAGE_ID");
         Object value = resultSet.getObject("PAGE_ID");
-        
         
       }
       

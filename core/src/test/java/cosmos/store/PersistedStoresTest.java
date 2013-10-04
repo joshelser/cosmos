@@ -1,6 +1,7 @@
 package cosmos.store;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -16,14 +17,20 @@ import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.client.admin.InstanceOperations;
 import org.apache.accumulo.core.client.admin.SecurityOperations;
 import org.apache.accumulo.core.client.admin.TableOperations;
+import org.apache.accumulo.core.client.mock.MockInstance;
+import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.Authorizations;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
+import cosmos.options.Defaults;
 import cosmos.options.Index;
+import cosmos.results.CloseableIterable;
 import cosmos.util.AscendingIndexIdentitySet;
 import cosmos.util.DescendingIndexIdentitySet;
 import cosmos.util.IdentitySet;
@@ -101,16 +108,24 @@ public class PersistedStoresTest {
     
   }
   
-  private DummyConnector connector = new DummyConnector();
+  private final DummyConnector dummyConnector = new DummyConnector();
+  protected Connector mockConnector;
+  
+  @Before
+  public void setupMockAccumulo() throws Exception {
+    MockInstance instance = new MockInstance();
+    mockConnector = instance.getConnector("foo", new PasswordToken("password"));
+    mockConnector.tableOperations().create(Defaults.METADATA_TABLE);
+  }
   
   @Test
   public void storeEqualityTest() throws Exception {
     Authorizations auths = new Authorizations();
     IdentitySet<Index> index = IdentitySet.<Index> create();
-    Store a = Store.create(connector, auths, index);
+    Store a = Store.create(dummyConnector, auths, index);
     
     Value v = PersistedStores.serialize(a);
-    Store b = PersistedStores.deserialize(connector, v);
+    Store b = PersistedStores.deserialize(dummyConnector, v);
     
     Assert.assertEquals(a, b);
   }
@@ -119,8 +134,8 @@ public class PersistedStoresTest {
   public void storeInequalityTest() throws Exception {
     Authorizations auths = new Authorizations();
     IdentitySet<Index> index = IdentitySet.<Index> create();
-    Store a = Store.create(connector, auths, "barfoo", index);
-    Store b = Store.create(connector, auths, "foobar", index);
+    Store a = Store.create(dummyConnector, auths, "barfoo", index);
+    Store b = Store.create(dummyConnector, auths, "foobar", index);
     
     Assert.assertNotEquals(a, b);
   }
@@ -133,10 +148,10 @@ public class PersistedStoresTest {
     Authorizations auths = new Authorizations();
     
     for (Set<Index> index : indexes) {
-      Store a = Store.create(connector, auths, index);
+      Store a = Store.create(dummyConnector, auths, index);
 
       Value v = PersistedStores.serialize(a);
-      Store b = PersistedStores.deserialize(connector, v);
+      Store b = PersistedStores.deserialize(dummyConnector, v);
 
       Assert.assertEquals("Stores were not equal after serialization when using " + index.getClass(), a, b);
     }
@@ -146,29 +161,29 @@ public class PersistedStoresTest {
   public void storeNonSerializedMembersTest() throws Exception {
     Authorizations auths = new Authorizations("a");
     IdentitySet<Index> index = IdentitySet.<Index> create();
-    Store a = Store.create(connector, auths, index);
+    Store a = Store.create(dummyConnector, auths, index);
     
     Value v = PersistedStores.serialize(a);
-    Store b = PersistedStores.deserialize(connector, v);
+    Store b = PersistedStores.deserialize(dummyConnector, v);
     
     // Test that we properly recreate the members that we didn't actually serialize
     // into the Accumulo Value
     Assert.assertEquals(a.tracer().getUUID(), b.tracer().getUUID());
-    Assert.assertEquals(connector, b.connector());
+    Assert.assertEquals(dummyConnector, b.connector());
   }
   
   @Test
   public void storeEqualityWithAuthsTest() throws Exception {
     Authorizations auths = new Authorizations("a");
     IdentitySet<Index> index = IdentitySet.<Index> create();
-    Store a = Store.create(connector, auths, index);
+    Store a = Store.create(dummyConnector, auths, index);
     
     Value v = PersistedStores.serialize(a);
-    Store b = PersistedStores.deserialize(connector, v);
+    Store b = PersistedStores.deserialize(dummyConnector, v);
     
     Assert.assertEquals(a, b);
     
-    Store c = Store.create(connector, new Authorizations("b"), a.uuid(), index);
+    Store c = Store.create(dummyConnector, new Authorizations("b"), a.uuid(), index);
     
     Assert.assertNotEquals(a, c);
     Assert.assertNotEquals(b, c);
@@ -178,16 +193,16 @@ public class PersistedStoresTest {
   public void storeEqualityWithIndexesTest() throws Exception {
     Authorizations auths = new Authorizations();
     Set<Index> index = Sets.newHashSet(Index.define("FOO"));
-    Store a = Store.create(connector, auths, index);
+    Store a = Store.create(dummyConnector, auths, index);
     
     Value v = PersistedStores.serialize(a);
-    Store b = PersistedStores.deserialize(connector, v);
+    Store b = PersistedStores.deserialize(dummyConnector, v);
     
     Assert.assertEquals(a, b);
     
     Set<Index> index2 = Sets.newHashSet(Index.define("FOO"));
     
-    Store c = Store.create(connector, auths, a.uuid(), index2);
+    Store c = Store.create(dummyConnector, auths, a.uuid(), index2);
     
     Assert.assertEquals(a, c);
     Assert.assertEquals(b, c);
@@ -197,31 +212,61 @@ public class PersistedStoresTest {
   public void storeEqualityWithIdentityIndexesTest() throws Exception {
     Authorizations auths = new Authorizations();
     IdentitySet<Index> index = IdentitySet.<Index> create();
-    Store a = Store.create(connector, auths, index);
+    Store a = Store.create(dummyConnector, auths, index);
     
     Value v = PersistedStores.serialize(a);
-    Store b = PersistedStores.deserialize(connector, v);
+    Store b = PersistedStores.deserialize(dummyConnector, v);
     
     Assert.assertEquals(a, b);
     
     IdentitySet<Index> index2 = IdentitySet.<Index> create();
     
-    Store c = Store.create(connector, auths, a.uuid(), index2);
+    Store c = Store.create(dummyConnector, auths, a.uuid(), index2);
     
     Assert.assertEquals(a, c);
     Assert.assertEquals(b, c);
     
-    Store d = Store.create(connector, auths, a.uuid(), AscendingIndexIdentitySet.create());
+    Store d = Store.create(dummyConnector, auths, a.uuid(), AscendingIndexIdentitySet.create());
     
     Assert.assertNotEquals(a, d);
     
-    Store e = Store.create(connector, auths, a.uuid(), DescendingIndexIdentitySet.create());
+    Store e = Store.create(dummyConnector, auths, a.uuid(), DescendingIndexIdentitySet.create());
     
     Assert.assertNotEquals(a, e);
     
-    Store f = Store.create(connector, auths, a.uuid(), Sets.<Index> newHashSet());
+    Store f = Store.create(dummyConnector, auths, a.uuid(), Sets.<Index> newHashSet());
     
     Assert.assertNotEquals(a, f);
+  }
+  
+  @Test
+  public void testEmptyListOfStores() throws Exception {
+    Authorizations auths = new Authorizations();
+    CloseableIterable<Store> storesIter = PersistedStores.list(mockConnector, auths, Defaults.METADATA_TABLE);
+    Assert.assertEquals(0, Iterables.size(storesIter));
+  }
+  
+  @Test
+  public void testNonEmptyListOfStores() throws Exception {
+    Authorizations auths = new Authorizations();
+    
+    Store s1 = Store.create(mockConnector, auths, Collections.<Index> emptySet());
+    Store s2 = Store.create(mockConnector, auths, Collections.<Index> emptySet());
+    Store s3 = Store.create(mockConnector, auths, Collections.<Index> emptySet());
+    
+    CloseableIterable<Store> storesIter = PersistedStores.list(mockConnector, auths, Defaults.METADATA_TABLE);
+    Assert.assertEquals(0, Iterables.size(storesIter));
+    
+    PersistedStores.store(s1);
+
+    storesIter = PersistedStores.list(mockConnector, auths, Defaults.METADATA_TABLE);
+    Assert.assertEquals(1, Iterables.size(storesIter));
+    
+    PersistedStores.store(s2);
+    PersistedStores.store(s3);
+
+    storesIter = PersistedStores.list(mockConnector, auths, Defaults.METADATA_TABLE);
+    Assert.assertEquals(3, Iterables.size(storesIter));
   }
   
 }

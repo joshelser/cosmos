@@ -5,9 +5,16 @@
     <artifactId>cosmos-project</artifactId>
     <version>0.3.0-SNAPSHOT</version>
   </parent>
-  <artifactId>cosmos-sql-repl</artifactId>
-  <name>SQL REPL</name>
-    <dependencies>
+  <artifactId>cosmos-sql-console</artifactId>
+  <name>SQL Console</name>
+  <!-- Some "reasonable" defaults" -->
+  <properties>
+	<zookeepers>localhost:2181</zookeepers>
+	<instanceName>accumulo</instanceName>
+	<username>root</username>
+	<password>password</password>
+  </properties>
+  <dependencies>
     <dependency>
       <groupId>cosmos</groupId>
       <artifactId>cosmos-core</artifactId>
@@ -75,7 +82,10 @@
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
-      <version>2.11.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.beust</groupId>
+      <artifactId>jcommander</artifactId>
     </dependency>
   </dependencies>
   <profiles>
@@ -91,7 +101,9 @@
               <arguments>
                 <argument>-classpath</argument>
                 <classpath></classpath>
-                <argument>cosmos.sql.repl.CosmosConsole</argument>
+                <argument>cosmos.sql.console.CosmosConsole</argument>
+				<argument>-m</argument>
+				<argument>-l</argument>
               </arguments>
             </configuration>
           </plugin>
@@ -110,7 +122,7 @@
               <arguments>
                 <argument>-classpath</argument>
                 <classpath></classpath>
-                <argument>cosmos.sql.repl.CosmosConsole</argument>
+                <argument>cosmos.sql.console.CosmosConsole</argument>
                 <argument>-z</argument>
                 <argument>${zookeepers}</argument>
                 <argument>-i</argument>
@@ -119,20 +131,41 @@
                 <argument>${username}</argument>
                 <argument>-p</argument>
                 <argument>${password}</argument>
-                <argument>-s</argument>
-                <argument>${sortable_result_id}</argument>
+                <argument>-r</argument>
               </arguments>
             </configuration>
           </plugin>
         </plugins>
       </build>
-      <!-- Some "reasonable" defaults" -->
-      <properties>
-        <zookeepers>localhost:2181</zookeepers>
-        <instanceName>accumulo</instanceName>
-        <username>root</username>
-        <password>password</password>
-      </properties>
+    </profile>
+    <profile>
+      <id>shell-load-data</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <configuration>
+              <executable>java</executable>
+              <arguments>
+                <argument>-classpath</argument>
+                <classpath></classpath>
+                <argument>cosmos.sql.console.CosmosConsole</argument>
+                <argument>-z</argument>
+                <argument>${zookeepers}</argument>
+                <argument>-i</argument>
+                <argument>${instanceName}</argument>
+                <argument>-u</argument>
+                <argument>${username}</argument>
+                <argument>-p</argument>
+                <argument>${password}</argument>
+                <argument>-r</argument>
+                <argument>-l</argument>
+              </arguments>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>

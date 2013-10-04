@@ -72,7 +72,7 @@ public class CosmosIntegrationTest extends CosmosIntegrationSetup {
     macDir.deleteOnExit();
     
     MiniAccumuloConfig config = new MiniAccumuloConfig(macDir, "");
-    config.setNumTservers(4);
+    config.setNumTservers(2);
     
     mac = new MiniAccumuloCluster(config);
     mac.start();

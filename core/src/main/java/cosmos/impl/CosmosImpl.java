@@ -34,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.accumulo.core.client.BatchDeleter;
 import org.apache.accumulo.core.client.BatchScanner;
 import org.apache.accumulo.core.client.BatchWriter;
-import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.IteratorSetting;
 import org.apache.accumulo.core.client.MutationsRejectedException;
 import org.apache.accumulo.core.client.Scanner;
@@ -86,7 +85,6 @@ public class CosmosImpl implements Cosmos{
   
   public static final long LOCK_SECS = 10;
   
-  private final BatchWriterConfig DEFAULT_BW_CONFIG = new BatchWriterConfig();
   private final CuratorFramework curator;
   private final ReverseLexicoder<String> revLex = new ReverseLexicoder<String>(new StringLexicoder());
   
@@ -228,8 +226,8 @@ public class CosmosImpl implements Cosmos{
       // Add the values of columns to the sortableresult as we want
       Set<Index> columnsToIndex = id.columnsToIndex();
       
-      bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
-      metadataBw = id.connector().createBatchWriter(id.metadataTable(), DEFAULT_BW_CONFIG);
+      bw = id.connector().createBatchWriter(id.dataTable(), id.writerConfig());
+      metadataBw = id.connector().createBatchWriter(id.metadataTable(), id.writerConfig());
       
       final IndexHelper indexHelper = IndexHelper.create(columnsToIndex);
       final Text holder = new Text();
@@ -377,7 +375,7 @@ public class CosmosImpl implements Cosmos{
       // Get the results we have to update
       results = fetch(id);
       
-      bw = id.connector().createBatchWriter(id.dataTable(), DEFAULT_BW_CONFIG);
+      bw = id.connector().createBatchWriter(id.dataTable(), id.writerConfig());
       
       // Iterate over the results we have
       for (MultimapQueryResult result : results) {
@@ -485,12 +483,10 @@ public class CosmosImpl implements Cosmos{
       State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-        sw.stop();
-        id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
-      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), id.readThreads());
       bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
       bs.fetchColumnFamily(Defaults.DOCID_FIELD_NAME_TEXT);
       
@@ -538,13 +534,10 @@ public class CosmosImpl implements Cosmos{
       State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-        sw.stop();
-        id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
-        
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
-      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), id.readThreads());
       bs.setRanges(Collections.singleton(Range.exact(id.uuid() + Defaults.NULL_BYTE_STR + value)));
       bs.fetchColumnFamily(new Text(column.name()));
       
@@ -602,7 +595,6 @@ public class CosmosImpl implements Cosmos{
       State s = PersistedStores.getState(id);
       
       if (!State.LOADING.equals(s) && !State.LOADED.equals(s)) {
-        sw.stop();
         throw unexpectedState(id, new State[] {State.LOADING, State.LOADED}, s);
       }
       
@@ -610,9 +602,6 @@ public class CosmosImpl implements Cosmos{
       
       if (!id.columnsToIndex().contains(ordering)) {
         log.error("{} is not indexed by {}", ordering, id);
-        
-        sw.stop();
-        id.tracer().addTiming(description, sw.elapsed(TimeUnit.MILLISECONDS));
         
         throw new UnindexedColumnException();
       }
@@ -683,7 +672,7 @@ public class CosmosImpl implements Cosmos{
       
       Text colf = new Text(column.name());
       
-      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), 10);
+      BatchScanner bs = id.connector().createBatchScanner(id.dataTable(), id.auths(), id.readThreads());
       bs.setRanges(Collections.singleton(Range.prefix(id.uuid())));
       bs.fetchColumnFamily(colf);
       
@@ -778,7 +767,7 @@ public class CosmosImpl implements Cosmos{
       // Delete of the Keys
       BatchDeleter bd = null;
       try {
-        bd = id.connector().createBatchDeleter(id.dataTable(), id.auths(), 4, new BatchWriterConfig());
+        bd = id.connector().createBatchDeleter(id.dataTable(), id.auths(), id.readThreads(), id.writerConfig());
         bd.setRanges(Collections.singleton(Range.prefix(id.uuid())));
         
         bd.delete();
