@@ -11,22 +11,38 @@ tokens
 {
 }
 
-@header 
-{
+@parser::members{
+	@Override
+	protected Object recoverFromMismatchedToken(IntStream intput, int ttype,BitSet follow) throws RecognitionException{
+		throw new MismatchedTokenException(ttype, input);
+	}
+
+	@Override
+	public Object recoverFromMismatchedSet(IntStream intput, RecognitionException e, BitSet follow) throws RecognitionException{
+		throw e;
+	}
 }
 
-@members 
-{
-
+@rulecatch {
+	catch(RecognitionException e){
+	throw e;
+	}
 }
 
 @lexer::header 
 {
 }
 
-@lexer::members 
-{
+@lexer::members{
+	@Override
+	public void reportError(RecognitionException e)
+	{
+		throw new RuntimeException(e);
+	}
 }
+
+
+
 
 fragment A_ :	'a' | 'A';
 fragment B_ :	'b' | 'B';
@@ -147,5 +163,5 @@ cosmos_specific:
 	supported_statements
 ;
 
-
 Space :  ' ' {skip();};
+

@@ -1,7 +1,6 @@
-// $ANTLR 3.5.1 CosmosSQL.g 2013-10-04 21:11:15
+// $ANTLR 3.5.1 CosmosSQL.g 2013-10-04 21:59:59
 
 package cosmos.sql.parser;
-
 import org.antlr.runtime.*;
 import java.util.Stack;
 import java.util.List;
@@ -118,7 +117,15 @@ public class CosmosSQLParser extends Parser {
 	@Override public String getGrammarFileName() { return "CosmosSQL.g"; }
 
 
+		@Override
+		protected Object recoverFromMismatchedToken(IntStream intput, int ttype,BitSet follow) throws RecognitionException{
+			throw new MismatchedTokenException(ttype, input);
+		}
 
+		@Override
+		public Object recoverFromMismatchedSet(IntStream intput, RecognitionException e, BitSet follow) throws RecognitionException{
+			throw e;
+		}
 
 
 	public static class show_tables_return extends ParserRuleReturnScope {
@@ -129,7 +136,7 @@ public class CosmosSQLParser extends Parser {
 
 
 	// $ANTLR start "show_tables"
-	// CosmosSQL.g:138:1: show_tables : SHOW TABLES ;
+	// CosmosSQL.g:154:1: show_tables : SHOW TABLES ;
 	public final CosmosSQLParser.show_tables_return show_tables() throws RecognitionException {
 		CosmosSQLParser.show_tables_return retval = new CosmosSQLParser.show_tables_return();
 		retval.start = input.LT(1);
@@ -143,17 +150,17 @@ public class CosmosSQLParser extends Parser {
 		Object TABLES2_tree=null;
 
 		try {
-			// CosmosSQL.g:138:12: ( SHOW TABLES )
-			// CosmosSQL.g:139:2: SHOW TABLES
+			// CosmosSQL.g:154:12: ( SHOW TABLES )
+			// CosmosSQL.g:155:2: SHOW TABLES
 			{
 			root_0 = (Object)adaptor.nil();
 
 
-			SHOW1=(Token)match(input,SHOW,FOLLOW_SHOW_in_show_tables1147); 
+			SHOW1=(Token)match(input,SHOW,FOLLOW_SHOW_in_show_tables1148); 
 			SHOW1_tree = (Object)adaptor.create(SHOW1);
 			adaptor.addChild(root_0, SHOW1_tree);
 
-			TABLES2=(Token)match(input,TABLES,FOLLOW_TABLES_in_show_tables1149); 
+			TABLES2=(Token)match(input,TABLES,FOLLOW_TABLES_in_show_tables1150); 
 			TABLES2_tree = (Object)adaptor.create(TABLES2);
 			adaptor.addChild(root_0, TABLES2_tree);
 
@@ -165,11 +172,11 @@ public class CosmosSQLParser extends Parser {
 			adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
 
 		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-			retval.tree = (Object)adaptor.errorNode(input, retval.start, input.LT(-1), re);
-		}
+
+			catch(RecognitionException e){
+			throw e;
+			}
+
 		finally {
 			// do for sure before leaving
 		}
@@ -186,7 +193,7 @@ public class CosmosSQLParser extends Parser {
 
 
 	// $ANTLR start "supported_statements"
-	// CosmosSQL.g:142:1: supported_statements : show_tables ;
+	// CosmosSQL.g:158:1: supported_statements : show_tables ;
 	public final CosmosSQLParser.supported_statements_return supported_statements() throws RecognitionException {
 		CosmosSQLParser.supported_statements_return retval = new CosmosSQLParser.supported_statements_return();
 		retval.start = input.LT(1);
@@ -197,13 +204,13 @@ public class CosmosSQLParser extends Parser {
 
 
 		try {
-			// CosmosSQL.g:142:21: ( show_tables )
-			// CosmosSQL.g:143:2: show_tables
+			// CosmosSQL.g:158:21: ( show_tables )
+			// CosmosSQL.g:159:2: show_tables
 			{
 			root_0 = (Object)adaptor.nil();
 
 
-			pushFollow(FOLLOW_show_tables_in_supported_statements1158);
+			pushFollow(FOLLOW_show_tables_in_supported_statements1159);
 			show_tables3=show_tables();
 			state._fsp--;
 
@@ -217,11 +224,11 @@ public class CosmosSQLParser extends Parser {
 			adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
 
 		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-			retval.tree = (Object)adaptor.errorNode(input, retval.start, input.LT(-1), re);
-		}
+
+			catch(RecognitionException e){
+			throw e;
+			}
+
 		finally {
 			// do for sure before leaving
 		}
@@ -238,7 +245,7 @@ public class CosmosSQLParser extends Parser {
 
 
 	// $ANTLR start "cosmos_specific"
-	// CosmosSQL.g:146:1: cosmos_specific : supported_statements ;
+	// CosmosSQL.g:162:1: cosmos_specific : supported_statements ;
 	public final CosmosSQLParser.cosmos_specific_return cosmos_specific() throws RecognitionException {
 		CosmosSQLParser.cosmos_specific_return retval = new CosmosSQLParser.cosmos_specific_return();
 		retval.start = input.LT(1);
@@ -249,13 +256,13 @@ public class CosmosSQLParser extends Parser {
 
 
 		try {
-			// CosmosSQL.g:146:16: ( supported_statements )
-			// CosmosSQL.g:147:2: supported_statements
+			// CosmosSQL.g:162:16: ( supported_statements )
+			// CosmosSQL.g:163:2: supported_statements
 			{
 			root_0 = (Object)adaptor.nil();
 
 
-			pushFollow(FOLLOW_supported_statements_in_cosmos_specific1167);
+			pushFollow(FOLLOW_supported_statements_in_cosmos_specific1168);
 			supported_statements4=supported_statements();
 			state._fsp--;
 
@@ -269,11 +276,11 @@ public class CosmosSQLParser extends Parser {
 			adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
 
 		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-			retval.tree = (Object)adaptor.errorNode(input, retval.start, input.LT(-1), re);
-		}
+
+			catch(RecognitionException e){
+			throw e;
+			}
+
 		finally {
 			// do for sure before leaving
 		}
@@ -285,8 +292,8 @@ public class CosmosSQLParser extends Parser {
 
 
 
-	public static final BitSet FOLLOW_SHOW_in_show_tables1147 = new BitSet(new long[]{0x1000000000000000L});
-	public static final BitSet FOLLOW_TABLES_in_show_tables1149 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_show_tables_in_supported_statements1158 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_supported_statements_in_cosmos_specific1167 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_SHOW_in_show_tables1148 = new BitSet(new long[]{0x1000000000000000L});
+	public static final BitSet FOLLOW_TABLES_in_show_tables1150 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_show_tables_in_supported_statements1159 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_supported_statements_in_cosmos_specific1168 = new BitSet(new long[]{0x0000000000000002L});
 }

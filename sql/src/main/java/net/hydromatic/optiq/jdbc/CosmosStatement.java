@@ -27,13 +27,14 @@ import java.sql.Statement;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.MismatchedTokenException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 
 import cosmos.sql.parser.CosmosResultSet;
 import cosmos.sql.parser.CosmosSQLLexer;
 import cosmos.sql.parser.CosmosSQLParser;
-import cosmos.sql.rules.ResultSetRule;
+import cosmos.sql.rules.ResultSetNode;
 
 /**
  * @author phrocker
@@ -188,27 +189,35 @@ public class CosmosStatement implements Statement {
     CosmosSQLParser parser = new CosmosSQLParser(tokens);
 
     try {
-
-      if (parser.failed())
-        return parent.executeQuery(sql);
+      
+            
       CosmosSQLParser.cosmos_specific_return r = parser.cosmos_specific();
 
+      
       CommonTree tree = (CommonTree) r.getTree();
 
       CommonTreeNodeStream nodes = new CommonTreeNodeStream(tree);
 
       CosmosResultSet walker = new CosmosResultSet(nodes);
 
-      ResultSetRule rule = walker.cosmos_specific();
+      
+      ResultSetNode rule = walker.cosmos_specific();
+      
+      
 
       return rule.execute(parent, parent.getConnection().getRootSchema());
 
+    
+    } catch (MismatchedTokenException e) {
+
+      return parent.executeQuery(sql);
+    
     } catch (Exception e) {
 
-      e.printStackTrace();
+      throw new SQLException(e);
     }
 
-    return parent.executeQuery(sql);
+    
   }
 
   /*

@@ -1,6 +1,7 @@
-// $ANTLR 3.5.1 CosmosSQL.g 2013-10-04 21:11:15
+// $ANTLR 3.5.1 CosmosSQL.g 2013-10-04 21:59:08
 
 package cosmos.sql.parser;
+
 
 import org.antlr.runtime.*;
 import java.util.Stack;
@@ -77,6 +78,11 @@ public class CosmosSQLLexer extends Lexer {
 	public static final int Y_=68;
 	public static final int Z_=69;
 
+		@Override
+		public void reportError(RecognitionException e)
+		{
+			throw new RuntimeException(e);
+		}
 
 
 	// delegates
@@ -97,7 +103,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "A_"
 	public final void mA_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:31:13: ( 'a' | 'A' )
+			// CosmosSQL.g:47:13: ( 'a' | 'A' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
@@ -120,7 +126,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "B_"
 	public final void mB_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:32:13: ( 'b' | 'B' )
+			// CosmosSQL.g:48:13: ( 'b' | 'B' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
@@ -143,7 +149,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "C_"
 	public final void mC_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:33:13: ( 'c' | 'C' )
+			// CosmosSQL.g:49:13: ( 'c' | 'C' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='C'||input.LA(1)=='c' ) {
@@ -166,7 +172,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "D_"
 	public final void mD_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:34:13: ( 'd' | 'D' )
+			// CosmosSQL.g:50:13: ( 'd' | 'D' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='D'||input.LA(1)=='d' ) {
@@ -189,7 +195,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "E_"
 	public final void mE_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:35:13: ( 'e' | 'E' )
+			// CosmosSQL.g:51:13: ( 'e' | 'E' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
@@ -212,7 +218,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "F_"
 	public final void mF_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:36:13: ( 'f' | 'F' )
+			// CosmosSQL.g:52:13: ( 'f' | 'F' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
@@ -235,7 +241,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "G_"
 	public final void mG_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:37:13: ( 'g' | 'G' )
+			// CosmosSQL.g:53:13: ( 'g' | 'G' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='G'||input.LA(1)=='g' ) {
@@ -258,7 +264,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "H_"
 	public final void mH_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:38:13: ( 'h' | 'H' )
+			// CosmosSQL.g:54:13: ( 'h' | 'H' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='H'||input.LA(1)=='h' ) {
@@ -281,7 +287,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "I_"
 	public final void mI_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:39:13: ( 'i' | 'I' )
+			// CosmosSQL.g:55:13: ( 'i' | 'I' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
@@ -304,7 +310,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "J_"
 	public final void mJ_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:40:13: ( 'j' | 'J' )
+			// CosmosSQL.g:56:13: ( 'j' | 'J' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='J'||input.LA(1)=='j' ) {
@@ -327,7 +333,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "K_"
 	public final void mK_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:41:13: ( 'k' | 'K' )
+			// CosmosSQL.g:57:13: ( 'k' | 'K' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='K'||input.LA(1)=='k' ) {
@@ -350,7 +356,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "L_"
 	public final void mL_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:42:13: ( 'l' | 'L' )
+			// CosmosSQL.g:58:13: ( 'l' | 'L' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
@@ -373,7 +379,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "M_"
 	public final void mM_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:43:13: ( 'm' | 'M' )
+			// CosmosSQL.g:59:13: ( 'm' | 'M' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
@@ -396,7 +402,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "N_"
 	public final void mN_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:44:13: ( 'n' | 'N' )
+			// CosmosSQL.g:60:13: ( 'n' | 'N' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
@@ -419,7 +425,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "O_"
 	public final void mO_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:45:13: ( 'o' | 'O' )
+			// CosmosSQL.g:61:13: ( 'o' | 'O' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
@@ -442,7 +448,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "P_"
 	public final void mP_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:46:13: ( 'p' | 'P' )
+			// CosmosSQL.g:62:13: ( 'p' | 'P' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
@@ -465,7 +471,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "Q_"
 	public final void mQ_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:47:13: ( 'q' | 'Q' )
+			// CosmosSQL.g:63:13: ( 'q' | 'Q' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='Q'||input.LA(1)=='q' ) {
@@ -488,7 +494,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "R_"
 	public final void mR_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:48:13: ( 'r' | 'R' )
+			// CosmosSQL.g:64:13: ( 'r' | 'R' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
@@ -511,7 +517,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "S_"
 	public final void mS_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:49:13: ( 's' | 'S' )
+			// CosmosSQL.g:65:13: ( 's' | 'S' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
@@ -534,7 +540,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "T_"
 	public final void mT_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:50:13: ( 't' | 'T' )
+			// CosmosSQL.g:66:13: ( 't' | 'T' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
@@ -557,7 +563,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "U_"
 	public final void mU_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:51:13: ( 'u' | 'U' )
+			// CosmosSQL.g:67:13: ( 'u' | 'U' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
@@ -580,7 +586,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "V_"
 	public final void mV_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:52:13: ( 'v' | 'V' )
+			// CosmosSQL.g:68:13: ( 'v' | 'V' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='V'||input.LA(1)=='v' ) {
@@ -603,7 +609,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "W_"
 	public final void mW_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:53:13: ( 'w' | 'W' )
+			// CosmosSQL.g:69:13: ( 'w' | 'W' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='W'||input.LA(1)=='w' ) {
@@ -626,7 +632,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "X_"
 	public final void mX_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:54:13: ( 'x' | 'X' )
+			// CosmosSQL.g:70:13: ( 'x' | 'X' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='X'||input.LA(1)=='x' ) {
@@ -649,7 +655,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "Y_"
 	public final void mY_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:55:13: ( 'y' | 'Y' )
+			// CosmosSQL.g:71:13: ( 'y' | 'Y' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='Y'||input.LA(1)=='y' ) {
@@ -672,7 +678,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "Z_"
 	public final void mZ_() throws RecognitionException {
 		try {
-			// CosmosSQL.g:56:13: ( 'z' | 'Z' )
+			// CosmosSQL.g:72:13: ( 'z' | 'Z' )
 			// CosmosSQL.g:
 			{
 			if ( input.LA(1)=='Z'||input.LA(1)=='z' ) {
@@ -697,8 +703,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = SHOW;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:61:9: ( S_ H_ O_ W_ )
-			// CosmosSQL.g:61:11: S_ H_ O_ W_
+			// CosmosSQL.g:77:9: ( S_ H_ O_ W_ )
+			// CosmosSQL.g:77:11: S_ H_ O_ W_
 			{
 			mS_(); 
 
@@ -724,8 +730,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = TABLES;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:62:11: ( T_ A_ B_ L_ E_ S_ )
-			// CosmosSQL.g:62:13: T_ A_ B_ L_ E_ S_
+			// CosmosSQL.g:78:11: ( T_ A_ B_ L_ E_ S_ )
+			// CosmosSQL.g:78:13: T_ A_ B_ L_ E_ S_
 			{
 			mT_(); 
 
@@ -755,7 +761,7 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = DIVIDE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:70:8: ( ( D_ I_ V_ ) | '/' )
+			// CosmosSQL.g:86:8: ( ( D_ I_ V_ ) | '/' )
 			int alt1=2;
 			int LA1_0 = input.LA(1);
 			if ( (LA1_0=='D'||LA1_0=='d') ) {
@@ -773,10 +779,10 @@ public class CosmosSQLLexer extends Lexer {
 
 			switch (alt1) {
 				case 1 :
-					// CosmosSQL.g:70:10: ( D_ I_ V_ )
+					// CosmosSQL.g:86:10: ( D_ I_ V_ )
 					{
-					// CosmosSQL.g:70:10: ( D_ I_ V_ )
-					// CosmosSQL.g:70:13: D_ I_ V_
+					// CosmosSQL.g:86:10: ( D_ I_ V_ )
+					// CosmosSQL.g:86:13: D_ I_ V_
 					{
 					mD_(); 
 
@@ -789,7 +795,7 @@ public class CosmosSQLLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// CosmosSQL.g:70:26: '/'
+					// CosmosSQL.g:86:26: '/'
 					{
 					match('/'); 
 					}
@@ -810,7 +816,7 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = MOD_SYM;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:71:9: ( ( M_ O_ D_ ) | '%' )
+			// CosmosSQL.g:87:9: ( ( M_ O_ D_ ) | '%' )
 			int alt2=2;
 			int LA2_0 = input.LA(1);
 			if ( (LA2_0=='M'||LA2_0=='m') ) {
@@ -828,10 +834,10 @@ public class CosmosSQLLexer extends Lexer {
 
 			switch (alt2) {
 				case 1 :
-					// CosmosSQL.g:71:11: ( M_ O_ D_ )
+					// CosmosSQL.g:87:11: ( M_ O_ D_ )
 					{
-					// CosmosSQL.g:71:11: ( M_ O_ D_ )
-					// CosmosSQL.g:71:14: M_ O_ D_
+					// CosmosSQL.g:87:11: ( M_ O_ D_ )
+					// CosmosSQL.g:87:14: M_ O_ D_
 					{
 					mM_(); 
 
@@ -844,7 +850,7 @@ public class CosmosSQLLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// CosmosSQL.g:71:27: '%'
+					// CosmosSQL.g:87:27: '%'
 					{
 					match('%'); 
 					}
@@ -865,7 +871,7 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = OR_SYM;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:72:8: ( ( O_ R_ ) | '||' )
+			// CosmosSQL.g:88:8: ( ( O_ R_ ) | '||' )
 			int alt3=2;
 			int LA3_0 = input.LA(1);
 			if ( (LA3_0=='O'||LA3_0=='o') ) {
@@ -883,10 +889,10 @@ public class CosmosSQLLexer extends Lexer {
 
 			switch (alt3) {
 				case 1 :
-					// CosmosSQL.g:72:10: ( O_ R_ )
+					// CosmosSQL.g:88:10: ( O_ R_ )
 					{
-					// CosmosSQL.g:72:10: ( O_ R_ )
-					// CosmosSQL.g:72:13: O_ R_
+					// CosmosSQL.g:88:10: ( O_ R_ )
+					// CosmosSQL.g:88:13: O_ R_
 					{
 					mO_(); 
 
@@ -897,7 +903,7 @@ public class CosmosSQLLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// CosmosSQL.g:72:23: '||'
+					// CosmosSQL.g:88:23: '||'
 					{
 					match("||"); 
 
@@ -919,7 +925,7 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = AND_SYM;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:73:9: ( ( A_ N_ D_ ) | '&&' )
+			// CosmosSQL.g:89:9: ( ( A_ N_ D_ ) | '&&' )
 			int alt4=2;
 			int LA4_0 = input.LA(1);
 			if ( (LA4_0=='A'||LA4_0=='a') ) {
@@ -937,10 +943,10 @@ public class CosmosSQLLexer extends Lexer {
 
 			switch (alt4) {
 				case 1 :
-					// CosmosSQL.g:73:11: ( A_ N_ D_ )
+					// CosmosSQL.g:89:11: ( A_ N_ D_ )
 					{
-					// CosmosSQL.g:73:11: ( A_ N_ D_ )
-					// CosmosSQL.g:73:14: A_ N_ D_
+					// CosmosSQL.g:89:11: ( A_ N_ D_ )
+					// CosmosSQL.g:89:14: A_ N_ D_
 					{
 					mA_(); 
 
@@ -953,7 +959,7 @@ public class CosmosSQLLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// CosmosSQL.g:73:27: '&&'
+					// CosmosSQL.g:89:27: '&&'
 					{
 					match("&&"); 
 
@@ -975,8 +981,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = ARROW;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:75:7: ( '=>' )
-			// CosmosSQL.g:75:9: '=>'
+			// CosmosSQL.g:91:7: ( '=>' )
+			// CosmosSQL.g:91:9: '=>'
 			{
 			match("=>"); 
 
@@ -996,7 +1002,7 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = EQ_SYM;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:76:8: ( '=' | '<=>' )
+			// CosmosSQL.g:92:8: ( '=' | '<=>' )
 			int alt5=2;
 			int LA5_0 = input.LA(1);
 			if ( (LA5_0=='=') ) {
@@ -1014,13 +1020,13 @@ public class CosmosSQLLexer extends Lexer {
 
 			switch (alt5) {
 				case 1 :
-					// CosmosSQL.g:76:10: '='
+					// CosmosSQL.g:92:10: '='
 					{
 					match('='); 
 					}
 					break;
 				case 2 :
-					// CosmosSQL.g:76:16: '<=>'
+					// CosmosSQL.g:92:16: '<=>'
 					{
 					match("<=>"); 
 
@@ -1042,7 +1048,7 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = NOT_EQ;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:77:8: ( '<>' | '!=' | '~=' | '^=' )
+			// CosmosSQL.g:93:8: ( '<>' | '!=' | '~=' | '^=' )
 			int alt6=4;
 			switch ( input.LA(1) ) {
 			case '<':
@@ -1072,28 +1078,28 @@ public class CosmosSQLLexer extends Lexer {
 			}
 			switch (alt6) {
 				case 1 :
-					// CosmosSQL.g:77:10: '<>'
+					// CosmosSQL.g:93:10: '<>'
 					{
 					match("<>"); 
 
 					}
 					break;
 				case 2 :
-					// CosmosSQL.g:77:17: '!='
+					// CosmosSQL.g:93:17: '!='
 					{
 					match("!="); 
 
 					}
 					break;
 				case 3 :
-					// CosmosSQL.g:77:24: '~='
+					// CosmosSQL.g:93:24: '~='
 					{
 					match("~="); 
 
 					}
 					break;
 				case 4 :
-					// CosmosSQL.g:77:30: '^='
+					// CosmosSQL.g:93:30: '^='
 					{
 					match("^="); 
 
@@ -1115,8 +1121,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = LET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:78:5: ( '<=' )
-			// CosmosSQL.g:78:7: '<='
+			// CosmosSQL.g:94:5: ( '<=' )
+			// CosmosSQL.g:94:7: '<='
 			{
 			match("<="); 
 
@@ -1136,8 +1142,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = GET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:79:5: ( '>=' )
-			// CosmosSQL.g:79:7: '>='
+			// CosmosSQL.g:95:5: ( '>=' )
+			// CosmosSQL.g:95:7: '>='
 			{
 			match(">="); 
 
@@ -1157,8 +1163,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = SET_VAR;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:80:9: ( ':=' )
-			// CosmosSQL.g:80:11: ':='
+			// CosmosSQL.g:96:9: ( ':=' )
+			// CosmosSQL.g:96:11: ':='
 			{
 			match(":="); 
 
@@ -1178,8 +1184,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = SHIFT_LEFT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:81:12: ( '<<' )
-			// CosmosSQL.g:81:14: '<<'
+			// CosmosSQL.g:97:12: ( '<<' )
+			// CosmosSQL.g:97:14: '<<'
 			{
 			match("<<"); 
 
@@ -1199,8 +1205,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = SHIFT_RIGHT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:82:13: ( '>>' )
-			// CosmosSQL.g:82:15: '>>'
+			// CosmosSQL.g:98:13: ( '>>' )
+			// CosmosSQL.g:98:15: '>>'
 			{
 			match(">>"); 
 
@@ -1220,8 +1226,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = ALL_FIELDS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:83:12: ( '.*' )
-			// CosmosSQL.g:83:14: '.*'
+			// CosmosSQL.g:99:12: ( '.*' )
+			// CosmosSQL.g:99:14: '.*'
 			{
 			match(".*"); 
 
@@ -1241,8 +1247,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = SEMI;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:85:6: ( ';' )
-			// CosmosSQL.g:85:8: ';'
+			// CosmosSQL.g:101:6: ( ';' )
+			// CosmosSQL.g:101:8: ';'
 			{
 			match(';'); 
 			}
@@ -1261,8 +1267,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = COLON;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:86:7: ( ':' )
-			// CosmosSQL.g:86:9: ':'
+			// CosmosSQL.g:102:7: ( ':' )
+			// CosmosSQL.g:102:9: ':'
 			{
 			match(':'); 
 			}
@@ -1281,8 +1287,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = DOT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:87:5: ( '.' )
-			// CosmosSQL.g:87:7: '.'
+			// CosmosSQL.g:103:5: ( '.' )
+			// CosmosSQL.g:103:7: '.'
 			{
 			match('.'); 
 			}
@@ -1301,8 +1307,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = COMMA;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:88:7: ( ',' )
-			// CosmosSQL.g:88:9: ','
+			// CosmosSQL.g:104:7: ( ',' )
+			// CosmosSQL.g:104:9: ','
 			{
 			match(','); 
 			}
@@ -1321,8 +1327,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = ASTERISK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:89:9: ( '*' )
-			// CosmosSQL.g:89:11: '*'
+			// CosmosSQL.g:105:9: ( '*' )
+			// CosmosSQL.g:105:11: '*'
 			{
 			match('*'); 
 			}
@@ -1341,8 +1347,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = RPAREN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:90:8: ( ')' )
-			// CosmosSQL.g:90:10: ')'
+			// CosmosSQL.g:106:8: ( ')' )
+			// CosmosSQL.g:106:10: ')'
 			{
 			match(')'); 
 			}
@@ -1361,8 +1367,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = LPAREN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:91:8: ( '(' )
-			// CosmosSQL.g:91:10: '('
+			// CosmosSQL.g:107:8: ( '(' )
+			// CosmosSQL.g:107:10: '('
 			{
 			match('('); 
 			}
@@ -1381,8 +1387,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = RBRACK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:92:8: ( ']' )
-			// CosmosSQL.g:92:10: ']'
+			// CosmosSQL.g:108:8: ( ']' )
+			// CosmosSQL.g:108:10: ']'
 			{
 			match(']'); 
 			}
@@ -1401,8 +1407,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = LBRACK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:93:8: ( '[' )
-			// CosmosSQL.g:93:10: '['
+			// CosmosSQL.g:109:8: ( '[' )
+			// CosmosSQL.g:109:10: '['
 			{
 			match('['); 
 			}
@@ -1421,8 +1427,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = PLUS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:94:6: ( '+' )
-			// CosmosSQL.g:94:8: '+'
+			// CosmosSQL.g:110:6: ( '+' )
+			// CosmosSQL.g:110:8: '+'
 			{
 			match('+'); 
 			}
@@ -1441,8 +1447,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = MINUS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:95:7: ( '-' )
-			// CosmosSQL.g:95:9: '-'
+			// CosmosSQL.g:111:7: ( '-' )
+			// CosmosSQL.g:111:9: '-'
 			{
 			match('-'); 
 			}
@@ -1461,8 +1467,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = NEGATION;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:96:9: ( '~' )
-			// CosmosSQL.g:96:11: '~'
+			// CosmosSQL.g:112:9: ( '~' )
+			// CosmosSQL.g:112:11: '~'
 			{
 			match('~'); 
 			}
@@ -1481,8 +1487,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = VERTBAR;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:97:9: ( '|' )
-			// CosmosSQL.g:97:11: '|'
+			// CosmosSQL.g:113:9: ( '|' )
+			// CosmosSQL.g:113:11: '|'
 			{
 			match('|'); 
 			}
@@ -1501,8 +1507,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = BITAND;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:98:8: ( '&' )
-			// CosmosSQL.g:98:10: '&'
+			// CosmosSQL.g:114:8: ( '&' )
+			// CosmosSQL.g:114:10: '&'
 			{
 			match('&'); 
 			}
@@ -1521,8 +1527,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = POWER_OP;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:99:9: ( '^' )
-			// CosmosSQL.g:99:11: '^'
+			// CosmosSQL.g:115:9: ( '^' )
+			// CosmosSQL.g:115:11: '^'
 			{
 			match('^'); 
 			}
@@ -1541,8 +1547,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = GTH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:100:5: ( '>' )
-			// CosmosSQL.g:100:7: '>'
+			// CosmosSQL.g:116:5: ( '>' )
+			// CosmosSQL.g:116:7: '>'
 			{
 			match('>'); 
 			}
@@ -1561,8 +1567,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = LTH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:101:5: ( '<' )
-			// CosmosSQL.g:101:7: '<'
+			// CosmosSQL.g:117:5: ( '<' )
+			// CosmosSQL.g:117:7: '<'
 			{
 			match('<'); 
 			}
@@ -1581,10 +1587,10 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = INTEGER_NUM;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:105:14: ( ( '0' .. '9' )+ )
-			// CosmosSQL.g:105:16: ( '0' .. '9' )+
+			// CosmosSQL.g:121:14: ( ( '0' .. '9' )+ )
+			// CosmosSQL.g:121:16: ( '0' .. '9' )+
 			{
-			// CosmosSQL.g:105:16: ( '0' .. '9' )+
+			// CosmosSQL.g:121:16: ( '0' .. '9' )+
 			int cnt7=0;
 			loop7:
 			while (true) {
@@ -1631,7 +1637,7 @@ public class CosmosSQLLexer extends Lexer {
 	// $ANTLR start "HEX_DIGIT_FRAGMENT"
 	public final void mHEX_DIGIT_FRAGMENT() throws RecognitionException {
 		try {
-			// CosmosSQL.g:107:28: ( ( 'a' .. 'f' | 'A' .. 'F' | '0' .. '9' ) )
+			// CosmosSQL.g:123:28: ( ( 'a' .. 'f' | 'A' .. 'F' | '0' .. '9' ) )
 			// CosmosSQL.g:
 			{
 			if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'F')||(input.LA(1) >= 'a' && input.LA(1) <= 'f') ) {
@@ -1656,7 +1662,7 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = HEX_DIGIT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:108:10: ( ( '0x' ( HEX_DIGIT_FRAGMENT )+ ) | ( 'X' '\\'' ( HEX_DIGIT_FRAGMENT )+ '\\'' ) )
+			// CosmosSQL.g:124:10: ( ( '0x' ( HEX_DIGIT_FRAGMENT )+ ) | ( 'X' '\\'' ( HEX_DIGIT_FRAGMENT )+ '\\'' ) )
 			int alt10=2;
 			int LA10_0 = input.LA(1);
 			if ( (LA10_0=='0') ) {
@@ -1674,14 +1680,14 @@ public class CosmosSQLLexer extends Lexer {
 
 			switch (alt10) {
 				case 1 :
-					// CosmosSQL.g:109:2: ( '0x' ( HEX_DIGIT_FRAGMENT )+ )
+					// CosmosSQL.g:125:2: ( '0x' ( HEX_DIGIT_FRAGMENT )+ )
 					{
-					// CosmosSQL.g:109:2: ( '0x' ( HEX_DIGIT_FRAGMENT )+ )
-					// CosmosSQL.g:109:5: '0x' ( HEX_DIGIT_FRAGMENT )+
+					// CosmosSQL.g:125:2: ( '0x' ( HEX_DIGIT_FRAGMENT )+ )
+					// CosmosSQL.g:125:5: '0x' ( HEX_DIGIT_FRAGMENT )+
 					{
 					match("0x"); 
 
-					// CosmosSQL.g:109:14: ( HEX_DIGIT_FRAGMENT )+
+					// CosmosSQL.g:125:14: ( HEX_DIGIT_FRAGMENT )+
 					int cnt8=0;
 					loop8:
 					while (true) {
@@ -1719,14 +1725,14 @@ public class CosmosSQLLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// CosmosSQL.g:111:2: ( 'X' '\\'' ( HEX_DIGIT_FRAGMENT )+ '\\'' )
+					// CosmosSQL.g:127:2: ( 'X' '\\'' ( HEX_DIGIT_FRAGMENT )+ '\\'' )
 					{
-					// CosmosSQL.g:111:2: ( 'X' '\\'' ( HEX_DIGIT_FRAGMENT )+ '\\'' )
-					// CosmosSQL.g:111:5: 'X' '\\'' ( HEX_DIGIT_FRAGMENT )+ '\\''
+					// CosmosSQL.g:127:2: ( 'X' '\\'' ( HEX_DIGIT_FRAGMENT )+ '\\'' )
+					// CosmosSQL.g:127:5: 'X' '\\'' ( HEX_DIGIT_FRAGMENT )+ '\\''
 					{
 					match('X'); 
 					match('\''); 
-					// CosmosSQL.g:111:14: ( HEX_DIGIT_FRAGMENT )+
+					// CosmosSQL.g:127:14: ( HEX_DIGIT_FRAGMENT )+
 					int cnt9=0;
 					loop9:
 					while (true) {
@@ -1780,7 +1786,7 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = BIT_NUM;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:114:8: ( ( '0b' ( '0' | '1' )+ ) | ( B_ '\\'' ( '0' | '1' )+ '\\'' ) )
+			// CosmosSQL.g:130:8: ( ( '0b' ( '0' | '1' )+ ) | ( B_ '\\'' ( '0' | '1' )+ '\\'' ) )
 			int alt13=2;
 			int LA13_0 = input.LA(1);
 			if ( (LA13_0=='0') ) {
@@ -1798,14 +1804,14 @@ public class CosmosSQLLexer extends Lexer {
 
 			switch (alt13) {
 				case 1 :
-					// CosmosSQL.g:115:2: ( '0b' ( '0' | '1' )+ )
+					// CosmosSQL.g:131:2: ( '0b' ( '0' | '1' )+ )
 					{
-					// CosmosSQL.g:115:2: ( '0b' ( '0' | '1' )+ )
-					// CosmosSQL.g:115:5: '0b' ( '0' | '1' )+
+					// CosmosSQL.g:131:2: ( '0b' ( '0' | '1' )+ )
+					// CosmosSQL.g:131:5: '0b' ( '0' | '1' )+
 					{
 					match("0b"); 
 
-					// CosmosSQL.g:115:13: ( '0' | '1' )+
+					// CosmosSQL.g:131:13: ( '0' | '1' )+
 					int cnt11=0;
 					loop11:
 					while (true) {
@@ -1843,15 +1849,15 @@ public class CosmosSQLLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// CosmosSQL.g:117:2: ( B_ '\\'' ( '0' | '1' )+ '\\'' )
+					// CosmosSQL.g:133:2: ( B_ '\\'' ( '0' | '1' )+ '\\'' )
 					{
-					// CosmosSQL.g:117:2: ( B_ '\\'' ( '0' | '1' )+ '\\'' )
-					// CosmosSQL.g:117:5: B_ '\\'' ( '0' | '1' )+ '\\''
+					// CosmosSQL.g:133:2: ( B_ '\\'' ( '0' | '1' )+ '\\'' )
+					// CosmosSQL.g:133:5: B_ '\\'' ( '0' | '1' )+ '\\''
 					{
 					mB_(); 
 
 					match('\''); 
-					// CosmosSQL.g:117:13: ( '0' | '1' )+
+					// CosmosSQL.g:133:13: ( '0' | '1' )+
 					int cnt12=0;
 					loop12:
 					while (true) {
@@ -1905,15 +1911,15 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = REAL_NUMBER;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:120:12: ( ( INTEGER_NUM DOT INTEGER_NUM | INTEGER_NUM DOT | DOT INTEGER_NUM | INTEGER_NUM ) ( ( 'E' | 'e' ) ( PLUS | MINUS )? INTEGER_NUM )? )
-			// CosmosSQL.g:121:2: ( INTEGER_NUM DOT INTEGER_NUM | INTEGER_NUM DOT | DOT INTEGER_NUM | INTEGER_NUM ) ( ( 'E' | 'e' ) ( PLUS | MINUS )? INTEGER_NUM )?
+			// CosmosSQL.g:136:12: ( ( INTEGER_NUM DOT INTEGER_NUM | INTEGER_NUM DOT | DOT INTEGER_NUM | INTEGER_NUM ) ( ( 'E' | 'e' ) ( PLUS | MINUS )? INTEGER_NUM )? )
+			// CosmosSQL.g:137:2: ( INTEGER_NUM DOT INTEGER_NUM | INTEGER_NUM DOT | DOT INTEGER_NUM | INTEGER_NUM ) ( ( 'E' | 'e' ) ( PLUS | MINUS )? INTEGER_NUM )?
 			{
-			// CosmosSQL.g:121:2: ( INTEGER_NUM DOT INTEGER_NUM | INTEGER_NUM DOT | DOT INTEGER_NUM | INTEGER_NUM )
+			// CosmosSQL.g:137:2: ( INTEGER_NUM DOT INTEGER_NUM | INTEGER_NUM DOT | DOT INTEGER_NUM | INTEGER_NUM )
 			int alt14=4;
 			alt14 = dfa14.predict(input);
 			switch (alt14) {
 				case 1 :
-					// CosmosSQL.g:121:5: INTEGER_NUM DOT INTEGER_NUM
+					// CosmosSQL.g:137:5: INTEGER_NUM DOT INTEGER_NUM
 					{
 					mINTEGER_NUM(); 
 
@@ -1924,7 +1930,7 @@ public class CosmosSQLLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// CosmosSQL.g:121:35: INTEGER_NUM DOT
+					// CosmosSQL.g:137:35: INTEGER_NUM DOT
 					{
 					mINTEGER_NUM(); 
 
@@ -1933,7 +1939,7 @@ public class CosmosSQLLexer extends Lexer {
 					}
 					break;
 				case 3 :
-					// CosmosSQL.g:121:53: DOT INTEGER_NUM
+					// CosmosSQL.g:137:53: DOT INTEGER_NUM
 					{
 					mDOT(); 
 
@@ -1942,7 +1948,7 @@ public class CosmosSQLLexer extends Lexer {
 					}
 					break;
 				case 4 :
-					// CosmosSQL.g:121:71: INTEGER_NUM
+					// CosmosSQL.g:137:71: INTEGER_NUM
 					{
 					mINTEGER_NUM(); 
 
@@ -1951,7 +1957,7 @@ public class CosmosSQLLexer extends Lexer {
 
 			}
 
-			// CosmosSQL.g:122:2: ( ( 'E' | 'e' ) ( PLUS | MINUS )? INTEGER_NUM )?
+			// CosmosSQL.g:138:2: ( ( 'E' | 'e' ) ( PLUS | MINUS )? INTEGER_NUM )?
 			int alt16=2;
 			int LA16_0 = input.LA(1);
 			if ( (LA16_0=='E'||LA16_0=='e') ) {
@@ -1959,7 +1965,7 @@ public class CosmosSQLLexer extends Lexer {
 			}
 			switch (alt16) {
 				case 1 :
-					// CosmosSQL.g:122:5: ( 'E' | 'e' ) ( PLUS | MINUS )? INTEGER_NUM
+					// CosmosSQL.g:138:5: ( 'E' | 'e' ) ( PLUS | MINUS )? INTEGER_NUM
 					{
 					if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
 						input.consume();
@@ -1969,7 +1975,7 @@ public class CosmosSQLLexer extends Lexer {
 						recover(mse);
 						throw mse;
 					}
-					// CosmosSQL.g:122:15: ( PLUS | MINUS )?
+					// CosmosSQL.g:138:15: ( PLUS | MINUS )?
 					int alt15=2;
 					int LA15_0 = input.LA(1);
 					if ( (LA15_0=='+'||LA15_0=='-') ) {
@@ -2015,10 +2021,10 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = TEXT_STRING;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:125:12: ( ( N_ | ( '_' U_ T_ F_ '8' ) )? ( ( '\\'' ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )* '\\'' ) | ( '\\\"' ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )* '\\\"' ) ) )
-			// CosmosSQL.g:126:2: ( N_ | ( '_' U_ T_ F_ '8' ) )? ( ( '\\'' ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )* '\\'' ) | ( '\\\"' ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )* '\\\"' ) )
+			// CosmosSQL.g:141:12: ( ( N_ | ( '_' U_ T_ F_ '8' ) )? ( ( '\\'' ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )* '\\'' ) | ( '\\\"' ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )* '\\\"' ) ) )
+			// CosmosSQL.g:142:2: ( N_ | ( '_' U_ T_ F_ '8' ) )? ( ( '\\'' ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )* '\\'' ) | ( '\\\"' ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )* '\\\"' ) )
 			{
-			// CosmosSQL.g:126:2: ( N_ | ( '_' U_ T_ F_ '8' ) )?
+			// CosmosSQL.g:142:2: ( N_ | ( '_' U_ T_ F_ '8' ) )?
 			int alt17=3;
 			int LA17_0 = input.LA(1);
 			if ( (LA17_0=='N'||LA17_0=='n') ) {
@@ -2029,17 +2035,17 @@ public class CosmosSQLLexer extends Lexer {
 			}
 			switch (alt17) {
 				case 1 :
-					// CosmosSQL.g:126:4: N_
+					// CosmosSQL.g:142:4: N_
 					{
 					mN_(); 
 
 					}
 					break;
 				case 2 :
-					// CosmosSQL.g:126:9: ( '_' U_ T_ F_ '8' )
+					// CosmosSQL.g:142:9: ( '_' U_ T_ F_ '8' )
 					{
-					// CosmosSQL.g:126:9: ( '_' U_ T_ F_ '8' )
-					// CosmosSQL.g:126:10: '_' U_ T_ F_ '8'
+					// CosmosSQL.g:142:9: ( '_' U_ T_ F_ '8' )
+					// CosmosSQL.g:142:10: '_' U_ T_ F_ '8'
 					{
 					match('_'); 
 					mU_(); 
@@ -2056,7 +2062,7 @@ public class CosmosSQLLexer extends Lexer {
 
 			}
 
-			// CosmosSQL.g:127:2: ( ( '\\'' ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )* '\\'' ) | ( '\\\"' ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )* '\\\"' ) )
+			// CosmosSQL.g:143:2: ( ( '\\'' ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )* '\\'' ) | ( '\\\"' ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )* '\\\"' ) )
 			int alt20=2;
 			int LA20_0 = input.LA(1);
 			if ( (LA20_0=='\'') ) {
@@ -2074,23 +2080,23 @@ public class CosmosSQLLexer extends Lexer {
 
 			switch (alt20) {
 				case 1 :
-					// CosmosSQL.g:128:3: ( '\\'' ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )* '\\'' )
+					// CosmosSQL.g:144:3: ( '\\'' ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )* '\\'' )
 					{
-					// CosmosSQL.g:128:3: ( '\\'' ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )* '\\'' )
-					// CosmosSQL.g:128:6: '\\'' ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )* '\\''
+					// CosmosSQL.g:144:3: ( '\\'' ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )* '\\'' )
+					// CosmosSQL.g:144:6: '\\'' ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )* '\\''
 					{
 					match('\''); 
-					// CosmosSQL.g:128:11: ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )*
+					// CosmosSQL.g:144:11: ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )*
 					loop18:
 					while (true) {
 						int alt18=5;
 						alt18 = dfa18.predict(input);
 						switch (alt18) {
 						case 1 :
-							// CosmosSQL.g:128:13: ( '\\\\' '\\\\' )
+							// CosmosSQL.g:144:13: ( '\\\\' '\\\\' )
 							{
-							// CosmosSQL.g:128:13: ( '\\\\' '\\\\' )
-							// CosmosSQL.g:128:14: '\\\\' '\\\\'
+							// CosmosSQL.g:144:13: ( '\\\\' '\\\\' )
+							// CosmosSQL.g:144:14: '\\\\' '\\\\'
 							{
 							match('\\'); 
 							match('\\'); 
@@ -2099,10 +2105,10 @@ public class CosmosSQLLexer extends Lexer {
 							}
 							break;
 						case 2 :
-							// CosmosSQL.g:128:27: ( '\\'' '\\'' )
+							// CosmosSQL.g:144:27: ( '\\'' '\\'' )
 							{
-							// CosmosSQL.g:128:27: ( '\\'' '\\'' )
-							// CosmosSQL.g:128:28: '\\'' '\\''
+							// CosmosSQL.g:144:27: ( '\\'' '\\'' )
+							// CosmosSQL.g:144:28: '\\'' '\\''
 							{
 							match('\''); 
 							match('\''); 
@@ -2111,10 +2117,10 @@ public class CosmosSQLLexer extends Lexer {
 							}
 							break;
 						case 3 :
-							// CosmosSQL.g:128:41: ( '\\\\' '\\'' )
+							// CosmosSQL.g:144:41: ( '\\\\' '\\'' )
 							{
-							// CosmosSQL.g:128:41: ( '\\\\' '\\'' )
-							// CosmosSQL.g:128:42: '\\\\' '\\''
+							// CosmosSQL.g:144:41: ( '\\\\' '\\'' )
+							// CosmosSQL.g:144:42: '\\\\' '\\''
 							{
 							match('\\'); 
 							match('\''); 
@@ -2123,7 +2129,7 @@ public class CosmosSQLLexer extends Lexer {
 							}
 							break;
 						case 4 :
-							// CosmosSQL.g:128:55: ~ ( '\\'' )
+							// CosmosSQL.g:144:55: ~ ( '\\'' )
 							{
 							if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '&')||(input.LA(1) >= '(' && input.LA(1) <= '\uFFFF') ) {
 								input.consume();
@@ -2147,23 +2153,23 @@ public class CosmosSQLLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// CosmosSQL.g:130:3: ( '\\\"' ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )* '\\\"' )
+					// CosmosSQL.g:146:3: ( '\\\"' ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )* '\\\"' )
 					{
-					// CosmosSQL.g:130:3: ( '\\\"' ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )* '\\\"' )
-					// CosmosSQL.g:130:6: '\\\"' ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )* '\\\"'
+					// CosmosSQL.g:146:3: ( '\\\"' ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )* '\\\"' )
+					// CosmosSQL.g:146:6: '\\\"' ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )* '\\\"'
 					{
 					match('\"'); 
-					// CosmosSQL.g:130:11: ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )*
+					// CosmosSQL.g:146:11: ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )*
 					loop19:
 					while (true) {
 						int alt19=5;
 						alt19 = dfa19.predict(input);
 						switch (alt19) {
 						case 1 :
-							// CosmosSQL.g:130:13: ( '\\\\' '\\\\' )
+							// CosmosSQL.g:146:13: ( '\\\\' '\\\\' )
 							{
-							// CosmosSQL.g:130:13: ( '\\\\' '\\\\' )
-							// CosmosSQL.g:130:14: '\\\\' '\\\\'
+							// CosmosSQL.g:146:13: ( '\\\\' '\\\\' )
+							// CosmosSQL.g:146:14: '\\\\' '\\\\'
 							{
 							match('\\'); 
 							match('\\'); 
@@ -2172,10 +2178,10 @@ public class CosmosSQLLexer extends Lexer {
 							}
 							break;
 						case 2 :
-							// CosmosSQL.g:130:27: ( '\\\"' '\\\"' )
+							// CosmosSQL.g:146:27: ( '\\\"' '\\\"' )
 							{
-							// CosmosSQL.g:130:27: ( '\\\"' '\\\"' )
-							// CosmosSQL.g:130:28: '\\\"' '\\\"'
+							// CosmosSQL.g:146:27: ( '\\\"' '\\\"' )
+							// CosmosSQL.g:146:28: '\\\"' '\\\"'
 							{
 							match('\"'); 
 							match('\"'); 
@@ -2184,10 +2190,10 @@ public class CosmosSQLLexer extends Lexer {
 							}
 							break;
 						case 3 :
-							// CosmosSQL.g:130:41: ( '\\\\' '\\\"' )
+							// CosmosSQL.g:146:41: ( '\\\\' '\\\"' )
 							{
-							// CosmosSQL.g:130:41: ( '\\\\' '\\\"' )
-							// CosmosSQL.g:130:42: '\\\\' '\\\"'
+							// CosmosSQL.g:146:41: ( '\\\\' '\\\"' )
+							// CosmosSQL.g:146:42: '\\\\' '\\\"'
 							{
 							match('\\'); 
 							match('\"'); 
@@ -2196,7 +2202,7 @@ public class CosmosSQLLexer extends Lexer {
 							}
 							break;
 						case 4 :
-							// CosmosSQL.g:130:55: ~ ( '\\\"' )
+							// CosmosSQL.g:146:55: ~ ( '\\\"' )
 							{
 							if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '\uFFFF') ) {
 								input.consume();
@@ -2238,8 +2244,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = ID;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:134:3: ( ( 'A' .. 'Z' | 'a' .. 'z' | '_' | '$' ) ( 'A' .. 'Z' | 'a' .. 'z' | '_' | '$' | '0' .. '9' )* )
-			// CosmosSQL.g:135:2: ( 'A' .. 'Z' | 'a' .. 'z' | '_' | '$' ) ( 'A' .. 'Z' | 'a' .. 'z' | '_' | '$' | '0' .. '9' )*
+			// CosmosSQL.g:150:3: ( ( 'A' .. 'Z' | 'a' .. 'z' | '_' | '$' ) ( 'A' .. 'Z' | 'a' .. 'z' | '_' | '$' | '0' .. '9' )* )
+			// CosmosSQL.g:151:2: ( 'A' .. 'Z' | 'a' .. 'z' | '_' | '$' ) ( 'A' .. 'Z' | 'a' .. 'z' | '_' | '$' | '0' .. '9' )*
 			{
 			if ( input.LA(1)=='$'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
 				input.consume();
@@ -2249,7 +2255,7 @@ public class CosmosSQLLexer extends Lexer {
 				recover(mse);
 				throw mse;
 			}
-			// CosmosSQL.g:135:37: ( 'A' .. 'Z' | 'a' .. 'z' | '_' | '$' | '0' .. '9' )*
+			// CosmosSQL.g:151:37: ( 'A' .. 'Z' | 'a' .. 'z' | '_' | '$' | '0' .. '9' )*
 			loop21:
 			while (true) {
 				int alt21=2;
@@ -2294,8 +2300,8 @@ public class CosmosSQLLexer extends Lexer {
 		try {
 			int _type = Space;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// CosmosSQL.g:151:7: ( ' ' )
-			// CosmosSQL.g:151:10: ' '
+			// CosmosSQL.g:166:7: ( ' ' )
+			// CosmosSQL.g:166:10: ' '
 			{
 			match(' '); 
 			skip();
@@ -2651,7 +2657,7 @@ public class CosmosSQLLexer extends Lexer {
 		}
 		@Override
 		public String getDescription() {
-			return "121:2: ( INTEGER_NUM DOT INTEGER_NUM | INTEGER_NUM DOT | DOT INTEGER_NUM | INTEGER_NUM )";
+			return "137:2: ( INTEGER_NUM DOT INTEGER_NUM | INTEGER_NUM DOT | DOT INTEGER_NUM | INTEGER_NUM )";
 		}
 	}
 
@@ -2712,7 +2718,7 @@ public class CosmosSQLLexer extends Lexer {
 		}
 		@Override
 		public String getDescription() {
-			return "()* loopback of 128:11: ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )*";
+			return "()* loopback of 144:11: ( ( '\\\\' '\\\\' ) | ( '\\'' '\\'' ) | ( '\\\\' '\\'' ) |~ ( '\\'' ) )*";
 		}
 		@Override
 		public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
@@ -2828,7 +2834,7 @@ public class CosmosSQLLexer extends Lexer {
 		}
 		@Override
 		public String getDescription() {
-			return "()* loopback of 130:11: ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )*";
+			return "()* loopback of 146:11: ( ( '\\\\' '\\\\' ) | ( '\\\"' '\\\"' ) | ( '\\\\' '\\\"' ) |~ ( '\\\"' ) )*";
 		}
 		@Override
 		public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {

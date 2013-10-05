@@ -1,17 +1,16 @@
 // $ANTLR 3.5.1 CosmosResultSet.g 2013-10-04 21:12:39
 
 package cosmos.sql.parser;
+
 import net.hydromatic.optiq.jdbc.ShowTableExp;
 
-import org.antlr.runtime.*;
-import org.antlr.runtime.tree.*;
+import org.antlr.runtime.BitSet;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.RecognizerSharedState;
+import org.antlr.runtime.tree.TreeNodeStream;
+import org.antlr.runtime.tree.TreeParser;
 
-import cosmos.sql.rules.ResultSetRule;
-
-
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
+import cosmos.sql.rules.ResultSetNode;
 
 @SuppressWarnings("all")
 public class CosmosResultSet extends TreeParser {
@@ -116,11 +115,11 @@ public class CosmosResultSet extends TreeParser {
 
 	// $ANTLR start "cosmos_specific"
 	// CosmosResultSet.g:9:1: cosmos_specific returns [ResultSetNode e] : supported_statements ;
-	public final ResultSetRule cosmos_specific() throws RecognitionException {
-		ResultSetRule e = null;
+	public final ResultSetNode cosmos_specific() throws RecognitionException {
+		ResultSetNode e = null;
 
 
-		ResultSetRule supported_statements1 =null;
+		ResultSetNode supported_statements1 =null;
 
 		try {
 			// CosmosResultSet.g:10:4: ( supported_statements )
@@ -173,8 +172,8 @@ public class CosmosResultSet extends TreeParser {
 
 	// $ANTLR start "supported_statements"
 	// CosmosResultSet.g:18:1: supported_statements returns [ResultSetNode e] : show_tables ;
-	public final ResultSetRule supported_statements() throws RecognitionException {
-		ResultSetRule e = null;
+	public final ResultSetNode supported_statements() throws RecognitionException {
+		ResultSetNode e = null;
 
 
 		try {

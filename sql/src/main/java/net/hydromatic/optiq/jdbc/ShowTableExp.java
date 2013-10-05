@@ -19,9 +19,9 @@ import net.hydromatic.optiq.runtime.Cursor.Accessor;
 
 import com.google.common.collect.Lists;
 
-import cosmos.sql.rules.ResultSetRule;
+import cosmos.sql.rules.ResultSetNode;
 
-public class ShowTableExp implements ResultSetRule {
+public class ShowTableExp implements ResultSetNode {
 
   @Override
   public ResultSet execute(Statement statement, Schema parentSchema) {
