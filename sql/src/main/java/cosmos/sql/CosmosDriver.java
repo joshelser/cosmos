@@ -24,6 +24,9 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import net.hydromatic.optiq.MutableSchema;
+import net.hydromatic.optiq.Schema.TableInSchema;
+import net.hydromatic.optiq.Schema.TableType;
+import net.hydromatic.optiq.impl.TableInSchemaImpl;
 import net.hydromatic.optiq.jdbc.DriverVersion;
 
 import net.hydromatic.optiq.jdbc.CosmosConnection;
@@ -36,6 +39,7 @@ import org.apache.accumulo.core.security.Authorizations;
 
 import cosmos.sql.impl.CosmosSql;
 import cosmos.sql.impl.CosmosTable;
+import cosmos.sql.impl.MetadataTable;
 
 /**
  * JDBC Driver.
@@ -102,8 +106,11 @@ public class CosmosDriver extends UnregisteredDriver {
     	
       schema = new TableSchema<CosmosSql>(rootSchema, COSMOS, rootSchema.getSubSchemaExpression(COSMOS, TableSchema.class),
           (CosmosSql) definer, CosmosTable.class, connector, auths, metadataTable);
-      
+            
       schema.initialize();
+      
+      
+      
       rootSchema.addSchema(COSMOS, schema);
       
      

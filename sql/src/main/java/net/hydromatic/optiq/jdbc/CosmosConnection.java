@@ -44,7 +44,6 @@ import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 import net.hydromatic.optiq.jdbc.OptiqConnection;
 
 /**
- * @author phrocker
  *
  */
 public class CosmosConnection implements OptiqConnection {

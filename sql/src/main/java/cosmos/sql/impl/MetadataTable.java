@@ -17,25 +17,36 @@
  *  Copyright 2013 
  *
  */
-package cosmos.sql.rules;
+package cosmos.sql.impl;
 
-import org.eigenbase.rel.FilterRel;
+import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 
+import org.eigenbase.reltype.RelDataType;
+
+import cosmos.sql.TableSchema;
 import cosmos.sql.DataTable;
-import cosmos.sql.TableScanner;
+import cosmos.sql.SchemaDefiner;
 
 /**
- * Initially the rule were separate; however, since they can be handled in a single class we simply use this class to push the rules down the optimizer
+ * Cosmos table representation.
  * 
  * 
  */
-public class FilterRule extends PushDownRule {
+public class MetadataTable extends DataTable<Object[]> {
   
-  DataTable<?> accumuloAccessor;
+ 
   
-  public FilterRule(DataTable<?> resultTable) {
-    super(resultTable, some(FilterRel.class, any(TableScanner.class)), "FilterShmilter");
-    this.accumuloAccessor = resultTable;
+  public MetadataTable(TableSchema<? extends SchemaDefiner<?>> meataSchema, SchemaDefiner<?> metadata, JavaTypeFactory typeFactory, RelDataType rowType,
+      String table) {
+    
+    super(meataSchema, table, typeFactory);
+    
+    super.table = table;
+    
+    super.rowType = rowType;
+    
   }
+  
+  
   
 }

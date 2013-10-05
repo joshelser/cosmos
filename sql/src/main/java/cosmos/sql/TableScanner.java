@@ -37,7 +37,7 @@ import cosmos.sql.call.Fields;
 import cosmos.sql.enumerable.EnumerableExpression;
 import cosmos.sql.enumerable.FieldPacker;
 import cosmos.sql.impl.CosmosTable;
-import cosmos.sql.rules.FilterRule;
+import cosmos.sql.parser.FilterRule;
 import cosmos.sql.rules.GroupByRule;
 import cosmos.sql.rules.ProjectRule;
 

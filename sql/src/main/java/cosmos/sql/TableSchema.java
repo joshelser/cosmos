@@ -74,6 +74,8 @@ public class TableSchema<T extends SchemaDefiner<?>> extends MapSchema {
     metaData.register(this);
     
     
+    
+    
     if (metaData instanceof TableDefiner) {
         Collection<String> tables = ((TableDefiner) metaData).getTables();
         for(String table : tables)
