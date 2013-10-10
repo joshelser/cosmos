@@ -157,13 +157,20 @@ public class MapRecord implements Record<MapRecord> {
   
   @Override
   public boolean equals(Object o) {
-    if (o instanceof MultimapRecord) {
-      MultimapRecord other = (MultimapRecord) o;
+    if (o instanceof MapRecord) {
+      MapRecord other = (MapRecord) o;
       return this.docId.equals(other.docId) && this.docVisibility.equals(other.docVisibility) &&
           this.document.equals(other.document);
     }
     
     return false;
+  }
+  
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(16);
+    sb.append("ID:").append(docId()).append(" ").append(documentVisibility()).append(" ").append(document());
+    return sb.toString();
   }
   
 }
