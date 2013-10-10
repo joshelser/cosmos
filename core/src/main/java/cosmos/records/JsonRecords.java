@@ -57,7 +57,7 @@ public class JsonRecords {
    * @throws IOException
    * @throws JsonSyntaxException
    */
-  public List<MapRecord> fromJson(File jsonFile) throws FileNotFoundException, IOException, JsonSyntaxException {
+  public static List<MapRecord> fromJson(File jsonFile) throws FileNotFoundException, IOException, JsonSyntaxException {
     return fromJson(jsonFile, new CountingDocIdGenerator());
   }
   
@@ -71,12 +71,11 @@ public class JsonRecords {
    * @throws IOException
    * @throws JsonSyntaxException
    */
-  public List<MapRecord> fromJson(File jsonFile, DocIdGenerator generator) throws FileNotFoundException, IOException, JsonSyntaxException {
+  public static List<MapRecord> fromJson(File jsonFile, DocIdGenerator generator) throws FileNotFoundException, IOException, JsonSyntaxException {
     Preconditions.checkNotNull(jsonFile);
     Preconditions.checkArgument(jsonFile.exists() && jsonFile.isFile() && jsonFile.canRead(), jsonFile + " is not a readable file");
     Preconditions.checkNotNull(generator);
     
-    final Gson gson = new Gson();
     final StringBuilder sb = new StringBuilder(128);
     FileReader fileReader = new FileReader(jsonFile);
     BufferedReader bufReader = new BufferedReader(fileReader);
@@ -88,6 +87,19 @@ public class JsonRecords {
     bufReader.close();
     
     String json = sb.toString();
+    
+    return fromJson(json, generator);
+  }
+  
+  public static List<MapRecord> fromJson(String json) throws JsonSyntaxException {
+    return fromJson(json, new CountingDocIdGenerator());
+  }
+  
+  public static List<MapRecord> fromJson(String json, DocIdGenerator generator) throws JsonSyntaxException {
+    Preconditions.checkNotNull(json);
+    Preconditions.checkNotNull(generator);
+    
+    final Gson gson = new Gson();
     List<Map<String,String>> maps = null;
     try {
       maps= gson.fromJson(json, listOfMapsType);
