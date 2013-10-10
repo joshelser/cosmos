@@ -26,8 +26,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import cosmos.sql.call.CallIfc;
 import cosmos.sql.call.BaseVisitor;
+import cosmos.sql.call.CallIfc;
 import cosmos.sql.call.ChildVisitor;
 
 public class Filter extends BaseVisitor<CallIfc<?>> {

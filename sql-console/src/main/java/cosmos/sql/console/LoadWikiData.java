@@ -11,12 +11,10 @@ import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.google.common.collect.Sets;
 
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
-import cosmos.options.Index;
-import cosmos.results.Record;
+import cosmos.records.Record;
 import cosmos.results.integration.CosmosIntegrationSetup;
 import cosmos.store.Store;
 

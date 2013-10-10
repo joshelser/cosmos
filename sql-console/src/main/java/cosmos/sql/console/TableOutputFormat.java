@@ -9,8 +9,8 @@ import java.util.Map.Entry;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
+import cosmos.records.RecordValue;
 import cosmos.results.Column;
-import cosmos.results.RecordValue;
 
 public class TableOutputFormat {
   public static final String COLUMN_SEPARATOR = "|", CORNER = "+", SPACE = " ", HYPHEN = "-", NEWLINE = "\n";

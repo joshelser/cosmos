@@ -48,11 +48,11 @@ import cosmos.IntegrationTests;
 import cosmos.impl.CosmosImpl;
 import cosmos.options.Defaults;
 import cosmos.options.Index;
+import cosmos.records.Record;
+import cosmos.records.RecordValue;
+import cosmos.records.impl.MultimapRecord;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
-import cosmos.results.Record;
-import cosmos.results.RecordValue;
-import cosmos.results.impl.MultimapRecord;
 import cosmos.store.Store;
 
 /**

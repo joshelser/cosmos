@@ -12,7 +12,8 @@ import cosmos.UnexpectedStateException;
 import cosmos.impl.CosmosImpl;
 import cosmos.options.Index;
 import cosmos.options.Paging;
-import cosmos.results.impl.MultimapRecord;
+import cosmos.records.RecordValue;
+import cosmos.records.impl.MultimapRecord;
 import cosmos.store.Store;
 import cosmos.util.IdentitySet;
 

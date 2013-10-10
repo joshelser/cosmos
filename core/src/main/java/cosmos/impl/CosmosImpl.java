@@ -67,12 +67,12 @@ import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.options.Order;
 import cosmos.options.Paging;
+import cosmos.records.Record;
+import cosmos.records.RecordValue;
+import cosmos.records.impl.MultimapRecord;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
-import cosmos.results.PagedQueryResult;
-import cosmos.results.Record;
-import cosmos.results.RecordValue;
-import cosmos.results.impl.MultimapRecord;
+import cosmos.results.PagedResults;
 import cosmos.store.PersistedStores;
 import cosmos.store.PersistedStores.State;
 import cosmos.store.Store;
@@ -488,7 +488,7 @@ public class CosmosImpl implements Cosmos{
       bs.fetchColumnFamily(Defaults.DOCID_FIELD_NAME_TEXT);
       
       // Handles stoping the stopwatch
-      return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id), id.tracer(), description, sw);
+      return CloseableIterable.transform(bs, new IndexToMultimapRecord(this, id), id.tracer(), description, sw);
     } catch (TableNotFoundException e) {
       // In the exceptional case, stop the timer
       sw.stop();
@@ -509,13 +509,13 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public PagedQueryResult<MultimapRecord> fetch(Store id, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+  public PagedResults<MultimapRecord> fetch(Store id, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     checkNotNull(limits);
     
     CloseableIterable<MultimapRecord> results = fetch(id);
     
-    return new PagedQueryResult<MultimapRecord>(results, limits);
+    return new PagedResults<MultimapRecord>(results, limits);
   }
   
   @Override
@@ -543,7 +543,7 @@ public class CosmosImpl implements Cosmos{
       filter.addOption(OrderFilter.PREFIX, Order.direction(Order.ASCENDING));
       bs.addScanIterator(filter);
       
-      return CloseableIterable.transform(bs, new IndexToMultimapQueryResult(this, id), id.tracer(), description, sw);
+      return CloseableIterable.transform(bs, new IndexToMultimapRecord(this, id), id.tracer(), description, sw);
     } catch (TableNotFoundException e) {
       // In the exceptional case, stop the timer
       sw.stop();
@@ -564,13 +564,13 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public PagedQueryResult<MultimapRecord> fetch(Store id, Column column, String value, Paging limits) throws TableNotFoundException,
+  public PagedResults<MultimapRecord> fetch(Store id, Column column, String value, Paging limits) throws TableNotFoundException,
       UnexpectedStateException {
     checkNotNull(limits);
     
     CloseableIterable<MultimapRecord> results = fetch(id, column, value);
     
-    return PagedQueryResult.create(results, limits);
+    return PagedResults.create(results, limits);
   }
   
   @Override
@@ -615,9 +615,9 @@ public class CosmosImpl implements Cosmos{
       
       // If the client has told us they don't want duplicate records, lets not give them duplicate records
       if (duplicateUidsAllowed) {
-        return CloseableIterable.transform(scanner, new IndexToMultimapQueryResult(this, id), id.tracer(), description, sw);
+        return CloseableIterable.transform(scanner, new IndexToMultimapRecord(this, id), id.tracer(), description, sw);
       } else {
-        return CloseableIterable.filterAndTransform(scanner, new DedupingPredicate(), new IndexToMultimapQueryResult(this, id), id.tracer(), description, sw);
+        return CloseableIterable.filterAndTransform(scanner, new DedupingPredicate(), new IndexToMultimapRecord(this, id), id.tracer(), description, sw);
       }
     } catch (TableNotFoundException e) {
       // In the exceptional case, stop the timer
@@ -639,14 +639,14 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public PagedQueryResult<MultimapRecord> fetch(Store id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException,
+  public PagedResults<MultimapRecord> fetch(Store id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException,
       UnindexedColumnException {
     checkNotNull(id);
     checkNotNull(limits);
     
     CloseableIterable<MultimapRecord> results = fetch(id, ordering);
     
-    return PagedQueryResult.create(results, limits);
+    return PagedResults.create(results, limits);
   }
   
   @Override
@@ -702,13 +702,13 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public PagedQueryResult<Entry<RecordValue,Long>> groupResults(Store id, Column column, Paging limits) throws TableNotFoundException,
+  public PagedResults<Entry<RecordValue,Long>> groupResults(Store id, Column column, Paging limits) throws TableNotFoundException,
       UnexpectedStateException, UnindexedColumnException {
     checkNotNull(limits);
     
     CloseableIterable<Entry<RecordValue,Long>> results = groupResults(id, column);
     
-    return PagedQueryResult.create(results, limits);
+    return PagedResults.create(results, limits);
   }
   
   @Override

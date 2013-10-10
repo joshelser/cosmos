@@ -37,7 +37,6 @@ import org.mediawiki.xml.export_0.MediaWikiType;
 import org.mediawiki.xml.export_0.PageType;
 import org.mediawiki.xml.export_0.RevisionType;
 
-
 import com.sun.xml.bind.api.ClassResolver;
 
 import cosmos.mediawiki.MediawikiPage.Page;

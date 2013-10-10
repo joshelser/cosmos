@@ -25,7 +25,6 @@ import java.util.TreeMap;
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
-import org.apache.accumulo.core.conf.Property;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
 import org.apache.accumulo.minicluster.MiniAccumuloConfig;
@@ -46,12 +45,11 @@ import com.google.common.io.Files;
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
 import cosmos.options.Index;
+import cosmos.records.RecordValue;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
-import cosmos.results.RecordValue;
 import cosmos.store.Store;
 import cosmos.util.AscendingIndexIdentitySet;
-import cosmos.util.IdentitySet;
 
 /**
  * 

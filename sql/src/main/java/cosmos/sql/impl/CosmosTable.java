@@ -23,9 +23,9 @@ import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 
 import org.eigenbase.reltype.RelDataType;
 
-import cosmos.sql.TableSchema;
 import cosmos.sql.DataTable;
 import cosmos.sql.SchemaDefiner;
+import cosmos.sql.TableSchema;
 
 /**
  * Cosmos table representation.

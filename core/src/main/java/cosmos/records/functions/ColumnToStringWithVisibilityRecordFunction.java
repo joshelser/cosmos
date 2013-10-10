@@ -14,11 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cosmos.results.docids;
+package cosmos.records.functions;
+
+import java.util.Map.Entry;
+
+import org.apache.accumulo.core.security.ColumnVisibility;
+
+import com.google.common.collect.Maps;
+
+import cosmos.records.RecordFunction;
+import cosmos.records.RecordValue;
+import cosmos.results.Column;
 
 /**
- * Interface to allow specific unique identifiers to be generated for a {@link Record}
+ * 
  */
-public interface DocIdGenerator {
-  public String getDocId(Object obj);
+public class ColumnToStringWithVisibilityRecordFunction implements RecordFunction<Column,String> {
+
+  protected final ColumnVisibility recordVisibility;
+  
+  public ColumnToStringWithVisibilityRecordFunction(ColumnVisibility recordVisibility) {
+    this.recordVisibility = recordVisibility;
+  }
+  
+  @Override
+  public Entry<Column,RecordValue> apply(Entry<Column,String> input) {
+    return Maps.immutableEntry(input.getKey(), RecordValue.create(input.getValue(), recordVisibility));
+  }
+
 }

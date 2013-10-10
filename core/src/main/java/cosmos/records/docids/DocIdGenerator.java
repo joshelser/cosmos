@@ -14,25 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cosmos.results.recordfuntions;
-
-import java.util.Map.Entry;
-
-import com.google.common.collect.Maps;
-
-import cosmos.options.Defaults;
-import cosmos.results.Column;
-import cosmos.results.RecordFunction;
-import cosmos.results.RecordValue;
+package cosmos.records.docids;
 
 /**
- * 
+ * Interface to allow specific unique identifiers to be generated for a {@link Record}
  */
-public class ColumnToStringRecordFunction implements RecordFunction<Column,String> {
-
-  @Override
-  public Entry<Column,RecordValue> apply(Entry<Column,String> input) {
-    return Maps.immutableEntry(input.getKey(), RecordValue.create(input.getValue(), Defaults.EMPTY_VIS));
-  }
-
+public interface DocIdGenerator {
+  public String getDocId(Object obj);
 }

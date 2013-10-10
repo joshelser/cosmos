@@ -21,9 +21,9 @@ import com.google.common.collect.Lists;
 
 import cosmos.Cosmos;
 import cosmos.options.Defaults;
+import cosmos.records.RecordValue;
+import cosmos.records.impl.MultimapRecord;
 import cosmos.results.Column;
-import cosmos.results.RecordValue;
-import cosmos.results.impl.MultimapRecord;
 import cosmos.store.Store;
 
 public class LoadBuildingPermits implements Runnable {

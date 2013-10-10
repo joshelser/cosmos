@@ -32,18 +32,18 @@ import com.google.common.base.Function;
 import cosmos.Cosmos;
 import cosmos.UnexpectedStateException;
 import cosmos.options.Defaults;
-import cosmos.results.impl.MultimapRecord;
+import cosmos.records.impl.MultimapRecord;
 import cosmos.store.Store;
 
 /**
  * 
  */
-public class IndexToMultimapQueryResult implements Function<Entry<Key,Value>,MultimapRecord> {
+public class IndexToMultimapRecord implements Function<Entry<Key,Value>,MultimapRecord> {
   
   protected final Cosmos sorts;
   protected final Store id;
   
-  public IndexToMultimapQueryResult(Cosmos sorts, Store id) {
+  public IndexToMultimapRecord(Cosmos sorts, Store id) {
     this.sorts = sorts;
     this.id = id;
   }

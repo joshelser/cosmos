@@ -25,11 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 
-import org.eigenbase.rel.RelNode;
-import org.eigenbase.relopt.RelOptTable;
-import org.eigenbase.relopt.RelOptTable.ToRelContext;
-import org.eigenbase.reltype.RelDataType;
-
 import net.hydromatic.linq4j.AbstractQueryable;
 import net.hydromatic.linq4j.Enumerable;
 import net.hydromatic.linq4j.Enumerator;
@@ -43,10 +38,15 @@ import net.hydromatic.optiq.Statistics;
 import net.hydromatic.optiq.TranslatableTable;
 import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 
+import org.eigenbase.rel.RelNode;
+import org.eigenbase.relopt.RelOptTable;
+import org.eigenbase.relopt.RelOptTable.ToRelContext;
+import org.eigenbase.reltype.RelDataType;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Queues;
 
-import cosmos.results.impl.MultimapRecord;
+import cosmos.records.impl.MultimapRecord;
 import cosmos.sql.CosmosRelNode.Plan;
 
 /**

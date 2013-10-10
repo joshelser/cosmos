@@ -28,7 +28,8 @@ import org.junit.Test;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import cosmos.results.impl.MultimapRecord;
+import cosmos.records.RecordValue;
+import cosmos.records.impl.MultimapRecord;
 
 /**
  * 

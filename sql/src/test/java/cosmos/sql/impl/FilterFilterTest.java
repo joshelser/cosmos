@@ -1,13 +1,13 @@
 package cosmos.sql.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import cosmos.sql.call.Field;
 import cosmos.sql.call.Literal;
 import cosmos.sql.call.impl.FieldEquality;
-import cosmos.sql.call.impl.operators.AndOperator;
 import cosmos.sql.call.impl.operators.OrOperator;
 
 public class FilterFilterTest {

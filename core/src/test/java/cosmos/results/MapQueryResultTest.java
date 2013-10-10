@@ -32,7 +32,9 @@ import org.junit.runners.JUnit4;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import cosmos.results.impl.MapRecord;
+import cosmos.records.RecordFunction;
+import cosmos.records.RecordValue;
+import cosmos.records.impl.MapRecord;
 
 @RunWith(JUnit4.class)
 public class MapQueryResultTest {

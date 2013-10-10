@@ -29,7 +29,7 @@ import org.apache.hadoop.io.DataInputBuffer;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 
-import cosmos.results.impl.MultimapRecord;
+import cosmos.records.impl.MultimapRecord;
 
 /**
  * 

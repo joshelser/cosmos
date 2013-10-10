@@ -44,14 +44,13 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 
 import cosmos.IntegrationTests;
 import cosmos.options.Index;
+import cosmos.records.Record;
+import cosmos.records.RecordValue;
+import cosmos.records.impl.MultimapRecord;
 import cosmos.results.Column;
-import cosmos.results.Record;
-import cosmos.results.RecordValue;
-import cosmos.results.impl.MultimapRecord;
 
 /**
  * 

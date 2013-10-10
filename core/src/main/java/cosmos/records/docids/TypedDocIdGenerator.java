@@ -14,15 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cosmos.results;
-
-import java.util.Map.Entry;
-
-import com.google.common.base.Function;
+package cosmos.records.docids;
 
 /**
- * 
+ * A {@link DocIdGenerator} that allows for object introspection to better determine what the docId should 
+ * be for a given {@link Record}.
  */
-public interface RecordFunction<K,V> extends Function<Entry<K,V>,Entry<Column,RecordValue>> {
+public abstract class TypedDocIdGenerator<T> implements DocIdGenerator {
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public String getDocId(Object obj) {
+    return getTypedDocId((T) obj);
+  }
+
+  /**
+   * Return a unique identifier for {@link obj}
+   * @param obj
+   * @return
+   */
+  public abstract String getTypedDocId(T obj);
 
 }

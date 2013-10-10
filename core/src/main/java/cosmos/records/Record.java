@@ -17,7 +17,7 @@
  *  Copyright 2013 Josh Elser
  *
  */
-package cosmos.results;
+package cosmos.records;
 
 import java.io.IOException;
 import java.util.Map.Entry;
@@ -25,6 +25,8 @@ import java.util.Map.Entry;
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.hadoop.io.Writable;
+
+import cosmos.results.Column;
 
 public interface Record<T> extends Writable {
   public String docId();

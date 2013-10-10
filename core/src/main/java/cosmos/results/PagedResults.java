@@ -28,18 +28,19 @@ import com.google.common.collect.Iterables;
 
 import cosmos.options.Paging;
 
-public class PagedQueryResult<T> implements Results<List<T>> {
+public class PagedResults<T> implements Results<List<T>> {
 
   protected final CloseableIterable<T> source;
   protected final Iterable<List<T>> pagedLimitedResults;
   
-  public static <T> PagedQueryResult<T> create(CloseableIterable<T> results, Paging limits) {
-    checkNotNull(results);
-    checkNotNull(limits);
-    return new PagedQueryResult<T>(results, limits);
+  public static <T> PagedResults<T> create(CloseableIterable<T> results, Paging limits) {
+    return new PagedResults<T>(results, limits);
   }
   
-  public PagedQueryResult(CloseableIterable<T> results, Paging limits) {
+  public PagedResults(CloseableIterable<T> results, Paging limits) {
+    checkNotNull(results);
+    checkNotNull(limits);
+    
     source = results;
     pagedLimitedResults = Iterables.partition(Iterables.limit(results, limits.maxResults()), limits.pageSize());
   }

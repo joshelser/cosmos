@@ -17,14 +17,14 @@
  *  Copyright 2013 Josh Elser
  *
  */
-package cosmos.results.impl;
+package cosmos.records.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Map.Entry;
 
 import org.apache.accumulo.core.data.Value;
@@ -34,88 +34,114 @@ import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableUtils;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
+import cosmos.records.Record;
+import cosmos.records.RecordFunction;
+import cosmos.records.RecordValue;
 import cosmos.results.Column;
-import cosmos.results.Record;
-import cosmos.results.RecordFunction;
-import cosmos.results.RecordValue;
 
-public class MapRecord implements Record<MapRecord> {
-  
+public class MultimapRecord implements Record<MultimapRecord> {
+
   protected String docId;
-  protected Map<Column,RecordValue> document;
+  protected Multimap<Column,RecordValue> document;
   protected ColumnVisibility docVisibility;
-  
-  protected MapRecord() { }
-  
-  public <T1,T2> MapRecord(Map<T1,T2> untypedDoc, String docId, ColumnVisibility docVisibility, RecordFunction<T1,T2> function) {
+
+  protected MultimapRecord() {}
+
+  public <T1,T2> MultimapRecord(Multimap<T1,T2> untypedDoc, String docId, ColumnVisibility docVisibility, RecordFunction<T1,T2> function) {
     checkNotNull(untypedDoc);
     checkNotNull(docId);
     checkNotNull(docVisibility);
     checkNotNull(function);
-    
+
     this.docId = docId;
-    this.document = Maps.newHashMapWithExpectedSize(untypedDoc.size());
     this.docVisibility = docVisibility;
-    
-    for (Entry<T1,T2> untypedEntry : untypedDoc.entrySet()) {
+    this.document = HashMultimap.create();
+
+    for (Entry<T1,T2> untypedEntry : untypedDoc.entries()) {
       Entry<Column,RecordValue> entry = function.apply(untypedEntry);
       this.document.put(entry.getKey(), entry.getValue());
     }
   }
-  
-  public MapRecord(Map<Column,RecordValue> document, String docId, ColumnVisibility docVisibility) {
+
+  public MultimapRecord(Multimap<Column,RecordValue> document, String docId, ColumnVisibility docVisibility) {
     checkNotNull(document);
     checkNotNull(docId);
     checkNotNull(docVisibility);
-    
+
     this.document = document;
     this.docId = docId;
     this.docVisibility = docVisibility;
   }
-  
+
+  public MultimapRecord(MultimapRecord other, String newDocId) {
+    checkNotNull(other);
+    checkNotNull(newDocId);
+
+    this.docId = newDocId;
+    this.document = HashMultimap.create(other.document);
+    this.docVisibility = other.docVisibility;
+  }
+
   public String docId() {
     return this.docId;
   }
-  
+
   public String document() {
     return this.document.toString();
   }
-  
-  public MapRecord typedDocument() {
+
+  public MultimapRecord typedDocument() {
     return this;
   }
-  
+
   public ColumnVisibility documentVisibility() {
     return this.docVisibility;
   }
-  
+
   public Iterable<Entry<Column,RecordValue>> columnValues() {
-    return this.document.entrySet();
+    return this.document.entries();
   }
-  
-  public static MapRecord recreate(DataInput in) throws IOException {
-    MapRecord result = new MapRecord();
+
+  public int columnSize() {
+    return this.document.keySet().size();
+  }
+
+  public boolean containsKey(Column key) {
+    return this.document.containsKey(key);
+  }
+
+  public boolean containEntry(Column column, RecordValue svalue) {
+    return this.document.containsEntry(column, svalue);
+  }
+
+  public Collection<RecordValue> get(Column column) {
+    return this.document.get(column);
+  }
+
+  public static MultimapRecord recreate(DataInput in) throws IOException {
+    MultimapRecord result = new MultimapRecord();
     result.readFields(in);
     return result;
   }
-  
+
   @Override
   public void readFields(DataInput in) throws IOException {
     this.docId = Text.readString(in);
-    
+
     final int cvLength = WritableUtils.readVInt(in);
     final byte[] cvBytes = new byte[cvLength];
     in.readFully(cvBytes);
-    
+
     this.docVisibility = new ColumnVisibility(cvBytes);
-    
+
     final int entryCount = WritableUtils.readVInt(in);
-    this.document = Maps.newHashMapWithExpectedSize(entryCount);
-    
+    this.document = HashMultimap.create();
+
     for (int i = 0; i < entryCount; i++) {
-      
+
       this.document.put(Column.recreate(in), RecordValue.recreate(in));
     }
   }
@@ -124,17 +150,17 @@ public class MapRecord implements Record<MapRecord> {
   public void write(DataOutput out) throws IOException {
     Text.writeString(out, this.docId);
 
-    byte[] cvBytes = this.docVisibility.flatten();
+    byte[] cvBytes = this.docVisibility.getExpression();
     WritableUtils.writeVInt(out, cvBytes.length);
     out.write(cvBytes);
-    
+
     WritableUtils.writeVInt(out, this.document.size());
-    for (Entry<Column,RecordValue> entry : this.document.entrySet()) {
+    for (Entry<Column,RecordValue> entry : this.document.entries()) {
       entry.getKey().write(out);
       entry.getValue().write(out);
     }
   }
-  
+
   @Override
   public Value toValue() throws IOException {
     DataOutputBuffer buf = new DataOutputBuffer();
@@ -142,28 +168,36 @@ public class MapRecord implements Record<MapRecord> {
     buf.close();
     byte[] bytes = new byte[buf.getLength()];
     System.arraycopy(buf.getData(), 0, bytes, 0, buf.getLength());
-    
+
     return new Value(bytes);
   }
-  
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(256);
+
+    sb.append(this.docId).append(" ").append(this.docVisibility).append(" - ").append(this.document);
+
+    return sb.toString();
+  }
+
   @Override
   public int hashCode() {
-    HashCodeBuilder hcb = new HashCodeBuilder(17,31);
+    HashCodeBuilder hcb = new HashCodeBuilder(17, 31);
     hcb.append(this.docId);
     hcb.append(this.docVisibility.hashCode());
     hcb.append(this.document.hashCode());
     return hcb.toHashCode();
   }
-  
+
   @Override
   public boolean equals(Object o) {
     if (o instanceof MultimapRecord) {
       MultimapRecord other = (MultimapRecord) o;
-      return this.docId.equals(other.docId) && this.docVisibility.equals(other.docVisibility) &&
-          this.document.equals(other.document);
+      return this.docId.equals(other.docId) && this.docVisibility.equals(other.docVisibility) && this.document.equals(other.document);
     }
-    
+
     return false;
   }
-  
+
 }

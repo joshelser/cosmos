@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cosmos.results;
+package cosmos.records;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,10 +35,10 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import cosmos.options.Defaults;
-import cosmos.results.docids.CountingDocIdGenerator;
-import cosmos.results.docids.DocIdGenerator;
-import cosmos.results.impl.MapRecord;
-import cosmos.results.recordfuntions.StringToStringRecordFunction;
+import cosmos.records.docids.CountingDocIdGenerator;
+import cosmos.records.docids.DocIdGenerator;
+import cosmos.records.functions.StringToStringRecordFunction;
+import cosmos.records.impl.MapRecord;
 
 /**
  * 

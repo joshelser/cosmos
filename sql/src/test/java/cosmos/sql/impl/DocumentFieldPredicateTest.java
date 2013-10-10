@@ -1,6 +1,7 @@
 package cosmos.sql.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.junit.Test;
@@ -8,9 +9,9 @@ import org.junit.Test;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
+import cosmos.records.RecordValue;
+import cosmos.records.impl.MultimapRecord;
 import cosmos.results.Column;
-import cosmos.results.RecordValue;
-import cosmos.results.impl.MultimapRecord;
 import cosmos.sql.call.Field;
 import cosmos.sql.call.Literal;
 

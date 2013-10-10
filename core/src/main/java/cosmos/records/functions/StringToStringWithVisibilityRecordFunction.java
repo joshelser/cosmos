@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cosmos.results.recordfuntions;
+package cosmos.records.functions;
 
 import java.util.Map.Entry;
 
@@ -22,9 +22,9 @@ import org.apache.accumulo.core.security.ColumnVisibility;
 
 import com.google.common.collect.Maps;
 
+import cosmos.records.RecordFunction;
+import cosmos.records.RecordValue;
 import cosmos.results.Column;
-import cosmos.results.RecordFunction;
-import cosmos.results.RecordValue;
 
 /**
  * Converts an {@link Entry<String,String>} to an {@link Entry<Column,RecordValue>} using a provided ColumnVisibility

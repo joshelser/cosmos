@@ -52,7 +52,9 @@ import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.options.Order;
 import cosmos.options.Paging;
-import cosmos.results.impl.MultimapRecord;
+import cosmos.records.Record;
+import cosmos.records.RecordValue;
+import cosmos.records.impl.MultimapRecord;
 import cosmos.store.PersistedStores;
 import cosmos.store.Store;
 import cosmos.util.IdentitySet;
@@ -381,7 +383,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.finalize(id);
     
-    PagedQueryResult<MultimapRecord> pqr = s.fetch(id, Paging.create(5, 20));
+    PagedResults<MultimapRecord> pqr = s.fetch(id, Paging.create(5, 20));
     
     int pageCount = 0;
     int numRecords = 0;
@@ -637,7 +639,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     int pageSize = 1;
     
     // Plain groupBy over three records with unique values in said column
-    PagedQueryResult<Entry<RecordValue,Long>> groups = s.groupResults(id, name, Paging.create(pageSize, Integer.MAX_VALUE));
+    PagedResults<Entry<RecordValue,Long>> groups = s.groupResults(id, name, Paging.create(pageSize, Integer.MAX_VALUE));
     Map<RecordValue,Long> expectedGroups = ImmutableMap.<RecordValue,Long>of(RecordValue.create("George", VIZ), 1l, RecordValue.create("Steve", VIZ), 1l, RecordValue.create("Frank", VIZ), 1l);
     int count = 0;
     for (List<Entry<RecordValue,Long>> groupPage : groups) {

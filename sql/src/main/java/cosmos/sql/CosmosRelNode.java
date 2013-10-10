@@ -22,8 +22,8 @@ package cosmos.sql;
 import org.eigenbase.rel.RelNode;
 import org.eigenbase.relopt.Convention;
 
-import cosmos.sql.call.CallIfc;
 import cosmos.sql.call.BaseVisitor;
+import cosmos.sql.call.CallIfc;
 
 /**
  * Accumulo relational expression

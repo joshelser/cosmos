@@ -28,9 +28,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimaps;
 
+import cosmos.records.RecordValue;
+import cosmos.records.impl.MultimapRecord;
 import cosmos.results.Column;
-import cosmos.results.RecordValue;
-import cosmos.results.impl.MultimapRecord;
 import cosmos.sql.call.Field;
 
 /**

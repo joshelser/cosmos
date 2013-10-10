@@ -16,7 +16,6 @@ import jline.console.history.FileHistory;
 import jline.console.history.History;
 import jline.console.history.MemoryHistory;
 
-import org.apache.accumulo.core.client.BatchWriterConfig;
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
@@ -38,7 +37,7 @@ import com.google.common.io.Files;
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
 import cosmos.options.Defaults;
-import cosmos.results.Record;
+import cosmos.records.Record;
 import cosmos.results.integration.CosmosIntegrationSetup;
 import cosmos.sql.CosmosDriver;
 import cosmos.sql.impl.CosmosSql;

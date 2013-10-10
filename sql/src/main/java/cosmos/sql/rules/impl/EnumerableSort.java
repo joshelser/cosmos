@@ -21,8 +21,6 @@ package cosmos.sql.rules.impl;
 
 import java.util.List;
 
-import net.hydromatic.linq4j.expressions.BlockBuilder;
-import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 import net.hydromatic.optiq.rules.java.EnumerableRel;
 import net.hydromatic.optiq.rules.java.EnumerableRelImplementor;
 

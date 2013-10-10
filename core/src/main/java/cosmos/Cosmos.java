@@ -29,12 +29,12 @@ import com.google.common.collect.Ordering;
 
 import cosmos.options.Index;
 import cosmos.options.Paging;
+import cosmos.records.Record;
+import cosmos.records.RecordValue;
+import cosmos.records.impl.MultimapRecord;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
-import cosmos.results.PagedQueryResult;
-import cosmos.results.Record;
-import cosmos.results.RecordValue;
-import cosmos.results.impl.MultimapRecord;
+import cosmos.results.PagedResults;
 import cosmos.store.Store;
 
 public interface Cosmos {
@@ -98,7 +98,7 @@ public interface Cosmos {
    * @param limits
    * @return
    */
-  public PagedQueryResult<MultimapRecord> fetch(Store id, Paging limits) throws TableNotFoundException, UnexpectedStateException;
+  public PagedResults<MultimapRecord> fetch(Store id, Paging limits) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Fetch results with the given {@link value} in the given {@link Column}
@@ -118,7 +118,7 @@ public interface Cosmos {
    * @param order
    * @return
    */
-  public PagedQueryResult<MultimapRecord> fetch(Store id, Column column, String value, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public PagedResults<MultimapRecord> fetch(Store id, Column column, String value, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Fetch results in the provided {@link Ordering}
@@ -153,7 +153,7 @@ public interface Cosmos {
    * @param order
    * @return
    */
-  public PagedQueryResult<MultimapRecord> fetch(Store id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public PagedResults<MultimapRecord> fetch(Store id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Return counts for unique values in the given column
@@ -173,7 +173,7 @@ public interface Cosmos {
    * @param order
    * @return
    */
-  public PagedQueryResult<Entry<RecordValue,Long>> groupResults(Store id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public PagedResults<Entry<RecordValue,Long>> groupResults(Store id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Given a docId contained in the {@link Store}, fetch the record  
