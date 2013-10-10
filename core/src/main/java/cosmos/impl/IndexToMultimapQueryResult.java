@@ -32,13 +32,13 @@ import com.google.common.base.Function;
 import cosmos.Cosmos;
 import cosmos.UnexpectedStateException;
 import cosmos.options.Defaults;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.store.Store;
 
 /**
  * 
  */
-public class IndexToMultimapQueryResult implements Function<Entry<Key,Value>,MultimapQueryResult> {
+public class IndexToMultimapQueryResult implements Function<Entry<Key,Value>,MultimapRecord> {
   
   protected final Cosmos sorts;
   protected final Store id;
@@ -49,7 +49,7 @@ public class IndexToMultimapQueryResult implements Function<Entry<Key,Value>,Mul
   }
   
   @Override
-  public MultimapQueryResult apply(Entry<Key,Value> input) {
+  public MultimapRecord apply(Entry<Key,Value> input) {
     Key k = input.getKey();
     
     Text colqual = k.getColumnQualifier();

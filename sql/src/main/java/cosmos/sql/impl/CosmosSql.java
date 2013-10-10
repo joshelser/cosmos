@@ -54,8 +54,8 @@ import cosmos.UnexpectedStateException;
 import cosmos.UnindexedColumnException;
 import cosmos.options.Index;
 import cosmos.results.Column;
-import cosmos.results.SValue;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.RecordValue;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.sql.BaseIterable;
 import cosmos.sql.CosmosRelNode;
 import cosmos.sql.DataTable;
@@ -82,9 +82,9 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
    */
   protected Cosmos cosmos;
 
-  protected Iterable<MultimapQueryResult> iter;
+  protected Iterable<MultimapRecord> iter;
 
-  protected Collection<Iterable<MultimapQueryResult>> plannedParentHood;
+  protected Collection<Iterable<MultimapRecord>> plannedParentHood;
   
   protected Connector connector;
   protected String metadataTable;
@@ -93,7 +93,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
   /**
    * Iterator reference
    */
-  protected Iterator<MultimapQueryResult> baseIter;
+  protected Iterator<MultimapRecord> baseIter;
 
   private JavaTypeFactory typeFactory;
 
@@ -159,7 +159,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
             plannedParentHood.add(cosmos.fetch(res));
           }
 
-          for (Iterable<MultimapQueryResult> subIter : plannedParentHood) {
+          for (Iterable<MultimapRecord> subIter : plannedParentHood) {
             if (iter == null) {
               iter = subIter;
             } else {
@@ -202,11 +202,11 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
     return new BaseIterable<Object[]>(returnIter);
   }
 
-  private Iterable<MultimapQueryResult> buildFilterIterator(List<ChildVisitor> filters, Store res) {
+  private Iterable<MultimapRecord> buildFilterIterator(List<ChildVisitor> filters, Store res) {
 
-    Iterable<MultimapQueryResult> baseIter = Collections.emptyList();
-    Iterable<Iterable<MultimapQueryResult>> ret = Iterables.transform(filters, new LogicVisitor(cosmos, res));
-    for (Iterable<MultimapQueryResult> iterable : ret) {
+    Iterable<MultimapRecord> baseIter = Collections.emptyList();
+    Iterable<Iterable<MultimapRecord>> ret = Iterables.transform(filters, new LogicVisitor(cosmos, res));
+    for (Iterable<MultimapRecord> iterable : ret) {
       baseIter = Iterables.concat(baseIter, iterable);
     }
 
@@ -214,7 +214,7 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
 
   }
 
-  class DocumentExpansion implements Function<MultimapQueryResult,Object[]> {
+  class DocumentExpansion implements Function<MultimapRecord,Object[]> {
 
     private List<String> fields;
 
@@ -222,24 +222,24 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
       this.fields = fields;
     }
 
-    public Object[] apply(MultimapQueryResult document) {
+    public Object[] apply(MultimapRecord document) {
 
       Object[] results = new List[fields.size()];
      
       for (int i = 0; i < fields.size(); i++) {
         String field = fields.get(i);
         Column col = new Column(field);
-        Collection<SValue> values = document.get(col);
+        Collection<RecordValue> values = document.get(col);
         if (values != null) {
 
-          List<Entry<Column,SValue>> columns = Lists.newArrayList();
-          for (SValue value : values) {
+          List<Entry<Column,RecordValue>> columns = Lists.newArrayList();
+          for (RecordValue value : values) {
             columns.add(Maps.immutableEntry(col, value));
           }
           results[i] = columns;// values.iterator().next().value();
 
         } else {
-          results[i] = new ArrayList<SValue>();
+          results[i] = new ArrayList<RecordValue>();
         }
       }
       return results;
@@ -248,11 +248,11 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
 
   }
 
-  class GroupByResultFuckit implements Function<Entry<SValue,Long>,Object[]> {
+  class GroupByResultFuckit implements Function<Entry<RecordValue,Long>,Object[]> {
 
     public GroupByResultFuckit() {}
 
-    public Object[] apply(Entry<SValue,Long> result) {
+    public Object[] apply(Entry<RecordValue,Long> result) {
 
       Object[] results = new Object[2];
       results[0] = result.getKey();

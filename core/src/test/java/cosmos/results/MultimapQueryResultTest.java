@@ -28,7 +28,7 @@ import org.junit.Test;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.impl.MultimapRecord;
 
 /**
  * 
@@ -37,12 +37,12 @@ public class MultimapQueryResultTest extends AbstractSortableTest {
   
   @Test
   public void identityWritableEquality() throws Exception {
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
-    data.put(Column.create("TEXT"), SValue.create("bar", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(data, "1", VIZ);
     
     DataOutputBuffer out = new DataOutputBuffer();
     mqr.write(out);
@@ -52,33 +52,33 @@ public class MultimapQueryResultTest extends AbstractSortableTest {
     byte[] bytes = out.getData();
     in.reset(bytes, out.getLength());
     
-    MultimapQueryResult mqr2 = MultimapQueryResult.recreate(in);
+    MultimapRecord mqr2 = MultimapRecord.recreate(in);
     
     Assert.assertEquals(mqr, mqr2);
   }
   
   @Test
   public void nonEqual() throws Exception {
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
-    data.put(Column.create("TEXT"), SValue.create("bar", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
-    MultimapQueryResult mqr2 = new MultimapQueryResult(data, "2", VIZ);
+    MultimapRecord mqr = new MultimapRecord(data, "1", VIZ);
+    MultimapRecord mqr2 = new MultimapRecord(data, "2", VIZ);
     
     Assert.assertNotEquals(mqr, mqr2);
     
-    MultimapQueryResult mqr3 = new MultimapQueryResult(data, "1", new ColumnVisibility("foobarbarbarbarbarbar"));
+    MultimapRecord mqr3 = new MultimapRecord(data, "1", new ColumnVisibility("foobarbarbarbarbarbar"));
     
     Assert.assertNotEquals(mqr, mqr3);
     Assert.assertNotEquals(mqr2, mqr3);
     
     data = HashMultimap.create(data);
     
-    data.put(Column.create("FOO"), SValue.create("barfoo", VIZ));
+    data.put(Column.create("FOO"), RecordValue.create("barfoo", VIZ));
     
-    MultimapQueryResult mqr4 = new MultimapQueryResult(data, "1", VIZ);
+    MultimapRecord mqr4 = new MultimapRecord(data, "1", VIZ);
     
     Assert.assertNotEquals(mqr, mqr4);
     Assert.assertNotEquals(mqr2, mqr4);

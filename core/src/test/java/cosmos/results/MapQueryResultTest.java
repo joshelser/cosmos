@@ -29,40 +29,37 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import cosmos.results.Column;
-import cosmos.results.SValue;
-import cosmos.results.impl.MapQueryResult;
+import cosmos.results.impl.MapRecord;
 
 @RunWith(JUnit4.class)
 public class MapQueryResultTest {
   
   @Test
   public void basicCreation() {
-    Set<Entry<Column,SValue>> expected = Sets.newHashSet();
+    Set<Entry<Column,RecordValue>> expected = Sets.newHashSet();
     expected.add(Maps.immutableEntry(Column.create("TEXT"),
-        SValue.create("foo", new ColumnVisibility("test"))));
+        RecordValue.create("foo", new ColumnVisibility("test"))));
     expected.add(Maps.immutableEntry(Column.create("TEXT"),
-        SValue.create("bar", new ColumnVisibility("test"))));
+        RecordValue.create("bar", new ColumnVisibility("test"))));
     
     Map<String,String> document = Maps.newHashMap();
     document.put("TEXT", "foo");
     document.put("TEXT", "bar");
     
-    MapQueryResult mqr = new MapQueryResult(document, "1", new ColumnVisibility("test"),
-        new Function<Entry<String,String>,Entry<Column,SValue>>() {
+    MapRecord mqr = new MapRecord(document, "1", new ColumnVisibility("test"),
+        new RecordFunction<String,String>() {
 
-          public Entry<Column,SValue> apply(Entry<String,String> input) {
+          public Entry<Column,RecordValue> apply(Entry<String,String> input) {
             final ColumnVisibility cv = new ColumnVisibility("test");
             return Maps.immutableEntry(Column.create(input.getKey()),
-                SValue.create(input.getValue(), cv));
+                RecordValue.create(input.getValue(), cv));
           }
     });
     
-    for (Entry<Column,SValue> column : mqr.columnValues()) {
+    for (Entry<Column,RecordValue> column : mqr.columnValues()) {
       Assert.assertTrue(expected.contains(column));
     }
   }

@@ -34,22 +34,22 @@ import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableUtils;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 
 import cosmos.results.Column;
-import cosmos.results.QueryResult;
-import cosmos.results.SValue;
+import cosmos.results.Record;
+import cosmos.results.RecordFunction;
+import cosmos.results.RecordValue;
 
-public class MapQueryResult implements QueryResult<MapQueryResult> {
+public class MapRecord implements Record<MapRecord> {
   
   protected String docId;
-  protected Map<Column,SValue> document;
+  protected Map<Column,RecordValue> document;
   protected ColumnVisibility docVisibility;
   
-  protected MapQueryResult() { }
+  protected MapRecord() { }
   
-  public <T1,T2> MapQueryResult(Map<T1,T2> untypedDoc, String docId, ColumnVisibility docVisibility, Function<Entry<T1,T2>,Entry<Column,SValue>> function) {
+  public <T1,T2> MapRecord(Map<T1,T2> untypedDoc, String docId, ColumnVisibility docVisibility, RecordFunction<T1,T2> function) {
     checkNotNull(untypedDoc);
     checkNotNull(docId);
     checkNotNull(docVisibility);
@@ -60,12 +60,12 @@ public class MapQueryResult implements QueryResult<MapQueryResult> {
     this.docVisibility = docVisibility;
     
     for (Entry<T1,T2> untypedEntry : untypedDoc.entrySet()) {
-      Entry<Column,SValue> entry = function.apply(untypedEntry);
+      Entry<Column,RecordValue> entry = function.apply(untypedEntry);
       this.document.put(entry.getKey(), entry.getValue());
     }
   }
   
-  public MapQueryResult(Map<Column,SValue> document, String docId, ColumnVisibility docVisibility) {
+  public MapRecord(Map<Column,RecordValue> document, String docId, ColumnVisibility docVisibility) {
     checkNotNull(document);
     checkNotNull(docId);
     checkNotNull(docVisibility);
@@ -83,7 +83,7 @@ public class MapQueryResult implements QueryResult<MapQueryResult> {
     return this.document.toString();
   }
   
-  public MapQueryResult typedDocument() {
+  public MapRecord typedDocument() {
     return this;
   }
   
@@ -91,12 +91,12 @@ public class MapQueryResult implements QueryResult<MapQueryResult> {
     return this.docVisibility;
   }
   
-  public Iterable<Entry<Column,SValue>> columnValues() {
+  public Iterable<Entry<Column,RecordValue>> columnValues() {
     return this.document.entrySet();
   }
   
-  public static MapQueryResult recreate(DataInput in) throws IOException {
-    MapQueryResult result = new MapQueryResult();
+  public static MapRecord recreate(DataInput in) throws IOException {
+    MapRecord result = new MapRecord();
     result.readFields(in);
     return result;
   }
@@ -116,7 +116,7 @@ public class MapQueryResult implements QueryResult<MapQueryResult> {
     
     for (int i = 0; i < entryCount; i++) {
       
-      this.document.put(Column.recreate(in), SValue.recreate(in));
+      this.document.put(Column.recreate(in), RecordValue.recreate(in));
     }
   }
 
@@ -129,7 +129,7 @@ public class MapQueryResult implements QueryResult<MapQueryResult> {
     out.write(cvBytes);
     
     WritableUtils.writeVInt(out, this.document.size());
-    for (Entry<Column,SValue> entry : this.document.entrySet()) {
+    for (Entry<Column,RecordValue> entry : this.document.entrySet()) {
       entry.getKey().write(out);
       entry.getValue().write(out);
     }
@@ -157,8 +157,8 @@ public class MapQueryResult implements QueryResult<MapQueryResult> {
   
   @Override
   public boolean equals(Object o) {
-    if (o instanceof MultimapQueryResult) {
-      MultimapQueryResult other = (MultimapQueryResult) o;
+    if (o instanceof MultimapRecord) {
+      MultimapRecord other = (MultimapRecord) o;
       return this.docId.equals(other.docId) && this.docVisibility.equals(other.docVisibility) &&
           this.document.equals(other.document);
     }

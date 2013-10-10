@@ -70,9 +70,9 @@ import cosmos.options.Paging;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
 import cosmos.results.PagedQueryResult;
-import cosmos.results.QueryResult;
-import cosmos.results.SValue;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.Record;
+import cosmos.results.RecordValue;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.store.PersistedStores;
 import cosmos.store.PersistedStores.State;
 import cosmos.store.Store;
@@ -157,12 +157,12 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public void addResult(Store id, QueryResult<?> queryResult) throws Exception {
+  public void addResult(Store id, Record<?> queryResult) throws Exception {
     checkNotNull(queryResult);
     
     Stopwatch sw = new Stopwatch().start();
     try {
-      addResults(id, Single.<QueryResult<?>> create(queryResult));
+      addResults(id, Single.<Record<?>> create(queryResult));
     } finally {
       sw.stop();
       id.tracer().addTiming("Cosmos:addResult", sw.elapsed(TimeUnit.MILLISECONDS));
@@ -170,7 +170,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public void addResults(Store id, Iterable<? extends QueryResult<?>> queryResults) throws Exception {
+  public void addResults(Store id, Iterable<? extends Record<?>> queryResults) throws Exception {
     checkNotNull(id);
     checkNotNull(queryResults);
     
@@ -217,7 +217,7 @@ public class CosmosImpl implements Cosmos{
     }
   }
   
-  protected void performAdd(Store id, Iterable<? extends QueryResult<?>> queryResults) throws MutationsRejectedException, TableNotFoundException,
+  protected void performAdd(Store id, Iterable<? extends Record<?>> queryResults) throws MutationsRejectedException, TableNotFoundException,
       IOException {
     BatchWriter bw = null, metadataBw = null;
     
@@ -232,14 +232,14 @@ public class CosmosImpl implements Cosmos{
       final Text holder = new Text();
       final Set<Column> columnsAlreadyIndexed = Sets.newHashSet();
       
-      for (QueryResult<?> result : queryResults) {
+      for (Record<?> result : queryResults) {
         bw.addMutation(addDocument(id, result));
         Mutation columnMutation = new Mutation(id.uuid());
         boolean newColumnIndexed = false;
         
-        for (Entry<Column,SValue> entry : result.columnValues()) {
+        for (Entry<Column,RecordValue> entry : result.columnValues()) {
           final Column c = entry.getKey();
-          final SValue v = entry.getValue();
+          final RecordValue v = entry.getValue();
           
           if (!columnsAlreadyIndexed.contains(c)) {
             holder.set(c.name());
@@ -362,7 +362,7 @@ public class CosmosImpl implements Cosmos{
       MutationsRejectedException, IOException {
     final IndexHelper indexHelper = IndexHelper.create(columnsToIndex);
     final int numCols = indexHelper.columnCount();
-    CloseableIterable<MultimapQueryResult> results = null;
+    CloseableIterable<MultimapRecord> results = null;
     BatchWriter bw = null;
     
     try {
@@ -375,7 +375,7 @@ public class CosmosImpl implements Cosmos{
       bw = id.connector().createBatchWriter(id.dataTable(), id.writerConfig());
       
       // Iterate over the results we have
-      for (MultimapQueryResult result : results) {
+      for (MultimapRecord result : results) {
         
         // If the cardinality of columns is greater in this result than the number of columns
         // we want to index
@@ -387,20 +387,20 @@ public class CosmosImpl implements Cosmos{
             if (result.containsKey(columnToIndex)) {
               // If so, get the value(s) for that column
               final Collection<Index> indices = indexHelper.indicesForColumn(columnToIndex);
-              final Collection<SValue> values = result.get(columnToIndex);
+              final Collection<RecordValue> values = result.get(columnToIndex);
               
               addIndicesForRecord(id, result, bw, indices, values);
             }
           }
         } else {
           // Otherwise it's more efficient to iterate over the columns of the result
-          for (Entry<Column,SValue> entry : result.columnValues()) {
+          for (Entry<Column,RecordValue> entry : result.columnValues()) {
             final Column column = entry.getKey();
             
             // Determine if we should index this column
             if (indexHelper.shouldIndex(column)) {
               final Collection<Index> indices = indexHelper.indicesForColumn(column);
-              final Collection<SValue> values = result.get(column);
+              final Collection<RecordValue> values = result.get(column);
               
               addIndicesForRecord(id, result, bw, indices, values);
             }
@@ -428,11 +428,11 @@ public class CosmosImpl implements Cosmos{
    * @throws MutationsRejectedException
    * @throws IOException
    */
-  protected void addIndicesForRecord(Store id, MultimapQueryResult result, BatchWriter bw, Collection<Index> indices, Collection<SValue> values)
+  protected void addIndicesForRecord(Store id, MultimapRecord result, BatchWriter bw, Collection<Index> indices, Collection<RecordValue> values)
       throws MutationsRejectedException, IOException {
     // Place an Index entry for each value in each direction defined
     for (Index index : indices) {
-      for (SValue value : values) {
+      for (RecordValue value : values) {
         Mutation m = getDocumentPrefix(id, result, value.value(), index.order());
         
         final String direction = Order.direction(index.order());
@@ -470,7 +470,7 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public CloseableIterable<MultimapQueryResult> fetch(Store id) throws TableNotFoundException, UnexpectedStateException {
+  public CloseableIterable<MultimapRecord> fetch(Store id) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     
     final String description = "Cosmos:fetch";
@@ -509,17 +509,17 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public PagedQueryResult<MultimapQueryResult> fetch(Store id, Paging limits) throws TableNotFoundException, UnexpectedStateException {
+  public PagedQueryResult<MultimapRecord> fetch(Store id, Paging limits) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     checkNotNull(limits);
     
-    CloseableIterable<MultimapQueryResult> results = fetch(id);
+    CloseableIterable<MultimapRecord> results = fetch(id);
     
-    return new PagedQueryResult<MultimapQueryResult>(results, limits);
+    return new PagedQueryResult<MultimapRecord>(results, limits);
   }
   
   @Override
-  public CloseableIterable<MultimapQueryResult> fetch(Store id, Column column, String value) throws TableNotFoundException, UnexpectedStateException {
+  public CloseableIterable<MultimapRecord> fetch(Store id, Column column, String value) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     checkNotNull(column);
     checkNotNull(value);
@@ -564,23 +564,23 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public PagedQueryResult<MultimapQueryResult> fetch(Store id, Column column, String value, Paging limits) throws TableNotFoundException,
+  public PagedQueryResult<MultimapRecord> fetch(Store id, Column column, String value, Paging limits) throws TableNotFoundException,
       UnexpectedStateException {
     checkNotNull(limits);
     
-    CloseableIterable<MultimapQueryResult> results = fetch(id, column, value);
+    CloseableIterable<MultimapRecord> results = fetch(id, column, value);
     
     return PagedQueryResult.create(results, limits);
   }
   
   @Override
-  public CloseableIterable<MultimapQueryResult> fetch(Store id, Index ordering) throws TableNotFoundException, UnexpectedStateException,
+  public CloseableIterable<MultimapRecord> fetch(Store id, Index ordering) throws TableNotFoundException, UnexpectedStateException,
       UnindexedColumnException {
     return fetch(id, ordering, true);
   }
   
   @Override
-  public CloseableIterable<MultimapQueryResult> fetch(Store id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException,
+  public CloseableIterable<MultimapRecord> fetch(Store id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException,
       UnexpectedStateException, UnindexedColumnException {
     checkNotNull(id);
     checkNotNull(ordering);
@@ -639,18 +639,18 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public PagedQueryResult<MultimapQueryResult> fetch(Store id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException,
+  public PagedQueryResult<MultimapRecord> fetch(Store id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException,
       UnindexedColumnException {
     checkNotNull(id);
     checkNotNull(limits);
     
-    CloseableIterable<MultimapQueryResult> results = fetch(id, ordering);
+    CloseableIterable<MultimapRecord> results = fetch(id, ordering);
     
     return PagedQueryResult.create(results, limits);
   }
   
   @Override
-  public CloseableIterable<Entry<SValue,Long>> groupResults(Store id, Column column) throws TableNotFoundException, UnexpectedStateException,
+  public CloseableIterable<Entry<RecordValue,Long>> groupResults(Store id, Column column) throws TableNotFoundException, UnexpectedStateException,
       UnindexedColumnException {
     checkNotNull(id);
     
@@ -702,17 +702,17 @@ public class CosmosImpl implements Cosmos{
   }
   
   @Override
-  public PagedQueryResult<Entry<SValue,Long>> groupResults(Store id, Column column, Paging limits) throws TableNotFoundException,
+  public PagedQueryResult<Entry<RecordValue,Long>> groupResults(Store id, Column column, Paging limits) throws TableNotFoundException,
       UnexpectedStateException, UnindexedColumnException {
     checkNotNull(limits);
     
-    CloseableIterable<Entry<SValue,Long>> results = groupResults(id, column);
+    CloseableIterable<Entry<RecordValue,Long>> results = groupResults(id, column);
     
     return PagedQueryResult.create(results, limits);
   }
   
   @Override
-  public MultimapQueryResult contents(Store id, String docId) throws TableNotFoundException, UnexpectedStateException {
+  public MultimapRecord contents(Store id, String docId) throws TableNotFoundException, UnexpectedStateException {
     checkNotNull(id);
     checkNotNull(docId);
     
@@ -786,7 +786,7 @@ public class CosmosImpl implements Cosmos{
     }
   }
   
-  protected Mutation getDocumentPrefix(Store id, QueryResult<?> queryResult, String suffix, Order order) {
+  protected Mutation getDocumentPrefix(Store id, Record<?> queryResult, String suffix, Order order) {
     final Text t = new Text();
     byte[] b = id.uuid().getBytes();
     t.append(b, 0, b.length);
@@ -801,7 +801,7 @@ public class CosmosImpl implements Cosmos{
     return new Mutation(t);
   }
   
-  protected Mutation addDocument(Store id, QueryResult<?> queryResult) throws IOException {
+  protected Mutation addDocument(Store id, Record<?> queryResult) throws IOException {
     Mutation m = getDocumentPrefix(id, queryResult, queryResult.docId(), Order.ASCENDING);
     
     // Store the docId as a searchable entry

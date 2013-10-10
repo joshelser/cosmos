@@ -12,7 +12,7 @@ import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
 import cosmos.options.Defaults;
 import cosmos.options.Index;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.store.PersistedStores;
 import cosmos.store.Store;
 import cosmos.util.IdentitySet;
@@ -31,13 +31,13 @@ public class SerializedStoreTest extends AbstractSortableTest {
     // Save off our Store that we've defined
     PersistedStores.store(id);
     
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("NAME"), SValue.create("George", VIZ));
-    data.put(Column.create("AGE"), SValue.create("25", VIZ));
-    data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
+    data.put(Column.create("NAME"), RecordValue.create("George", VIZ));
+    data.put(Column.create("AGE"), RecordValue.create("25", VIZ));
+    data.put(Column.create("HEIGHT"), RecordValue.create("70", VIZ));
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(data, "1", VIZ);
     
     cosmos.addResult(id, mqr);
     cosmos.finalize(id);
@@ -46,11 +46,11 @@ public class SerializedStoreTest extends AbstractSortableTest {
     
     id = PersistedStores.retrieve(c, Defaults.METADATA_TABLE, AUTHS, uuid);
     
-    CloseableIterable<MultimapQueryResult> records = cosmos.fetch(id);
-    Iterator<MultimapQueryResult> iter = records.iterator();
+    CloseableIterable<MultimapRecord> records = cosmos.fetch(id);
+    Iterator<MultimapRecord> iter = records.iterator();
     Assert.assertTrue(iter.hasNext());
     
-    MultimapQueryResult record = iter.next();
+    MultimapRecord record = iter.next();
     
     Assert.assertEquals("1", record.docId());
     
@@ -73,13 +73,13 @@ public class SerializedStoreTest extends AbstractSortableTest {
     // Save off our Store that we've defined
     PersistedStores.store(id);
     
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("NAME"), SValue.create("George", VIZ));
-    data.put(Column.create("AGE"), SValue.create("25", VIZ));
-    data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
+    data.put(Column.create("NAME"), RecordValue.create("George", VIZ));
+    data.put(Column.create("AGE"), RecordValue.create("25", VIZ));
+    data.put(Column.create("HEIGHT"), RecordValue.create("70", VIZ));
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(data, "1", VIZ);
     
     cosmos.addResult(id, mqr);
     
@@ -87,17 +87,17 @@ public class SerializedStoreTest extends AbstractSortableTest {
     
     id = PersistedStores.retrieve(c, Defaults.METADATA_TABLE, AUTHS, uuid);
     
-    CloseableIterable<MultimapQueryResult> records = cosmos.fetch(id);
-    Iterator<MultimapQueryResult> iter = records.iterator();
+    CloseableIterable<MultimapRecord> records = cosmos.fetch(id);
+    Iterator<MultimapRecord> iter = records.iterator();
     Assert.assertTrue(iter.hasNext());
     
-    MultimapQueryResult record = iter.next();
+    MultimapRecord record = iter.next();
     
     Assert.assertEquals("1", record.docId());
     
     Assert.assertFalse(iter.hasNext());
     
-    mqr = new MultimapQueryResult(data, "2", VIZ);
+    mqr = new MultimapRecord(data, "2", VIZ);
     cosmos.addResult(id, mqr);
     
     records = cosmos.fetch(id);

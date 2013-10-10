@@ -12,7 +12,7 @@ import cosmos.UnexpectedStateException;
 import cosmos.impl.CosmosImpl;
 import cosmos.options.Index;
 import cosmos.options.Paging;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.store.Store;
 import cosmos.util.IdentitySet;
 
@@ -41,7 +41,7 @@ public class CosmosImplStateTest extends AbstractSortableTest {
     Store id = Store.create(c, AUTHS, IdentitySet.<Index> create());
     Cosmos cosmos = new CosmosImpl(zkConnectString());
     
-    MultimapQueryResult mqr = new MultimapQueryResult(HashMultimap.<Column,SValue> create(), "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(HashMultimap.<Column,RecordValue> create(), "1", VIZ);
     
     cosmos.addResult(id, mqr);
   }
@@ -51,7 +51,7 @@ public class CosmosImplStateTest extends AbstractSortableTest {
     Store id = Store.create(c, AUTHS, IdentitySet.<Index> create());
     Cosmos cosmos = new CosmosImpl(zkConnectString());
     
-    MultimapQueryResult mqr = new MultimapQueryResult(HashMultimap.<Column,SValue> create(), "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(HashMultimap.<Column,RecordValue> create(), "1", VIZ);
     
     cosmos.addResults(id, Collections.singleton(mqr));
   }

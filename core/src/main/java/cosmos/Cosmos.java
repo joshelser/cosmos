@@ -32,9 +32,9 @@ import cosmos.options.Paging;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
 import cosmos.results.PagedQueryResult;
-import cosmos.results.QueryResult;
-import cosmos.results.SValue;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.Record;
+import cosmos.results.RecordValue;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.store.Store;
 
 public interface Cosmos {
@@ -48,7 +48,7 @@ public interface Cosmos {
    * @param queryResult
    * @throws Exception
    */
-  public void addResult(Store id, QueryResult<?> queryResult) throws Exception;
+  public void addResult(Store id, Record<?> queryResult) throws Exception;
   
   /**
    * Add results to the given SortableResult
@@ -56,7 +56,7 @@ public interface Cosmos {
    * @param id
    * @param queryResults
    */
-  public void addResults(Store id, Iterable<? extends QueryResult<?>> queryResults) throws Exception;
+  public void addResults(Store id, Iterable<? extends Record<?>> queryResults) throws Exception;
   
   /**
    * Closes the state of the given SortableResult. No additional results can be written after the set has been finalized. 
@@ -89,7 +89,7 @@ public interface Cosmos {
    * @param id
    * @return
    */
-  public CloseableIterable<MultimapQueryResult> fetch(Store id) throws TableNotFoundException, UnexpectedStateException;
+  public CloseableIterable<MultimapRecord> fetch(Store id) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Fetch all results from the given {@link Store}, paging through results
@@ -98,7 +98,7 @@ public interface Cosmos {
    * @param limits
    * @return
    */
-  public PagedQueryResult<MultimapQueryResult> fetch(Store id, Paging limits) throws TableNotFoundException, UnexpectedStateException;
+  public PagedQueryResult<MultimapRecord> fetch(Store id, Paging limits) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Fetch results with the given {@link value} in the given {@link Column}
@@ -108,7 +108,7 @@ public interface Cosmos {
    * @param order
    * @return
    */
-  public CloseableIterable<MultimapQueryResult> fetch(Store id, Column column, String value) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public CloseableIterable<MultimapRecord> fetch(Store id, Column column, String value) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Fetch results with values for the given {@link Column}, paging through results
@@ -118,7 +118,7 @@ public interface Cosmos {
    * @param order
    * @return
    */
-  public PagedQueryResult<MultimapQueryResult> fetch(Store id, Column column, String value, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public PagedQueryResult<MultimapRecord> fetch(Store id, Column column, String value, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Fetch results in the provided {@link Ordering}
@@ -128,7 +128,7 @@ public interface Cosmos {
    * @param order
    * @return
    */
-  public CloseableIterable<MultimapQueryResult> fetch(Store id, Index ordering) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public CloseableIterable<MultimapRecord> fetch(Store id, Index ordering) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
 
   /**
    * Fetch results in the provided {@link Ordering}. If {@link duplicateUidsAllowed} is true,
@@ -143,7 +143,7 @@ public interface Cosmos {
    * @throws UnexpectedStateException
    * @throws UnindexedColumnException
    */
-  public CloseableIterable<MultimapQueryResult> fetch(Store id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public CloseableIterable<MultimapRecord> fetch(Store id, Index ordering, boolean duplicateUidsAllowed) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
 
   /**
    * Fetch results in the provided {@link Ordering}, paging through results
@@ -153,7 +153,7 @@ public interface Cosmos {
    * @param order
    * @return
    */
-  public PagedQueryResult<MultimapQueryResult> fetch(Store id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public PagedQueryResult<MultimapRecord> fetch(Store id, Index ordering, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Return counts for unique values in the given column
@@ -163,7 +163,7 @@ public interface Cosmos {
    * @param order
    * @return
    */
-  public CloseableIterable<Entry<SValue,Long>> groupResults(Store id, Column column) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public CloseableIterable<Entry<RecordValue,Long>> groupResults(Store id, Column column) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Return counts for unique values in the given column, paging through results
@@ -173,7 +173,7 @@ public interface Cosmos {
    * @param order
    * @return
    */
-  public PagedQueryResult<Entry<SValue,Long>> groupResults(Store id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public PagedQueryResult<Entry<RecordValue,Long>> groupResults(Store id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Given a docId contained in the {@link Store}, fetch the record  
@@ -183,7 +183,7 @@ public interface Cosmos {
    * @throws TableNotFoundException
    * @throws UnexpectedStateException
    */
-  public MultimapQueryResult contents(Store id, String docId) throws TableNotFoundException, UnexpectedStateException;
+  public MultimapRecord contents(Store id, String docId) throws TableNotFoundException, UnexpectedStateException;
   
   /**
    * Clean up references to the data referenced by this SortableResult

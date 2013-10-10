@@ -50,9 +50,9 @@ import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
-import cosmos.results.QueryResult;
-import cosmos.results.SValue;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.Record;
+import cosmos.results.RecordValue;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.store.Store;
 
 /**
@@ -160,7 +160,7 @@ public class CosmosIntegrationTest extends CosmosIntegrationSetup {
   @Test
   public void wiki1Test() throws Exception {
     MediaWikiType wiki1 = getWiki1();
-    List<QueryResult<?>> results = wikiToMultimap(wiki1);
+    List<Record<?>> results = wikiToMultimap(wiki1);
     
     ZooKeeperInstance zk = new ZooKeeperInstance(mac.getInstanceName(), mac.getZooKeepers());
     Connector con = zk.getConnector("root", new PasswordToken(""));
@@ -177,16 +177,16 @@ public class CosmosIntegrationTest extends CosmosIntegrationSetup {
     
     Column pageIdCol = Column.create(PAGE_ID);
     
-    CloseableIterable<MultimapQueryResult> newResults = s.fetch(id);
+    CloseableIterable<MultimapRecord> newResults = s.fetch(id);
     
     Assert.assertNotNull(newResults);
     
     long count = 0;
     String prevPageId = "";
-    for (MultimapQueryResult res : newResults) {
-      Collection<SValue> pageIds = res.get(pageIdCol);
+    for (MultimapRecord res : newResults) {
+      Collection<RecordValue> pageIds = res.get(pageIdCol);
       String currPageId = null;
-      for (SValue pageId : pageIds) {
+      for (RecordValue pageId : pageIds) {
         if (null == currPageId) {
           currPageId = pageId.value();
         }

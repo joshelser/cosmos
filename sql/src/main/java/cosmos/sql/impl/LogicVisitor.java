@@ -44,7 +44,7 @@ import cosmos.Cosmos;
 import cosmos.UnexpectedStateException;
 import cosmos.UnindexedColumnException;
 import cosmos.results.Column;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.sql.call.ChildVisitor;
 import cosmos.sql.call.Field;
 import cosmos.sql.call.Literal;
@@ -54,7 +54,7 @@ import cosmos.sql.call.impl.operators.AndOperator;
 import cosmos.sql.call.impl.operators.OrOperator;
 import cosmos.store.Store;
 
-public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQueryResult>> {
+public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapRecord>> {
 
   private Store sortRes;
   private Cosmos cosmosRef;
@@ -90,7 +90,7 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
   }
 
   @Override
-  public Iterable<MultimapQueryResult> apply(ChildVisitor input) {
+  public Iterable<MultimapRecord> apply(ChildVisitor input) {
 
     HashFunction hf = Hashing.md5();
     HashCode hc = hf.newHasher().putObject(input, input).hash();
@@ -108,7 +108,7 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
       }
     }
 
-    Iterable<MultimapQueryResult> iter = Collections.emptyList();
+    Iterable<MultimapRecord> iter = Collections.emptyList();
     if (input instanceof FieldEquality) {
       FieldEquality equality = (FieldEquality) input;
       iter = apply(equality);
@@ -125,9 +125,9 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
     return iter;
   }
 
-  protected Iterable<MultimapQueryResult> apply(AndOperator andOp) {
+  protected Iterable<MultimapRecord> apply(AndOperator andOp) {
 
-    Iterable<MultimapQueryResult> iter = Collections.emptyList();
+    Iterable<MultimapRecord> iter = Collections.emptyList();
     Iterable<ChildVisitor> children = Iterables.filter(andOp.getChildren(), new FilterFilter());
     Iterator<ChildVisitor> childIter = children.iterator();
     if (childIter.hasNext()) {
@@ -147,9 +147,9 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
     return iter;
   }
 
-  protected Iterable<MultimapQueryResult> apply(OrOperator andOp) {
+  protected Iterable<MultimapRecord> apply(OrOperator andOp) {
 
-    Iterable<MultimapQueryResult> iter = Collections.emptyList();
+    Iterable<MultimapRecord> iter = Collections.emptyList();
     Iterable<ChildVisitor> children = Iterables.filter(andOp.getChildren(), new FilterFilter());
     Iterator<ChildVisitor> childIter = children.iterator();
 
@@ -181,8 +181,8 @@ public class LogicVisitor implements Function<ChildVisitor,Iterable<MultimapQuer
   }
 
   @SuppressWarnings("unchecked")
-  protected Iterable<MultimapQueryResult> apply(FieldEquality equality) {
-    Iterable<MultimapQueryResult> iter = Collections.emptyList();
+  protected Iterable<MultimapRecord> apply(FieldEquality equality) {
+    Iterable<MultimapRecord> iter = Collections.emptyList();
     for (ChildVisitor child : equality.getChildren()) {
       Pair<Field,Literal> entry = (Pair<Field,Literal>) child;
       cosmos.sql.call.Field field = (Field) entry.first();

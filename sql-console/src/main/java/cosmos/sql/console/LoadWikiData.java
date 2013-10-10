@@ -16,7 +16,7 @@ import com.google.common.collect.Sets;
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
 import cosmos.options.Index;
-import cosmos.results.QueryResult;
+import cosmos.results.Record;
 import cosmos.results.integration.CosmosIntegrationSetup;
 import cosmos.store.Store;
 
@@ -56,7 +56,7 @@ public class LoadWikiData {
     log.info("Parsing mediawiki data");
     MediaWikiType wiki = CosmosIntegrationSetup.getWiki1();
     
-    List<QueryResult<?>> results = CosmosIntegrationSetup.wikiToMultimap(wiki);
+    List<Record<?>> results = CosmosIntegrationSetup.wikiToMultimap(wiki);
     
     log.info("Loading {} mediawiki pages as {}", results.size(), id.uuid());
     cosmos.addResults(id, results);

@@ -46,7 +46,7 @@ import net.hydromatic.optiq.impl.java.JavaTypeFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Queues;
 
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.sql.CosmosRelNode.Plan;
 
 /**
@@ -170,7 +170,7 @@ public class DataTable<T> extends AbstractQueryable<T> implements
 
 	@Override
 	public Type getElementType() {
-		return MultimapQueryResult.class;
+		return MultimapRecord.class;
 	}
 
 	public String getTable() {

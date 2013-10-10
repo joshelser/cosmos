@@ -22,8 +22,8 @@ import com.google.common.collect.Lists;
 import cosmos.Cosmos;
 import cosmos.options.Defaults;
 import cosmos.results.Column;
-import cosmos.results.SValue;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.RecordValue;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.store.Store;
 
 public class LoadBuildingPermits implements Runnable {
@@ -94,7 +94,7 @@ public class LoadBuildingPermits implements Runnable {
       long entriesLoadedSinceLastLog = 0l;
       
       // Buffer 100 results to ammortize the BatchWriter costs underneath
-      ArrayList<MultimapQueryResult> cachedResults = Lists.newArrayListWithCapacity(itemsToBuffer + 1);
+      ArrayList<MultimapRecord> cachedResults = Lists.newArrayListWithCapacity(itemsToBuffer + 1);
       while (null != (data = reader.readNext())) {
         lineNumber++;
         
@@ -105,13 +105,13 @@ public class LoadBuildingPermits implements Runnable {
         }
         
         // Make the Multimap of column to svalue
-        HashMultimap<Column,SValue> metadata = HashMultimap.create();
+        HashMultimap<Column,RecordValue> metadata = HashMultimap.create();
         for (int i = 0; i < schema.size(); i++) {
           String name = schema.get(i);
           String value = StringUtils.trim(data[i]);
           
           if (!StringUtils.isBlank(value)) {
-            metadata.put(Column.create(name), SValue.create(value, Defaults.EMPTY_VIS));
+            metadata.put(Column.create(name), RecordValue.create(value, Defaults.EMPTY_VIS));
           }
         }
         
@@ -120,10 +120,10 @@ public class LoadBuildingPermits implements Runnable {
           log.error("Expected to find one {} column in record: {}", ID, metadata.toString());
         }
         
-        SValue docId = metadata.get(ID).iterator().next();
+        RecordValue docId = metadata.get(ID).iterator().next();
         
         // Add the record to our buffer
-        cachedResults.add(new MultimapQueryResult(metadata, docId.value(), Defaults.EMPTY_VIS));
+        cachedResults.add(new MultimapRecord(metadata, docId.value(), Defaults.EMPTY_VIS));
         
         // Flush the buffer when it gets big enough
         if (itemsToBuffer < cachedResults.size()) {

@@ -52,7 +52,7 @@ import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.options.Order;
 import cosmos.options.Paging;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.store.PersistedStores;
 import cosmos.store.Store;
 import cosmos.util.IdentitySet;
@@ -60,16 +60,16 @@ import cosmos.util.IdentitySet;
 @RunWith(JUnit4.class)
 public class BasicIndexingTest extends AbstractSortableTest {
   
-  protected List<Multimap<Column,SValue>> data;
+  protected List<Multimap<Column,RecordValue>> data;
   
   @Test
   public void test() throws Exception {
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
-    data.put(Column.create("TEXT"), SValue.create("bar", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(data, "1", VIZ);
     
     Set<Index> columnsToIndex = Collections.singleton(Index.define("TEXT"));
     
@@ -79,11 +79,11 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    s.addResults(id, Collections.<Record<?>> singleton(mqr));
     
-    mqr = new MultimapQueryResult(mqr, "2");
+    mqr = new MultimapRecord(mqr, "2");
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    s.addResults(id, Collections.<Record<?>> singleton(mqr));
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(8, Iterables.size(scanner));
@@ -93,7 +93,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.finalize(id);
     
-    CloseableIterable<MultimapQueryResult> results = s.fetch(id);
+    CloseableIterable<MultimapRecord> results = s.fetch(id);
     
     Assert.assertEquals(2, Iterables.size(results));
     
@@ -117,12 +117,12 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void totalDeletion() throws Exception {
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
-    data.put(Column.create("TEXT"), SValue.create("bar", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(data, "1", VIZ);
     
     Store id = Store.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
     
@@ -130,7 +130,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    s.addResults(id, Collections.<Record<?>> singleton(mqr));
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(4, Iterables.size(scanner));
@@ -153,12 +153,12 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void postIndex() throws Exception {
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
-    data.put(Column.create("TEXT"), SValue.create("bar", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(data, "1", VIZ);
     
     Store id = Store.create(c, AUTHS, Collections.<Index> emptySet());
     
@@ -166,7 +166,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    s.addResults(id, Collections.<Record<?>> singleton(mqr));
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(2, Iterables.size(scanner));
@@ -187,12 +187,12 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void addResultsWithIndexOverSparseData() throws Exception {
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
-    data.put(Column.create("TEXT"), SValue.create("bar", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(data, "1", VIZ);
     
     Set<Index> columnsToIndex = Sets.newHashSet(Index.define("TEXT"), Index.define("DOESNTEXIST"));
     
@@ -202,11 +202,11 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    s.addResults(id, Collections.<Record<?>> singleton(mqr));
     
-    mqr = new MultimapQueryResult(mqr, "2");
+    mqr = new MultimapRecord(mqr, "2");
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    s.addResults(id, Collections.<Record<?>> singleton(mqr));
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(8, Iterables.size(scanner));
@@ -216,7 +216,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.finalize(id);
     
-    CloseableIterable<MultimapQueryResult> results = s.fetch(id);
+    CloseableIterable<MultimapRecord> results = s.fetch(id);
     
     Assert.assertEquals(2, Iterables.size(results));
     
@@ -226,12 +226,12 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void indexEverything() throws Exception {
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
-    data.put(Column.create("SIZE"), SValue.create("2", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
+    data.put(Column.create("SIZE"), RecordValue.create("2", VIZ));
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(data, "1", VIZ);
     
     Set<Index> columnsToIndex = IdentitySet.<Index> create();
     
@@ -241,15 +241,15 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    s.addResults(id, Collections.<Record<?>> singleton(mqr));
     
     data = HashMultimap.create();
-    data.put(Column.create("TEXT"), SValue.create("bar", VIZ));
-    data.put(Column.create("SIZE"), SValue.create("3", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
+    data.put(Column.create("SIZE"), RecordValue.create("3", VIZ));
     
-    mqr = new MultimapQueryResult(data, "2", VIZ);
+    mqr = new MultimapRecord(data, "2", VIZ);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    s.addResults(id, Collections.<Record<?>> singleton(mqr));
     
     // 2 records with 2 columns (forward and reverse), plus the UID pointer (8+2=10)
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
@@ -260,14 +260,14 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.finalize(id);
     
-    CloseableIterable<MultimapQueryResult> results = s.fetch(id);
+    CloseableIterable<MultimapRecord> results = s.fetch(id);
     
     Assert.assertEquals(2, Iterables.size(results));
     results.close();
     
     // Sort by TEXT: should be docid "2" then "1"
     results = s.fetch(id, Index.define("TEXT"));
-    Iterator<MultimapQueryResult> resultsIter = results.iterator();
+    Iterator<MultimapRecord> resultsIter = results.iterator();
     
     Assert.assertTrue(resultsIter.hasNext());
     Assert.assertEquals("2", resultsIter.next().docId());
@@ -325,13 +325,13 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void postIndexSparseData() throws Exception {
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
-    data.put(Column.create("TEXT"), SValue.create("bar", VIZ));
-    data.put(Column.create("TEXT"), SValue.create("foobar", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("foobar", VIZ));
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(data, "1", VIZ);
     
     Store id = Store.create(c, AUTHS, Collections.<Index> emptySet());
     
@@ -339,7 +339,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    s.addResults(id, Collections.<Record<?>> singleton(mqr));
     
     Scanner scanner = c.createScanner(Defaults.DATA_TABLE, new Authorizations("test"));
     Assert.assertEquals(2, Iterables.size(scanner));
@@ -360,15 +360,15 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void pagedResults() throws Exception {
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("TEXT"), SValue.create("foo", VIZ));
-    data.put(Column.create("TEXT"), SValue.create("bar", VIZ));
-    data.put(Column.create("TEXT"), SValue.create("foobar", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("foobar", VIZ));
     
-    List<QueryResult<?>> mqrs = Lists.newArrayListWithCapacity(20);
+    List<Record<?>> mqrs = Lists.newArrayListWithCapacity(20);
     for (int i = 0; i < 16; i++) {
-      mqrs.add(new MultimapQueryResult(data, Integer.toString(i), VIZ));
+      mqrs.add(new MultimapRecord(data, Integer.toString(i), VIZ));
     }
     
     Store id = Store.create(c, AUTHS, Collections.singleton(Index.define("TEXT")));
@@ -381,11 +381,11 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.finalize(id);
     
-    PagedQueryResult<MultimapQueryResult> pqr = s.fetch(id, Paging.create(5, 20));
+    PagedQueryResult<MultimapRecord> pqr = s.fetch(id, Paging.create(5, 20));
     
     int pageCount = 0;
     int numRecords = 0;
-    for (List<MultimapQueryResult> page : pqr) {
+    for (List<MultimapRecord> page : pqr) {
       pageCount++;
       int nextSize = page.size();
       
@@ -401,7 +401,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     pageCount = 0;
     numRecords = 0;
-    for (List<MultimapQueryResult> page : pqr) {
+    for (List<MultimapRecord> page : pqr) {
       pageCount++;
       int nextSize = page.size();
       
@@ -421,17 +421,17 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Store id = Store.create(c, AUTHS,
         Sets.newHashSet(Index.define("NAME"), Index.define("AGE"), Index.define("HEIGHT"), Index.define("WEIGHT")));
     
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("NAME"), SValue.create("George", VIZ));
-    data.put(Column.create("AGE"), SValue.create("25", VIZ));
-    data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
+    data.put(Column.create("NAME"), RecordValue.create("George", VIZ));
+    data.put(Column.create("AGE"), RecordValue.create("25", VIZ));
+    data.put(Column.create("HEIGHT"), RecordValue.create("70", VIZ));
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "1", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "1", VIZ)));
     
     Set<Column> actual = Sets.newHashSet(s.columns(id));
     Set<Column> expected = Sets.newHashSet(data.keySet());
@@ -440,14 +440,14 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     data.removeAll(Column.create("HEIGHT"));
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "2", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "2", VIZ)));
     
     Assert.assertEquals(expected, Sets.newHashSet(s.columns(id)));
     
     data.removeAll(Column.create("AGE"));
-    data.put(Column.create("WEIGHT"), SValue.create("100", VIZ));
+    data.put(Column.create("WEIGHT"), RecordValue.create("100", VIZ));
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "3", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "3", VIZ)));
     
     expected.add(Column.create("WEIGHT"));
     
@@ -477,31 +477,31 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
     
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(name, SValue.create("George", VIZ));
-    data.put(Column.create("AGE"), SValue.create("25", VIZ));
-    data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
+    data.put(name, RecordValue.create("George", VIZ));
+    data.put(Column.create("AGE"), RecordValue.create("25", VIZ));
+    data.put(Column.create("HEIGHT"), RecordValue.create("70", VIZ));
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "1", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "1", VIZ)));
     
     data.removeAll(name);
-    data.put(name, SValue.create("Steve", VIZ));
+    data.put(name, RecordValue.create("Steve", VIZ));
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "2", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "2", VIZ)));
     
     data.removeAll(name);
-    data.put(name, SValue.create("Frank", VIZ));
-    data.put(Column.create("WEIGHT"), SValue.create("100", VIZ));
+    data.put(name, RecordValue.create("Frank", VIZ));
+    data.put(Column.create("WEIGHT"), RecordValue.create("100", VIZ));
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "3", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "3", VIZ)));
     
-    CloseableIterable<MultimapQueryResult> iter = s.fetch(id, name, "George");
-    ArrayList<MultimapQueryResult> results = Lists.newArrayList(iter);
+    CloseableIterable<MultimapRecord> iter = s.fetch(id, name, "George");
+    ArrayList<MultimapRecord> results = Lists.newArrayList(iter);
     iter.close();
     
     Assert.assertEquals(1, results.size());
@@ -509,9 +509,9 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Assert.assertEquals("1", results.get(0).docId());
     
     data.removeAll(height);
-    data.put(height, SValue.create("75", VIZ));
+    data.put(height, RecordValue.create("75", VIZ));
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "4", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "4", VIZ)));
     
     iter = s.fetch(id, name, "Frank");
     results = Lists.newArrayList(iter);
@@ -521,13 +521,13 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Set<String> docids = Sets.newHashSet("3", "4");
     
-    for (MultimapQueryResult r : results) {
+    for (MultimapRecord r : results) {
       Assert.assertTrue("Did not find " + r.docId() + " to remove from " + docids, docids.remove(r.docId()));
     }
     
     Assert.assertTrue("Expected empty set of docids: " + docids, docids.isEmpty());
     
-    CloseableIterable<MultimapQueryResult> empty = s.fetch(id, age, "0");
+    CloseableIterable<MultimapRecord> empty = s.fetch(id, age, "0");
     
     Assert.assertEquals(0, Iterables.size(empty));
     
@@ -541,34 +541,34 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
     
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(name, SValue.create("George", VIZ));
-    data.put(Column.create("AGE"), SValue.create("25", VIZ));
-    data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
+    data.put(name, RecordValue.create("George", VIZ));
+    data.put(Column.create("AGE"), RecordValue.create("25", VIZ));
+    data.put(Column.create("HEIGHT"), RecordValue.create("70", VIZ));
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "1", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "1", VIZ)));
     
     data.removeAll(name);
-    data.put(name, SValue.create("Steve", VIZ));
+    data.put(name, RecordValue.create("Steve", VIZ));
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "2", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "2", VIZ)));
     
     data.removeAll(name);
-    data.put(name, SValue.create("Frank", VIZ));
-    data.put(Column.create("WEIGHT"), SValue.create("100", VIZ));
+    data.put(name, RecordValue.create("Frank", VIZ));
+    data.put(Column.create("WEIGHT"), RecordValue.create("100", VIZ));
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "3", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "3", VIZ)));
     
     // Plain groupBy over three records with unique values in said column
-    CloseableIterable<Entry<SValue,Long>> groups = s.groupResults(id, name);
-    Map<SValue,Long> expectedGroups = ImmutableMap.<SValue,Long>of(SValue.create("George", VIZ), 1l, SValue.create("Steve", VIZ), 1l, SValue.create("Frank", VIZ), 1l);
+    CloseableIterable<Entry<RecordValue,Long>> groups = s.groupResults(id, name);
+    Map<RecordValue,Long> expectedGroups = ImmutableMap.<RecordValue,Long>of(RecordValue.create("George", VIZ), 1l, RecordValue.create("Steve", VIZ), 1l, RecordValue.create("Frank", VIZ), 1l);
     int count = 0;
-    for (Entry<SValue,Long> group : groups) {
+    for (Entry<RecordValue,Long> group : groups) {
       Assert.assertTrue(expectedGroups.containsKey(group.getKey()));
       Assert.assertEquals(expectedGroups.get(group.getKey()), group.getValue());
       count++;
@@ -578,9 +578,9 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     // Group by weight which only has one value
     groups = s.groupResults(id, weight);
-    expectedGroups = ImmutableMap.<SValue,Long>of(SValue.create("100", VIZ), 1l);
+    expectedGroups = ImmutableMap.<RecordValue,Long>of(RecordValue.create("100", VIZ), 1l);
     count = 0;
-    for (Entry<SValue,Long> group : groups) {
+    for (Entry<RecordValue,Long> group : groups) {
       Assert.assertTrue(expectedGroups.containsKey(group.getKey()));
       Assert.assertEquals(expectedGroups.get(group.getKey()), group.getValue());
       count++;
@@ -590,9 +590,9 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     // Group by height which is the same for everyone
     groups = s.groupResults(id, height);
-    expectedGroups = ImmutableMap.<SValue,Long>of(SValue.create("70", VIZ), 3l);
+    expectedGroups = ImmutableMap.<RecordValue,Long>of(RecordValue.create("70", VIZ), 3l);
     count = 0;
-    for (Entry<SValue,Long> group : groups) {
+    for (Entry<RecordValue,Long> group : groups) {
       Assert.assertTrue(expectedGroups.containsKey(group.getKey()));
       Assert.assertEquals(expectedGroups.get(group.getKey()), group.getValue());
       count++;
@@ -611,39 +611,39 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
     
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(name, SValue.create("George", VIZ));
-    data.put(Column.create("AGE"), SValue.create("25", VIZ));
-    data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
+    data.put(name, RecordValue.create("George", VIZ));
+    data.put(Column.create("AGE"), RecordValue.create("25", VIZ));
+    data.put(Column.create("HEIGHT"), RecordValue.create("70", VIZ));
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "1", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "1", VIZ)));
     
     data.removeAll(name);
-    data.put(name, SValue.create("Steve", VIZ));
+    data.put(name, RecordValue.create("Steve", VIZ));
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "2", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "2", VIZ)));
     
     data.removeAll(name);
-    data.put(name, SValue.create("Frank", VIZ));
-    data.put(Column.create("WEIGHT"), SValue.create("100", VIZ));
+    data.put(name, RecordValue.create("Frank", VIZ));
+    data.put(Column.create("WEIGHT"), RecordValue.create("100", VIZ));
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "3", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "3", VIZ)));
     
     int pageSize = 1;
     
     // Plain groupBy over three records with unique values in said column
-    PagedQueryResult<Entry<SValue,Long>> groups = s.groupResults(id, name, Paging.create(pageSize, Integer.MAX_VALUE));
-    Map<SValue,Long> expectedGroups = ImmutableMap.<SValue,Long>of(SValue.create("George", VIZ), 1l, SValue.create("Steve", VIZ), 1l, SValue.create("Frank", VIZ), 1l);
+    PagedQueryResult<Entry<RecordValue,Long>> groups = s.groupResults(id, name, Paging.create(pageSize, Integer.MAX_VALUE));
+    Map<RecordValue,Long> expectedGroups = ImmutableMap.<RecordValue,Long>of(RecordValue.create("George", VIZ), 1l, RecordValue.create("Steve", VIZ), 1l, RecordValue.create("Frank", VIZ), 1l);
     int count = 0;
-    for (List<Entry<SValue,Long>> groupPage : groups) {
+    for (List<Entry<RecordValue,Long>> groupPage : groups) {
       Assert.assertEquals(pageSize, groupPage.size());
       
-      for (Entry<SValue,Long> group : groupPage) {
+      for (Entry<RecordValue,Long> group : groupPage) {
         Assert.assertTrue(expectedGroups.containsKey(group.getKey()));
         Assert.assertEquals(expectedGroups.get(group.getKey()), group.getValue());
         count++;
@@ -659,11 +659,11 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void reverseSorting() throws Exception {
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(Column.create("TEXT"), SValue.create("aaa", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("aaa", VIZ));
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(data, "1", VIZ);
     
     Set<Index> columnsToIndex = IdentitySet.<Index> create();
     
@@ -673,18 +673,18 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    s.addResults(id, Collections.<Record<?>> singleton(mqr));
     
     data = HashMultimap.create();
-    data.put(Column.create("TEXT"), SValue.create("aab", VIZ));
+    data.put(Column.create("TEXT"), RecordValue.create("aab", VIZ));
     
-    mqr = new MultimapQueryResult(data, "2", VIZ);
+    mqr = new MultimapRecord(data, "2", VIZ);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    s.addResults(id, Collections.<Record<?>> singleton(mqr));
     
     s.finalize(id);
     
-    CloseableIterable<MultimapQueryResult> results = s.fetch(id);
+    CloseableIterable<MultimapRecord> results = s.fetch(id);
     
     Assert.assertEquals(2, Iterables.size(results));
     results.close();
@@ -692,7 +692,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     // Sort by TEXT descending, 1 then 2
     results = s.fetch(id, Index.define("TEXT", Order.DESCENDING));
     
-    Iterator<MultimapQueryResult> resultsIter = results.iterator();
+    Iterator<MultimapRecord> resultsIter = results.iterator();
     
     Assert.assertTrue(resultsIter.hasNext());
     Assert.assertEquals("2", resultsIter.next().docId());
@@ -723,13 +723,13 @@ public class BasicIndexingTest extends AbstractSortableTest {
 
   @Test
   public void addHighColumnCardinalityResults() throws Exception {
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
     for (int i = 0; i < 100; i++) { 
-      data.put(Column.create("TEXT" + i), SValue.create("foo", VIZ));
+      data.put(Column.create("TEXT" + i), RecordValue.create("foo", VIZ));
     }
     
-    MultimapQueryResult mqr = new MultimapQueryResult(data, "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(data, "1", VIZ);
     
     Set<Index> columnsToIndex = Sets.newHashSet(Index.define("TEXT0"), Index.define("TEXT1"), Index.define("TEXT2"));
     
@@ -739,7 +739,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(mqr));
+    s.addResults(id, Collections.<Record<?>> singleton(mqr));
     
     // Trigger the case where our record has more columns than what we're indexing
     s.index(id, columnsToIndex);
@@ -764,17 +764,17 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
     
-    Multimap<Column,SValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue> data = HashMultimap.create();
     
-    data.put(name, SValue.create("George", VIZ));
-    data.put(Column.create("AGE"), SValue.create("25", VIZ));
-    data.put(Column.create("HEIGHT"), SValue.create("70", VIZ));
+    data.put(name, RecordValue.create("George", VIZ));
+    data.put(Column.create("AGE"), RecordValue.create("25", VIZ));
+    data.put(Column.create("HEIGHT"), RecordValue.create("70", VIZ));
     
     Cosmos s = new CosmosImpl(zkConnectString());
     
     s.register(id);
     
-    s.addResults(id, Collections.<QueryResult<?>> singleton(new MultimapQueryResult(data, "1", VIZ)));
+    s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "1", VIZ)));
     
     try {
       // A different ID than what we just added

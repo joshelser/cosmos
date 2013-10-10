@@ -38,7 +38,7 @@ import com.google.common.io.Files;
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
 import cosmos.options.Defaults;
-import cosmos.results.QueryResult;
+import cosmos.results.Record;
 import cosmos.results.integration.CosmosIntegrationSetup;
 import cosmos.sql.CosmosDriver;
 import cosmos.sql.impl.CosmosSql;
@@ -258,7 +258,7 @@ public class CosmosConsole {
         CosmosIntegrationSetup.initializeJaxb();
         
         // Load all of the wikis.. they're not *that* big
-        List<QueryResult<?>> inputData = Lists.newArrayListWithExpectedSize(200000);
+        List<Record<?>> inputData = Lists.newArrayListWithExpectedSize(200000);
         for (MediaWikiType wiki : Lists.newArrayList(CosmosIntegrationSetup.getWiki1(), CosmosIntegrationSetup.getWiki2(), CosmosIntegrationSetup.getWiki3(),
             CosmosIntegrationSetup.getWiki4(), CosmosIntegrationSetup.getWiki5())) {
           inputData.addAll(CosmosIntegrationSetup.wikiToMultimap(wiki));

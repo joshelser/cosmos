@@ -10,7 +10,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
 import cosmos.results.Column;
-import cosmos.results.SValue;
+import cosmos.results.RecordValue;
 
 public class TableOutputFormat {
   public static final String COLUMN_SEPARATOR = "|", CORNER = "+", SPACE = " ", HYPHEN = "-", NEWLINE = "\n";
@@ -34,10 +34,10 @@ public class TableOutputFormat {
     while (results.next()) {
       for (int i = 0; i < columns.size(); i++) {
         String column = columns.get(i);
-        List<Entry<Column,SValue>> sValues = (List<Entry<Column,SValue>>) results.getObject(column);
+        List<Entry<Column,RecordValue>> sValues = (List<Entry<Column,RecordValue>>) results.getObject(column);
         
         if (null != sValues && !sValues.isEmpty()) {
-          for (Entry<Column,SValue> values : sValues) {
+          for (Entry<Column,RecordValue> values : sValues) {
             sb.append(values.getValue().toString());
           }
         }

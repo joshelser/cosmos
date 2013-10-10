@@ -48,7 +48,7 @@ import cosmos.impl.CosmosImpl;
 import cosmos.options.Index;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
-import cosmos.results.SValue;
+import cosmos.results.RecordValue;
 import cosmos.store.Store;
 import cosmos.util.AscendingIndexIdentitySet;
 import cosmos.util.IdentitySet;
@@ -177,16 +177,16 @@ public class BuildingPermitsExample {
       sw.start();
       
       // Get the number of times we've seen each value in a given column
-      CloseableIterable<Entry<SValue,Long>> groupingsInColumn = cosmos.groupResults(id, c);
+      CloseableIterable<Entry<RecordValue,Long>> groupingsInColumn = cosmos.groupResults(id, c);
       
       log.info(c.name() + ":");
       
       // Iterate over the counts, collecting the top N values in each column
-      TreeMap<Long,SValue> topValues = Maps.newTreeMap();
+      TreeMap<Long,RecordValue> topValues = Maps.newTreeMap();
       
-      for (Entry<SValue,Long> entry : groupingsInColumn) {
+      for (Entry<RecordValue,Long> entry : groupingsInColumn) {
         if (topValues.size() == numTopValues) {
-          Entry<Long,SValue> least = topValues.pollFirstEntry();
+          Entry<Long,RecordValue> least = topValues.pollFirstEntry();
           
           if (least.getKey() < entry.getValue()) {
             topValues.put(entry.getValue(), entry.getKey());

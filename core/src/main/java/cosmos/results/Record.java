@@ -26,7 +26,7 @@ import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.hadoop.io.Writable;
 
-public interface QueryResult<T> extends Writable {
+public interface Record<T> extends Writable {
   public String docId();
   
   public String document();
@@ -35,7 +35,7 @@ public interface QueryResult<T> extends Writable {
   
   public ColumnVisibility documentVisibility();
   
-  public Iterable<Entry<Column,SValue>> columnValues();
+  public Iterable<Entry<Column,RecordValue>> columnValues();
   
   public Value toValue() throws IOException;
 }

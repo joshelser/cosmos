@@ -53,9 +53,9 @@ import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
-import cosmos.results.QueryResult;
-import cosmos.results.SValue;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.Record;
+import cosmos.results.RecordValue;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.store.Store;
 
 /**
@@ -118,43 +118,43 @@ public class GroupByIntegrationTest {
     
     final ColumnVisibility cv = new ColumnVisibility("");
     
-    Multimap<Column,SValue> data = HashMultimap.create();
-    data.put(Column.create("NAME"), SValue.create("Josh", cv));
-    data.put(Column.create("AGE"), SValue.create("24", cv));
-    data.put(Column.create("STATE"), SValue.create("MD", cv));
-    data.put(Column.create("COLOR"), SValue.create("Blue", cv));
+    Multimap<Column,RecordValue> data = HashMultimap.create();
+    data.put(Column.create("NAME"), RecordValue.create("Josh", cv));
+    data.put(Column.create("AGE"), RecordValue.create("24", cv));
+    data.put(Column.create("STATE"), RecordValue.create("MD", cv));
+    data.put(Column.create("COLOR"), RecordValue.create("Blue", cv));
     
-    MultimapQueryResult mqr1 = new MultimapQueryResult(data, "1", cv);
-    
-    data = HashMultimap.create();
-    data.put(Column.create("NAME"), SValue.create("Wilhelm", cv));
-    data.put(Column.create("AGE"), SValue.create("25", cv));
-    data.put(Column.create("STATE"), SValue.create("MD", cv));
-    data.put(Column.create("COLOR"), SValue.create("Pink", cv));
-    
-    MultimapQueryResult mqr2 = new MultimapQueryResult(data, "2", cv);
+    MultimapRecord mqr1 = new MultimapRecord(data, "1", cv);
     
     data = HashMultimap.create();
-    data.put(Column.create("NAME"), SValue.create("Marky", cv));
-    data.put(Column.create("AGE"), SValue.create("29", cv));
-    data.put(Column.create("STATE"), SValue.create("MD", cv));
-    data.put(Column.create("COLOR"), SValue.create("Blue", cv));
+    data.put(Column.create("NAME"), RecordValue.create("Wilhelm", cv));
+    data.put(Column.create("AGE"), RecordValue.create("25", cv));
+    data.put(Column.create("STATE"), RecordValue.create("MD", cv));
+    data.put(Column.create("COLOR"), RecordValue.create("Pink", cv));
     
-    MultimapQueryResult mqr3 = new MultimapQueryResult(data, "3", cv);
+    MultimapRecord mqr2 = new MultimapRecord(data, "2", cv);
+    
+    data = HashMultimap.create();
+    data.put(Column.create("NAME"), RecordValue.create("Marky", cv));
+    data.put(Column.create("AGE"), RecordValue.create("29", cv));
+    data.put(Column.create("STATE"), RecordValue.create("MD", cv));
+    data.put(Column.create("COLOR"), RecordValue.create("Blue", cv));
+    
+    MultimapRecord mqr3 = new MultimapRecord(data, "3", cv);
     
     // Add our data
-    sorts.addResults(id, Lists.<QueryResult<?>> newArrayList(mqr3, mqr2, mqr1));
+    sorts.addResults(id, Lists.<Record<?>> newArrayList(mqr3, mqr2, mqr1));
     
     // Testing NAME
-    Map<SValue,Long> expects = ImmutableMap.<SValue,Long> of(
-        SValue.create("Josh", cv), 1l, 
-        SValue.create("Wilhelm", cv), 1l, 
-        SValue.create("Marky", cv), 1l);
+    Map<RecordValue,Long> expects = ImmutableMap.<RecordValue,Long> of(
+        RecordValue.create("Josh", cv), 1l, 
+        RecordValue.create("Wilhelm", cv), 1l, 
+        RecordValue.create("Marky", cv), 1l);
     
-    CloseableIterable<Entry<SValue,Long>> countedResults = sorts.groupResults(id, Column.create("NAME"));
+    CloseableIterable<Entry<RecordValue,Long>> countedResults = sorts.groupResults(id, Column.create("NAME"));
     
     int resultCount = 0;
-    for (Entry<SValue,Long> entry : countedResults) {
+    for (Entry<RecordValue,Long> entry : countedResults) {
       resultCount++;
       
       Assert.assertTrue(expects.containsKey(entry.getKey()));
@@ -165,15 +165,15 @@ public class GroupByIntegrationTest {
     Assert.assertEquals(expects.size(), resultCount);
   
     // TEesting AGE
-    expects = ImmutableMap.<SValue,Long> of(
-        SValue.create("24", cv), 1l, 
-        SValue.create("25", cv), 1l, 
-        SValue.create("29", cv), 1l);
+    expects = ImmutableMap.<RecordValue,Long> of(
+        RecordValue.create("24", cv), 1l, 
+        RecordValue.create("25", cv), 1l, 
+        RecordValue.create("29", cv), 1l);
     
     countedResults = sorts.groupResults(id, Column.create("AGE"));
     
     resultCount = 0;
-    for (Entry<SValue,Long> entry : countedResults) {
+    for (Entry<RecordValue,Long> entry : countedResults) {
       resultCount++;
       
       Assert.assertTrue(expects.containsKey(entry.getKey()));
@@ -185,12 +185,12 @@ public class GroupByIntegrationTest {
     Assert.assertEquals(expects.size(), resultCount);
   
     // Testing STATE
-    expects = ImmutableMap.<SValue,Long> of(SValue.create("MD", cv), 3l);
+    expects = ImmutableMap.<RecordValue,Long> of(RecordValue.create("MD", cv), 3l);
     
     countedResults = sorts.groupResults(id, Column.create("STATE"));
     
     resultCount = 0;
-    for (Entry<SValue,Long> entry : countedResults) {
+    for (Entry<RecordValue,Long> entry : countedResults) {
       resultCount++;
       
       Assert.assertTrue(expects.containsKey(entry.getKey()));
@@ -202,14 +202,14 @@ public class GroupByIntegrationTest {
     Assert.assertEquals(expects.size(), resultCount);
   
     // Testing COLOR
-    expects = ImmutableMap.<SValue,Long> of(
-        SValue.create("Blue", cv), 2l, 
-        SValue.create("Pink", cv), 1l);
+    expects = ImmutableMap.<RecordValue,Long> of(
+        RecordValue.create("Blue", cv), 2l, 
+        RecordValue.create("Pink", cv), 1l);
     
     countedResults = sorts.groupResults(id, Column.create("COLOR"));
     
     resultCount = 0;
-    for (Entry<SValue,Long> entry : countedResults) {
+    for (Entry<RecordValue,Long> entry : countedResults) {
       resultCount++;
       
       Assert.assertTrue(expects.containsKey(entry.getKey()));

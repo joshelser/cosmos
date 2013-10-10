@@ -30,13 +30,13 @@ import org.apache.hadoop.io.WritableUtils;
 
 import com.google.common.base.Preconditions;
 
-public class SValue implements Writable, Comparable<SValue> {
+public class RecordValue implements Writable, Comparable<RecordValue> {
   private String value;
   private ColumnVisibility visibility;
   
-  protected SValue() { }
+  protected RecordValue() { }
   
-  public SValue(String value, ColumnVisibility visibility) {
+  public RecordValue(String value, ColumnVisibility visibility) {
     Preconditions.checkNotNull(value);
     Preconditions.checkNotNull(visibility);
     this.value = value;
@@ -51,14 +51,14 @@ public class SValue implements Writable, Comparable<SValue> {
     return this.visibility;
   }
   
-  public static SValue create(String value, ColumnVisibility visibility) {
+  public static RecordValue create(String value, ColumnVisibility visibility) {
     Preconditions.checkNotNull(value);
     Preconditions.checkNotNull(visibility);
-    return new SValue(value, visibility);
+    return new RecordValue(value, visibility);
   }
   
-  public static SValue recreate(DataInput in) throws IOException {
-    final SValue val = new SValue();
+  public static RecordValue recreate(DataInput in) throws IOException {
+    final RecordValue val = new RecordValue();
     val.readFields(in);
     return val;
   }
@@ -70,8 +70,8 @@ public class SValue implements Writable, Comparable<SValue> {
   
   @Override
   public boolean equals(Object o) {
-    if (o instanceof SValue) {
-      SValue other = (SValue) o;
+    if (o instanceof RecordValue) {
+      RecordValue other = (RecordValue) o;
       return this.value.equals(other.value) &&
           this.visibility.equals(other.visibility);
     }
@@ -104,7 +104,7 @@ public class SValue implements Writable, Comparable<SValue> {
   }
 
   @Override
-  public int compareTo(SValue o) {
+  public int compareTo(RecordValue o) {
     int res = this.value.compareTo(o.value);
     
     if (0 == res) {

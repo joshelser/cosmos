@@ -24,12 +24,12 @@ import java.util.Collection;
 import com.google.common.base.Predicate;
 
 import cosmos.results.Column;
-import cosmos.results.SValue;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.RecordValue;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.sql.call.Field;
 import cosmos.sql.call.Literal;
 
-public class DocumentFieldPredicate implements Predicate<MultimapQueryResult> {
+public class DocumentFieldPredicate implements Predicate<MultimapRecord> {
 
   private Column column;
   private Literal predicateValue;
@@ -40,9 +40,9 @@ public class DocumentFieldPredicate implements Predicate<MultimapQueryResult> {
   }
 
   @Override
-  public boolean apply(MultimapQueryResult input) {
-    Collection<SValue> values = input.get(column);
-    for (SValue value : values) {
+  public boolean apply(MultimapRecord input) {
+    Collection<RecordValue> values = input.get(column);
+    for (RecordValue value : values) {
       if (value.value().equals(predicateValue.toString()))
         return true;
     }

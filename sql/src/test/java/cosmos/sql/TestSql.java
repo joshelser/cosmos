@@ -88,8 +88,8 @@ import cosmos.mediawiki.MediawikiPage.Page.Revision.Contributor;
 import cosmos.options.Defaults;
 import cosmos.options.Index;
 import cosmos.results.Column;
-import cosmos.results.SValue;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.RecordValue;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.sql.impl.CosmosSql;
 import cosmos.store.PersistedStores;
 import cosmos.store.Store;
@@ -198,9 +198,9 @@ public class TestSql {
       
       meataData = new Store(connector, connector.securityOperations().getUserAuthorizations("root"), columns);
       
-      Function<Entry<Key,Value>,MultimapQueryResult> func = new Function<Entry<Key,Value>,MultimapQueryResult>() {
+      Function<Entry<Key,Value>,MultimapRecord> func = new Function<Entry<Key,Value>,MultimapRecord>() {
         @Override
-        public MultimapQueryResult apply(Entry<Key,Value> input) {
+        public MultimapRecord apply(Entry<Key,Value> input) {
           Page p;
           try {
             p = Page.parseFrom(input.getValue().get());
@@ -212,11 +212,11 @@ public class TestSql {
       };
       
       Map<Column,Long> counts = Maps.newHashMap();
-      ArrayList<MultimapQueryResult> tformSource = Lists.newArrayListWithCapacity(20000);
+      ArrayList<MultimapRecord> tformSource = Lists.newArrayListWithCapacity(20000);
       Iterable<Entry<Key,Value>> inputIterable = Iterables.limit(bs, numRecords);
       for (Entry<Key,Value> input : inputIterable) {
         
-        MultimapQueryResult r = func.apply(input);
+        MultimapRecord r = func.apply(input);
         tformSource.add(r);
         
         loadCountsForRecord(counts, r);
@@ -321,9 +321,9 @@ public class TestSql {
       while (resultSet.next()) {
         assertEquals(metaData.getColumnName(1), "PAGE_ID");
         @SuppressWarnings("unchecked")
-        List<Entry<Column,SValue>> sValues = (List<Entry<Column,SValue>>) resultSet.getObject("PAGE_ID");
+        List<Entry<Column,RecordValue>> sValues = (List<Entry<Column,RecordValue>>) resultSet.getObject("PAGE_ID");
         assertEquals(sValues.size(), 1);
-        SValue onlyValue = sValues.iterator().next().getValue();
+        RecordValue onlyValue = sValues.iterator().next().getValue();
         assertEquals(onlyValue.visibility().toString(), "[en]");
         
         assertTrue(onlyValue.value().equals(Integer.valueOf(9).toString()) || onlyValue.value().equals(Integer.valueOf(8).toString()));
@@ -360,9 +360,9 @@ public class TestSql {
       while (resultSet.next()) {
         assertEquals(metaData.getColumnName(1), "PAGE_ID");
         @SuppressWarnings("unchecked")
-        List<Entry<Column,SValue>> sValues = (List<Entry<Column,SValue>>) resultSet.getObject("PAGE_ID");
+        List<Entry<Column,RecordValue>> sValues = (List<Entry<Column,RecordValue>>) resultSet.getObject("PAGE_ID");
         assertEquals(sValues.size(), 1);
-        SValue onlyValue = sValues.iterator().next().getValue();
+        RecordValue onlyValue = sValues.iterator().next().getValue();
         assertEquals(onlyValue.visibility().toString(), "[en]");
         
         assertEquals(onlyValue.value(), Integer.valueOf(9).toString());
@@ -400,9 +400,9 @@ public class TestSql {
       while (resultSet.next()) {
         assertEquals(metaData.getColumnName(1), "PAGE_ID");
         @SuppressWarnings("unchecked")
-        List<Entry<Column,SValue>> sValues = (List<Entry<Column,SValue>>) resultSet.getObject("PAGE_ID");
+        List<Entry<Column,RecordValue>> sValues = (List<Entry<Column,RecordValue>>) resultSet.getObject("PAGE_ID");
         assertEquals(sValues.size(), 1);
-        SValue onlyValue = sValues.iterator().next().getValue();
+        RecordValue onlyValue = sValues.iterator().next().getValue();
         assertEquals(onlyValue.visibility().toString(), "[en]");
         
         assertEquals(onlyValue.value(), Integer.valueOf(resultsFound).toString());
@@ -439,9 +439,9 @@ public class TestSql {
       while (resultSet.next()) {
         assertEquals(metaData.getColumnName(1), "PAGE_ID");
         @SuppressWarnings("unchecked")
-        List<Entry<Column,SValue>> sValues = (List<Entry<Column,SValue>>) resultSet.getObject("PAGE_ID");
+        List<Entry<Column,RecordValue>> sValues = (List<Entry<Column,RecordValue>>) resultSet.getObject("PAGE_ID");
         assertEquals(sValues.size(), 1);
-        SValue onlyValue = sValues.iterator().next().getValue();
+        RecordValue onlyValue = sValues.iterator().next().getValue();
         assertEquals(onlyValue.visibility().toString(), "[en]");
         
         assertEquals(onlyValue.value(), Integer.valueOf(resultsFound).toString());
@@ -515,9 +515,9 @@ public class TestSql {
       while (resultSet.next()) {
         assertEquals(metaData.getColumnName(1), "PAGE_ID");
         @SuppressWarnings("unchecked")
-        List<Entry<Column,SValue>> sValues = (List<Entry<Column,SValue>>) resultSet.getObject("PAGE_ID");
+        List<Entry<Column,RecordValue>> sValues = (List<Entry<Column,RecordValue>>) resultSet.getObject("PAGE_ID");
         assertEquals(sValues.size(), 1);
-        SValue onlyValue = sValues.iterator().next().getValue();
+        RecordValue onlyValue = sValues.iterator().next().getValue();
         assertEquals(onlyValue.visibility().toString(), "[en]");
         values.remove(onlyValue.value());
         resultsFound++;
@@ -531,8 +531,8 @@ public class TestSql {
     }
   }
   
-  public static void loadCountsForRecord(Map<Column,Long> counts, MultimapQueryResult r) {
-    for (Entry<Column,SValue> entry : r.columnValues()) {
+  public static void loadCountsForRecord(Map<Column,Long> counts, MultimapRecord r) {
+    for (Entry<Column,RecordValue> entry : r.columnValues()) {
       Column c = entry.getKey();
       if (counts.containsKey(c)) {
         counts.put(c, counts.get(c) + 1);
@@ -542,31 +542,31 @@ public class TestSql {
     }
   }
   
-  public static MultimapQueryResult pagesToQueryResult(Page p) {
-    HashMultimap<Column,SValue> data = HashMultimap.create();
+  public static MultimapRecord pagesToQueryResult(Page p) {
+    HashMultimap<Column,RecordValue> data = HashMultimap.create();
     
     String pageId = Long.toString(p.getId());
     
-    data.put(PAGE_ID, SValue.create(pageId, cv));
+    data.put(PAGE_ID, RecordValue.create(pageId, cv));
     
     Revision r = p.getRevision();
     if (null != r) {
-      data.put(REVISION_ID, SValue.create(Long.toString(r.getId()), cv));
-      data.put(REVISION_TIMESTAMP, SValue.create(r.getTimestamp(), cv));
+      data.put(REVISION_ID, RecordValue.create(Long.toString(r.getId()), cv));
+      data.put(REVISION_TIMESTAMP, RecordValue.create(r.getTimestamp(), cv));
       
       Contributor c = r.getContributor();
       if (null != c) {
         if (null != c.getUsername()) {
-          data.put(CONTRIBUTOR_USERNAME, SValue.create(c.getUsername(), cv));
+          data.put(CONTRIBUTOR_USERNAME, RecordValue.create(c.getUsername(), cv));
         }
         
         if (0l != c.getId()) {
-          data.put(CONTRIBUTOR_ID, SValue.create(Long.toString(c.getId()), cv));
+          data.put(CONTRIBUTOR_ID, RecordValue.create(Long.toString(c.getId()), cv));
         }
       }
     }
     
-    return new MultimapQueryResult(data, pageId, cv);
+    return new MultimapRecord(data, pageId, cv);
   }
   
 }

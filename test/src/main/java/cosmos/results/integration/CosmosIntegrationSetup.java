@@ -49,9 +49,9 @@ import com.google.common.collect.Sets;
 import cosmos.IntegrationTests;
 import cosmos.options.Index;
 import cosmos.results.Column;
-import cosmos.results.QueryResult;
-import cosmos.results.SValue;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.Record;
+import cosmos.results.RecordValue;
+import cosmos.results.impl.MultimapRecord;
 
 /**
  * 
@@ -244,23 +244,23 @@ public class CosmosIntegrationSetup {
     return jaxb.getValue();
   }
   
-  public static List<QueryResult<?>> wikiToMultimap(MediaWikiType wiki) {
+  public static List<Record<?>> wikiToMultimap(MediaWikiType wiki) {
     Preconditions.checkNotNull(wiki);
     
     List<PageType> pages = wiki.getPage();
-    List<QueryResult<?>> mmap = Lists.newArrayList();
+    List<Record<?>> mmap = Lists.newArrayList();
     final String lang = wiki.getLang();
     final ColumnVisibility viz = new ColumnVisibility(lang);
     long id = 0l;
     
     for (PageType page : pages) {
-      Multimap<Column,SValue> data = HashMultimap.create();
+      Multimap<Column,RecordValue> data = HashMultimap.create();
       
-      data.put(Column.create(PAGE_ID), SValue.create(page.getId().toString(), viz));
-      data.put(Column.create(PAGE_TITLE), SValue.create(page.getTitle(), viz));
+      data.put(Column.create(PAGE_ID), RecordValue.create(page.getId().toString(), viz));
+      data.put(Column.create(PAGE_TITLE), RecordValue.create(page.getTitle(), viz));
       
       if (!StringUtils.isBlank(page.getRestrictions())) {
-        data.put(Column.create(PAGE_RESTRICTIONS), SValue.create(page.getRestrictions(), viz));
+        data.put(Column.create(PAGE_RESTRICTIONS), RecordValue.create(page.getRestrictions(), viz));
       }
       
       List<Object> revisions = page.getRevisionOrUploadOrLogitem();
@@ -271,23 +271,23 @@ public class CosmosIntegrationSetup {
           if (null != rev.getContributor()) {
             // If we have an IP, not a logged in user
             if (null != rev.getContributor().getIp()) {
-              data.put(Column.create(CONTRIBUTOR_IP), SValue.create(rev.getContributor().getIp(), viz));
+              data.put(Column.create(CONTRIBUTOR_IP), RecordValue.create(rev.getContributor().getIp(), viz));
             } else {
               // Assume username with ID
-              data.put(Column.create(CONTRIBUTOR_USERNAME), SValue.create(rev.getContributor().getUsername(), viz));
-              data.put(Column.create(CONTRIBUTOR_ID), SValue.create(rev.getContributor().getId().toString(), viz));
+              data.put(Column.create(CONTRIBUTOR_USERNAME), RecordValue.create(rev.getContributor().getUsername(), viz));
+              data.put(Column.create(CONTRIBUTOR_ID), RecordValue.create(rev.getContributor().getId().toString(), viz));
             }
           }
-          data.put(Column.create(REVISION_ID), SValue.create(rev.getId().toString(), viz));
-          data.put(Column.create(REVISION_TIMESTAMP), SValue.create(rev.getTimestamp().toString(), viz));
+          data.put(Column.create(REVISION_ID), RecordValue.create(rev.getId().toString(), viz));
+          data.put(Column.create(REVISION_TIMESTAMP), RecordValue.create(rev.getTimestamp().toString(), viz));
           
           if (null != rev.getComment() && !StringUtils.isBlank(rev.getComment().getValue())) {
-            data.put(Column.create(REVISION_COMMENT), SValue.create(rev.getComment().getValue(), viz));
+            data.put(Column.create(REVISION_COMMENT), RecordValue.create(rev.getComment().getValue(), viz));
           }
         }
       }
       
-      mmap.add(new MultimapQueryResult(data, lang + id, viz));
+      mmap.add(new MultimapRecord(data, lang + id, viz));
       id++;
     }
     

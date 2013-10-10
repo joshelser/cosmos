@@ -29,8 +29,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimaps;
 
 import cosmos.results.Column;
-import cosmos.results.SValue;
-import cosmos.results.impl.MultimapQueryResult;
+import cosmos.results.RecordValue;
+import cosmos.results.impl.MultimapRecord;
 import cosmos.sql.call.Field;
 
 /**
@@ -39,9 +39,9 @@ import cosmos.sql.call.Field;
  * 
  */
 
-public class FieldLimiter implements Function<MultimapQueryResult,MultimapQueryResult> {
+public class FieldLimiter implements Function<MultimapRecord,MultimapRecord> {
   
-  Predicate<Entry<Column,SValue>> limitingPredicate;
+  Predicate<Entry<Column,RecordValue>> limitingPredicate;
   
   public FieldLimiter(List<Field> fields) {
     limitingPredicate = new FieldLimitPredicate(Lists.newArrayList(Iterables.transform(fields, new Function<Field,String>() {
@@ -54,12 +54,12 @@ public class FieldLimiter implements Function<MultimapQueryResult,MultimapQueryR
   }
   
   @Override
-  public MultimapQueryResult apply(MultimapQueryResult input) {
+  public MultimapRecord apply(MultimapRecord input) {
     return new FieldLimitingQueryResult(input, input.docId(), limitingPredicate);
   }
   
-  private class FieldLimitingQueryResult extends MultimapQueryResult {
-    public FieldLimitingQueryResult(MultimapQueryResult other, String newDocId, Predicate<Entry<Column,SValue>> limitingPredicate) {
+  private class FieldLimitingQueryResult extends MultimapRecord {
+    public FieldLimitingQueryResult(MultimapRecord other, String newDocId, Predicate<Entry<Column,RecordValue>> limitingPredicate) {
       super(other, newDocId);
       document = Multimaps.filterEntries(document, limitingPredicate);
       
@@ -72,7 +72,7 @@ public class FieldLimiter implements Function<MultimapQueryResult,MultimapQueryR
    * @author phrocker
    * 
    */
-  private class FieldLimitPredicate implements Predicate<Entry<Column,SValue>> {
+  private class FieldLimitPredicate implements Predicate<Entry<Column,RecordValue>> {
     
     private List<String> fields;
     
@@ -81,7 +81,7 @@ public class FieldLimiter implements Function<MultimapQueryResult,MultimapQueryR
     }
     
     @Override
-    public boolean apply(Entry<Column,SValue> entry) {
+    public boolean apply(Entry<Column,RecordValue> entry) {
       return fields.contains(entry.getKey().name());
     }
   }
