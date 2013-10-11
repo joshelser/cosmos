@@ -52,6 +52,10 @@ public abstract class RecordValue<T extends Comparable<T>> implements Writable, 
     return this.visibility;
   }
   
+  public abstract byte[] lexicographicValue();
+  
+  public abstract byte[] reverseLexicographicValue();
+  
   public static RecordValue<?> recreate(DataInput in) throws IOException {
     String clzName = WritableUtils.readString(in);
     
@@ -102,15 +106,12 @@ public abstract class RecordValue<T extends Comparable<T>> implements Writable, 
   }
 
   protected void writeVisibility(DataOutput out) throws IOException {
-    WritableUtils.writeString(out, this.getClass().getName());
-    
     byte[] cvBytes = this.visibility.getExpression();
     WritableUtils.writeVInt(out, cvBytes.length);
     out.write(cvBytes);
   }
   
   public void readVisibility(DataInput in) throws IOException {
-    
     final int cvLength = WritableUtils.readVInt(in);
     final byte[] cvBytes = new byte[cvLength];
     in.readFully(cvBytes);

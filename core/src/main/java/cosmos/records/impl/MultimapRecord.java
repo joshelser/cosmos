@@ -141,7 +141,6 @@ public class MultimapRecord implements Record<MultimapRecord> {
     this.document = HashMultimap.create();
 
     for (int i = 0; i < entryCount; i++) {
-
       this.document.put(Column.recreate(in), RecordValue.recreate(in));
     }
   }

@@ -31,6 +31,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.accumulo.core.Constants;
 import org.apache.accumulo.core.client.BatchDeleter;
 import org.apache.accumulo.core.client.BatchScanner;
 import org.apache.accumulo.core.client.BatchWriter;
@@ -249,8 +250,7 @@ public class CosmosImpl implements Cosmos {
 
           if (indexHelper.shouldIndex(c)) {
             for (Index index : indexHelper.indicesForColumn(c)) {
-              // TODO Defer to the implementation of the RecordValue to get lexicographically sortedness
-              Mutation m = getDocumentPrefix(id, result, v.value().toString(), index.order());
+              Mutation m = getDocumentPrefix(id, result, v, index.order());
 
               final String direction = Order.direction(index.order());
               m.put(index.column().toString(), direction + Defaults.NULL_BYTE_STR + result.docId(), v.visibility(), Defaults.EMPTY_VALUE);
@@ -434,7 +434,7 @@ public class CosmosImpl implements Cosmos {
     for (Index index : indices) {
       for (RecordValue<?> value : values) {
         // TODO Defer to the implementation of the RecordValue to get lexicographically sortedness
-        Mutation m = getDocumentPrefix(id, result, value.value().toString(), index.order());
+        Mutation m = getDocumentPrefix(id, result, value, index.order());
 
         final String direction = Order.direction(index.order());
         m.put(index.column().toString(), direction + Defaults.NULL_BYTE_STR + result.docId(), value.visibility(), Defaults.EMPTY_VALUE);
@@ -784,23 +784,29 @@ public class CosmosImpl implements Cosmos {
     }
   }
 
-  protected Mutation getDocumentPrefix(Store id, Record<?> record, String suffix, Order order) {
+  protected Mutation getDocumentPrefix(Store id, Record<?> record, RecordValue<?> value, Order order) {
+    byte[] b = id.uuid().getBytes();
+    if (Order.ASCENDING.equals(order)) {
+      b = value.lexicographicValue();
+    } else {
+      b = value.reverseLexicographicValue();
+    }
+
+    return getDocumentPrefix(id, record, b);
+  }
+
+  protected Mutation getDocumentPrefix(Store id, Record<?> record, byte[] suffix) {
     final Text t = new Text();
     byte[] b = id.uuid().getBytes();
     t.append(b, 0, b.length);
     t.append(new byte[] {0}, 0, 1);
-    if (Order.ASCENDING.equals(order)) {
-      t.append(suffix.getBytes(), 0, suffix.getBytes().length);
-    } else {
-      b = this.revLex.encode(suffix);
-      t.append(b, 0, b.length);
-    }
+    t.append(suffix, 0, suffix.length);
 
     return new Mutation(t);
   }
 
   protected Mutation addDocument(Store id, Record<?> queryResult) throws IOException {
-    Mutation m = getDocumentPrefix(id, queryResult, queryResult.docId(), Order.ASCENDING);
+    Mutation m = getDocumentPrefix(id, queryResult, queryResult.docId().getBytes(Constants.UTF8));
 
     // Store the docId as a searchable entry
     m.put(Defaults.DOCID_FIELD_NAME, Order.FORWARD + Defaults.NULL_BYTE_STR + queryResult.docId(), queryResult.documentVisibility(), Defaults.EMPTY_VALUE);

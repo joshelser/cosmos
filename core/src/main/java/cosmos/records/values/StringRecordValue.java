@@ -20,6 +20,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import org.apache.accumulo.core.client.lexicoder.ReverseLexicoder;
+import org.apache.accumulo.core.client.lexicoder.StringLexicoder;
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.hadoop.io.WritableUtils;
 
@@ -27,6 +29,11 @@ import org.apache.hadoop.io.WritableUtils;
  * 
  */
 public class StringRecordValue extends RecordValue<String> {
+  
+  private static final StringLexicoder lexer = new StringLexicoder();
+  private static final ReverseLexicoder<String> revLexer = new ReverseLexicoder<String>(lexer);
+  
+  protected StringRecordValue() {}
   
   public StringRecordValue(String value, ColumnVisibility cv) {
     super(value, cv);
@@ -40,8 +47,19 @@ public class StringRecordValue extends RecordValue<String> {
   
   @Override
   public void write(DataOutput out) throws IOException {
+    WritableUtils.writeString(out, StringRecordValue.class.getName());
     writeVisibility(out);
     WritableUtils.writeString(out, value);
+  }
+
+  @Override
+  public byte[] lexicographicValue() {
+    return lexer.encode(value);
+  }
+
+  @Override
+  public byte[] reverseLexicographicValue() {
+    return revLexer.encode(value);
   }
 
 }
