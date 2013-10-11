@@ -20,46 +20,50 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.accumulo.core.client.lexicoder.IntegerLexicoder;
 import org.apache.accumulo.core.client.lexicoder.ReverseLexicoder;
+import org.apache.accumulo.core.client.lexicoder.StringLexicoder;
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.hadoop.io.WritableUtils;
 
 /**
  * 
  */
-public class IntegerRecordValue extends NumberRecordValue<Integer> {
-
-  private static final IntegerLexicoder lexer = new IntegerLexicoder();
-  private static final ReverseLexicoder<Integer> revLexer = new ReverseLexicoder<Integer>(lexer);
+public class BooleanRecordValue extends RecordValue<Boolean> {
+  private static final StringLexicoder lexer = new StringLexicoder();
+  private static final ReverseLexicoder<String> revLexer = new ReverseLexicoder<String>(lexer);
   
-  protected IntegerRecordValue() { }
+  protected BooleanRecordValue() { }
   
-  public IntegerRecordValue(Integer value, ColumnVisibility cv) {
-    super(value, cv);
+  public BooleanRecordValue(Boolean b, ColumnVisibility cv) {
+    super(b, cv);
   }
   
   @Override
   public void readFields(DataInput in) throws IOException {
     readVisibility(in);
-    this.value = WritableUtils.readVInt(in);
+    value = Boolean.parseBoolean(WritableUtils.readString(in));
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    WritableUtils.writeString(out, IntegerRecordValue.class.getName());
+    WritableUtils.writeString(out, BooleanRecordValue.class.getName());
     writeVisibility(out);
-    WritableUtils.writeVInt(out, value);
+    WritableUtils.writeString(out, value.toString());
+  }
+
+  @Override
+  public RecordValueType type() {
+    return RecordValueType.BOOLEAN;
   }
 
   @Override
   public byte[] lexicographicValue() {
-    return lexer.encode(value());
+    return lexer.encode(value.toString());
   }
 
   @Override
   public byte[] reverseLexicographicValue() {
-    return revLexer.encode(value());
+    return revLexer.encode(value.toString());
   }
 
 }

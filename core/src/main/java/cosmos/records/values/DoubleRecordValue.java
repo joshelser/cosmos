@@ -20,7 +20,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.accumulo.core.client.lexicoder.IntegerLexicoder;
+import org.apache.accumulo.core.client.lexicoder.DoubleLexicoder;
 import org.apache.accumulo.core.client.lexicoder.ReverseLexicoder;
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.hadoop.io.WritableUtils;
@@ -28,38 +28,38 @@ import org.apache.hadoop.io.WritableUtils;
 /**
  * 
  */
-public class IntegerRecordValue extends NumberRecordValue<Integer> {
+public class DoubleRecordValue extends NumberRecordValue<Double> {
 
-  private static final IntegerLexicoder lexer = new IntegerLexicoder();
-  private static final ReverseLexicoder<Integer> revLexer = new ReverseLexicoder<Integer>(lexer);
+  private static final DoubleLexicoder lexer = new DoubleLexicoder();
+  private static final ReverseLexicoder<Double> revLexer = new ReverseLexicoder<Double>(lexer);
   
-  protected IntegerRecordValue() { }
+  protected DoubleRecordValue() { }
   
-  public IntegerRecordValue(Integer value, ColumnVisibility cv) {
-    super(value, cv);
+  public DoubleRecordValue(Double d, ColumnVisibility cv) {
+    super(d, cv);
   }
   
   @Override
   public void readFields(DataInput in) throws IOException {
     readVisibility(in);
-    this.value = WritableUtils.readVInt(in);
+    this.value = in.readDouble();
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    WritableUtils.writeString(out, IntegerRecordValue.class.getName());
+    WritableUtils.writeString(out, DoubleRecordValue.class.getName());
     writeVisibility(out);
-    WritableUtils.writeVInt(out, value);
+    out.writeDouble(value);
   }
 
   @Override
   public byte[] lexicographicValue() {
-    return lexer.encode(value());
+    return lexer.encode(value);
   }
 
   @Override
   public byte[] reverseLexicographicValue() {
-    return revLexer.encode(value());
+    return revLexer.encode(value);
   }
 
 }

@@ -23,23 +23,40 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import cosmos.options.Defaults;
 import cosmos.records.docids.CountingDocIdGenerator;
 import cosmos.records.docids.DocIdGenerator;
-import cosmos.records.functions.StringToStringRecordFunction;
+import cosmos.records.functions.StringToRecordValueRecordFunction;
 import cosmos.records.impl.MapRecord;
+import cosmos.records.values.BooleanRecordValue;
+import cosmos.records.values.DoubleRecordValue;
+import cosmos.records.values.IntegerRecordValue;
+import cosmos.records.values.LongRecordValue;
+import cosmos.records.values.NumberRecordValue;
+import cosmos.records.values.RecordValue;
+import cosmos.records.values.StringRecordValue;
+import cosmos.results.Column;
 
 /**
  * 
@@ -47,7 +64,8 @@ import cosmos.records.impl.MapRecord;
 public class JsonRecords {
   private static final Logger log = LoggerFactory.getLogger(JsonRecords.class);
   
-  protected static final Type listOfMapsType = new TypeToken<List<Map<String,String>>>(){}.getType();
+  protected static final Type listOfMapsType = new TypeToken<List<Map<String,RecordValue<?>>>>(){}.getType();
+  
   
   /**
    * Takes a JSON file and creates {@link MapRecord}s from the contents. Monotonically increasing docIds are applied
@@ -100,22 +118,72 @@ public class JsonRecords {
     Preconditions.checkNotNull(json);
     Preconditions.checkNotNull(generator);
     
-    final Gson gson = new Gson();
-    List<Map<String,String>> maps = null;
-    try {
-      maps = gson.fromJson(json, listOfMapsType);
-    } catch (JsonSyntaxException e) {
-      log.error("Expected JSON to be a List of Maps");
-      throw e;
-    }
+    JsonParser parser = new JsonParser();
+    JsonElement topLevelElement = parser.parse(json);
     
-    if (null == maps) {
+    if (topLevelElement.isJsonNull()) {
       return Collections.emptyList();
+    } else if (!topLevelElement.isJsonArray()) {
+      throw new JsonSyntaxException("Expected a list of dictionaries");
     }
     
-    List<MapRecord> records = Lists.newArrayListWithExpectedSize(maps.size());
-    for (Map<String,String> map : maps) {
-      records.add(new MapRecord(map, generator.getDocId(map), Defaults.EMPTY_VIS, new StringToStringRecordFunction()));
+    final LinkedList<MapRecord> records = Lists.newLinkedList();
+    
+    // Walk the top level list
+    JsonArray list = topLevelElement.getAsJsonArray();
+    for (int i = 0; i < list.size(); i++) {
+      JsonElement e = list.get(i);
+      if (!e.isJsonObject()) {
+        throw new JsonSyntaxException("Expected a dictionary");
+      }
+      
+      // Parse each "Object" (map)
+      JsonObject map = e.getAsJsonObject();
+      Map<Column,RecordValue<?>> data = Maps.newHashMap();
+      for (Entry<String,JsonElement> entry : map.entrySet()) {
+        final Column key = Column.create(entry.getKey());
+        final JsonElement value = entry.getValue();
+        
+        if (value.isJsonNull()) {
+          data.put(key, null);
+        } else if (value.isJsonPrimitive()) {
+          JsonPrimitive primitive = (JsonPrimitive) value;
+          
+          // Numbers
+          if (primitive.isNumber()) {
+            NumberRecordValue<?> v;
+            
+            double d = primitive.getAsDouble();
+            if ((int) d == d) {
+              v = new IntegerRecordValue((int) d, Defaults.EMPTY_VIS);
+            } else if ((long) d == d) {
+              v = new LongRecordValue((long) d, Defaults.EMPTY_VIS);
+            } else {
+              v = new DoubleRecordValue(d, Defaults.EMPTY_VIS);
+            }
+            
+            data.put(key, v);
+            
+          } else if (primitive.isString()) {
+            // String
+            data.put(key, new StringRecordValue(primitive.getAsString(), Defaults.EMPTY_VIS));
+            
+          } else if (primitive.isBoolean()) {
+            // Boolean
+            data.put(key, new BooleanRecordValue(primitive.getAsBoolean(), Defaults.EMPTY_VIS));
+            
+          } else if (primitive.isJsonNull()) {
+            // Is this redundant?
+            data.put(key, null);
+          } else {
+            throw new RuntimeException("Handled primitive: " + primitive);
+          }
+        } else {
+          throw new RuntimeException("Expected a String, Number or Boolean");
+        }
+      }
+      
+      records.add(new MapRecord(data, generator.getDocId(data), Defaults.EMPTY_VIS));
     }
     
     return records;

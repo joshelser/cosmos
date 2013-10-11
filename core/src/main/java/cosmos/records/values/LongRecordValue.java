@@ -28,7 +28,7 @@ import org.apache.hadoop.io.WritableUtils;
 /**
  * 
  */
-public class LongRecordValue extends RecordValue<Long> {
+public class LongRecordValue extends NumberRecordValue<Long> {
 
   private static final LongLexicoder lexer = new LongLexicoder();
   private static final ReverseLexicoder<Long> revLexer = new ReverseLexicoder<Long>(lexer);

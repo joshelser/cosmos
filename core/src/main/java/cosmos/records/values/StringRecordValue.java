@@ -62,4 +62,9 @@ public class StringRecordValue extends RecordValue<String> {
     return revLexer.encode(value);
   }
 
+  @Override
+  public RecordValueType type() {
+    return RecordValueType.STRING;
+  }
+
 }

@@ -52,6 +52,8 @@ public abstract class RecordValue<T extends Comparable<T>> implements Writable, 
     return this.visibility;
   }
   
+  public abstract RecordValueType type();
+  
   public abstract byte[] lexicographicValue();
   
   public abstract byte[] reverseLexicographicValue();
