@@ -253,7 +253,7 @@ public class CosmosIntegrationSetup {
     long id = 0l;
     
     for (PageType page : pages) {
-      Multimap<Column,RecordValue> data = HashMultimap.create();
+      Multimap<Column,RecordValue<?>> data = HashMultimap.create();
       
       data.put(Column.create(PAGE_ID), RecordValue.create(page.getId().toString(), viz));
       data.put(Column.create(PAGE_TITLE), RecordValue.create(page.getTitle(), viz));

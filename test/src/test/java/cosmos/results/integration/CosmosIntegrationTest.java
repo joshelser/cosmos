@@ -184,16 +184,16 @@ public class CosmosIntegrationTest extends CosmosIntegrationSetup {
     long count = 0;
     String prevPageId = "";
     for (MultimapRecord res : newResults) {
-      Collection<RecordValue> pageIds = res.get(pageIdCol);
+      Collection<RecordValue<?>> pageIds = res.get(pageIdCol);
       String currPageId = null;
-      for (RecordValue pageId : pageIds) {
+      for (RecordValue<?> pageId : pageIds) {
         if (null == currPageId) {
-          currPageId = pageId.value();
+          currPageId = pageId.value().toString();
         }
 
         // If we have multiple pageIds for this record, choose the least one greater than the prev
-        if (prevPageId.compareTo(pageId.value()) < 0 && pageId.value().compareTo(currPageId) < 0) {
-          currPageId = pageId.value();
+        if (prevPageId.compareTo(pageId.value().toString()) < 0 && pageId.value().toString().compareTo(currPageId) < 0) {
+          currPageId = pageId.value().toString();
         }
       }
       count++;

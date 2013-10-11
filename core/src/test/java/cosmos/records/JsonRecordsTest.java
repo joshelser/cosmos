@@ -36,40 +36,49 @@ public class JsonRecordsTest {
   @Test
   public void simpleJsonTest() {
     String json = "[{'foo1':'bar1', 'foo2':'bar2'}, {'foo3':'bar3', 'foo4':'bar4'}]";
-    
+
     List<MapRecord> records = JsonRecords.fromJson(json);
-    
+
     Assert.assertEquals(2, records.size());
-    
-    Assert.assertEquals(new MapRecord(ImmutableMap.<Column,RecordValue> of(Column.create("foo1"), RecordValue.create("bar1", Defaults.EMPTY_VIS),
-        Column.create("foo2"), RecordValue.create("bar2", Defaults.EMPTY_VIS)), "0", Defaults.EMPTY_VIS), records.get(0));
-    
-    Assert.assertEquals(new MapRecord(ImmutableMap.<Column,RecordValue> of(Column.create("foo3"), RecordValue.create("bar3", Defaults.EMPTY_VIS),
-        Column.create("foo4"), RecordValue.create("bar4", Defaults.EMPTY_VIS)), "1", Defaults.EMPTY_VIS), records.get(1));
+
+    Assert.assertEquals(
+        new MapRecord(ImmutableMap.<Column,RecordValue<?>> of(Column.create("foo1"), RecordValue.create("bar1"), Column.create("foo2"),
+            RecordValue.create("bar2")), "0", Defaults.EMPTY_VIS), records.get(0));
+
+    Assert.assertEquals(
+        new MapRecord(ImmutableMap.<Column,RecordValue<?>> of(Column.create("foo3"), RecordValue.create("bar3"), Column.create("foo4"),
+            RecordValue.create("bar4")), "1", Defaults.EMPTY_VIS), records.get(1));
   }
-  
+
   @Test(expected = JsonParseException.class)
   public void invalidJson() {
     String json = "[{'foo1";
-    
+
     JsonRecords.fromJson(json);
   }
-  
+
   @Test(expected = JsonParseException.class)
   public void nonSupportedJson() {
     String json = "{'foo1':'bar1'}";
-    
+
     JsonRecords.fromJson(json);
   }
 
   @Test
   public void emptyJson() {
     String json = "[]";
-    
+
     Assert.assertEquals(0, JsonRecords.fromJson(json).size());
-    
+
     json = "";
-    
+
     Assert.assertEquals(0, JsonRecords.fromJson(json).size());
+  }
+
+  @Test
+  public void numericJson() {
+    String json = "[ {'foo1':'bar1', 'foo2':2} ]";
+
+    List<MapRecord> records = JsonRecords.fromJson(json);
   }
 }

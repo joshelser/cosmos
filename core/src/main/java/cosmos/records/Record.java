@@ -37,7 +37,7 @@ public interface Record<T> extends Writable {
   
   public ColumnVisibility documentVisibility();
   
-  public Iterable<Entry<Column,RecordValue>> columnValues();
+  public Iterable<Entry<Column,RecordValue<?>>> columnValues();
   
   public Value toValue() throws IOException;
 }

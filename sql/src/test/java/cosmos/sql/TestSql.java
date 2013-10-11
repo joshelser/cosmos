@@ -321,7 +321,7 @@ public class TestSql {
       while (resultSet.next()) {
         assertEquals(metaData.getColumnName(1), "PAGE_ID");
         @SuppressWarnings("unchecked")
-        List<Entry<Column,RecordValue>> sValues = (List<Entry<Column,RecordValue>>) resultSet.getObject("PAGE_ID");
+        List<Entry<Column,RecordValue<?>>> sValues = (List<Entry<Column,RecordValue<?>>>) resultSet.getObject("PAGE_ID");
         assertEquals(sValues.size(), 1);
         RecordValue onlyValue = sValues.iterator().next().getValue();
         assertEquals(onlyValue.visibility().toString(), "[en]");
@@ -360,9 +360,9 @@ public class TestSql {
       while (resultSet.next()) {
         assertEquals(metaData.getColumnName(1), "PAGE_ID");
         @SuppressWarnings("unchecked")
-        List<Entry<Column,RecordValue>> sValues = (List<Entry<Column,RecordValue>>) resultSet.getObject("PAGE_ID");
+        List<Entry<Column,RecordValue<?>>> sValues = (List<Entry<Column,RecordValue<?>>>) resultSet.getObject("PAGE_ID");
         assertEquals(sValues.size(), 1);
-        RecordValue onlyValue = sValues.iterator().next().getValue();
+        RecordValue<?> onlyValue = sValues.iterator().next().getValue();
         assertEquals(onlyValue.visibility().toString(), "[en]");
         
         assertEquals(onlyValue.value(), Integer.valueOf(9).toString());
@@ -400,9 +400,9 @@ public class TestSql {
       while (resultSet.next()) {
         assertEquals(metaData.getColumnName(1), "PAGE_ID");
         @SuppressWarnings("unchecked")
-        List<Entry<Column,RecordValue>> sValues = (List<Entry<Column,RecordValue>>) resultSet.getObject("PAGE_ID");
+        List<Entry<Column,RecordValue<?>>> sValues = (List<Entry<Column,RecordValue<?>>>) resultSet.getObject("PAGE_ID");
         assertEquals(sValues.size(), 1);
-        RecordValue onlyValue = sValues.iterator().next().getValue();
+        RecordValue<?> onlyValue = sValues.iterator().next().getValue();
         assertEquals(onlyValue.visibility().toString(), "[en]");
         
         assertEquals(onlyValue.value(), Integer.valueOf(resultsFound).toString());
@@ -439,9 +439,9 @@ public class TestSql {
       while (resultSet.next()) {
         assertEquals(metaData.getColumnName(1), "PAGE_ID");
         @SuppressWarnings("unchecked")
-        List<Entry<Column,RecordValue>> sValues = (List<Entry<Column,RecordValue>>) resultSet.getObject("PAGE_ID");
+        List<Entry<Column,RecordValue<?>>> sValues = (List<Entry<Column,RecordValue<?>>>) resultSet.getObject("PAGE_ID");
         assertEquals(sValues.size(), 1);
-        RecordValue onlyValue = sValues.iterator().next().getValue();
+        RecordValue<?> onlyValue = sValues.iterator().next().getValue();
         assertEquals(onlyValue.visibility().toString(), "[en]");
         
         assertEquals(onlyValue.value(), Integer.valueOf(resultsFound).toString());
@@ -515,9 +515,9 @@ public class TestSql {
       while (resultSet.next()) {
         assertEquals(metaData.getColumnName(1), "PAGE_ID");
         @SuppressWarnings("unchecked")
-        List<Entry<Column,RecordValue>> sValues = (List<Entry<Column,RecordValue>>) resultSet.getObject("PAGE_ID");
+        List<Entry<Column,RecordValue<?>>> sValues = (List<Entry<Column,RecordValue<?>>>) resultSet.getObject("PAGE_ID");
         assertEquals(sValues.size(), 1);
-        RecordValue onlyValue = sValues.iterator().next().getValue();
+        RecordValue<?> onlyValue = sValues.iterator().next().getValue();
         assertEquals(onlyValue.visibility().toString(), "[en]");
         values.remove(onlyValue.value());
         resultsFound++;
@@ -532,7 +532,7 @@ public class TestSql {
   }
   
   public static void loadCountsForRecord(Map<Column,Long> counts, MultimapRecord r) {
-    for (Entry<Column,RecordValue> entry : r.columnValues()) {
+    for (Entry<Column,RecordValue<?>> entry : r.columnValues()) {
       Column c = entry.getKey();
       if (counts.containsKey(c)) {
         counts.put(c, counts.get(c) + 1);
@@ -543,7 +543,7 @@ public class TestSql {
   }
   
   public static MultimapRecord pagesToQueryResult(Page p) {
-    HashMultimap<Column,RecordValue> data = HashMultimap.create();
+    HashMultimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     String pageId = Long.toString(p.getId());
     

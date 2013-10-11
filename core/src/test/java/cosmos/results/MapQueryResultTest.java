@@ -41,10 +41,10 @@ public class MapQueryResultTest {
   
   @Test
   public void basicCreation() {
-    Set<Entry<Column,RecordValue>> expected = Sets.newHashSet();
-    expected.add(Maps.immutableEntry(Column.create("TEXT"),
+    Set<Entry<Column,RecordValue<?>>> expected = Sets.newHashSet();
+    expected.add(Maps.<Column,RecordValue<?>> immutableEntry(Column.create("TEXT"),
         RecordValue.create("foo", new ColumnVisibility("test"))));
-    expected.add(Maps.immutableEntry(Column.create("TEXT"),
+    expected.add(Maps.<Column,RecordValue<?>> immutableEntry(Column.create("TEXT"),
         RecordValue.create("bar", new ColumnVisibility("test"))));
     
     Map<String,String> document = Maps.newHashMap();
@@ -54,14 +54,14 @@ public class MapQueryResultTest {
     MapRecord mqr = new MapRecord(document, "1", new ColumnVisibility("test"),
         new RecordFunction<String,String>() {
 
-          public Entry<Column,RecordValue> apply(Entry<String,String> input) {
+          public Entry<Column,RecordValue<?>> apply(Entry<String,String> input) {
             final ColumnVisibility cv = new ColumnVisibility("test");
-            return Maps.immutableEntry(Column.create(input.getKey()),
+            return Maps.<Column,RecordValue<?>> immutableEntry(Column.create(input.getKey()),
                 RecordValue.create(input.getValue(), cv));
           }
     });
     
-    for (Entry<Column,RecordValue> column : mqr.columnValues()) {
+    for (Entry<Column,RecordValue<?>> column : mqr.columnValues()) {
       Assert.assertTrue(expected.contains(column));
     }
   }

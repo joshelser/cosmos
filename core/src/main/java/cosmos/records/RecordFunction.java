@@ -25,6 +25,6 @@ import cosmos.results.Column;
 /**
  * 
  */
-public interface RecordFunction<K,V> extends Function<Entry<K,V>,Entry<Column,RecordValue>> {
+public interface RecordFunction<K,V> extends Function<Entry<K,V>,Entry<Column,RecordValue<?>>> {
 
 }

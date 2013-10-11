@@ -14,32 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cosmos.records.functions;
+package cosmos.records;
 
-import java.util.Map.Entry;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 import org.apache.accumulo.core.security.ColumnVisibility;
-
-import com.google.common.collect.Maps;
-
-import cosmos.records.RecordFunction;
-import cosmos.records.RecordValue;
-import cosmos.results.Column;
+import org.apache.hadoop.io.WritableUtils;
 
 /**
  * 
  */
-public class ColumnToStringWithVisibilityRecordFunction implements RecordFunction<Column,String> {
+public class LongRecordValue extends RecordValue<Long> {
 
-  protected final ColumnVisibility recordVisibility;
-
-  public ColumnToStringWithVisibilityRecordFunction(ColumnVisibility recordVisibility) {
-    this.recordVisibility = recordVisibility;
+  public LongRecordValue(Long value, ColumnVisibility cv) {
+    super(value, cv);
+  }
+  
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    readVisibility(in);
+    this.value = WritableUtils.readVLong(in);
   }
 
   @Override
-  public Entry<Column,RecordValue<?>> apply(Entry<Column,String> input) {
-    return Maps.<Column,RecordValue<?>> immutableEntry(input.getKey(), RecordValue.create(input.getValue(), recordVisibility));
+  public void write(DataOutput out) throws IOException {
+    writeVisibility(out);
+    WritableUtils.writeVLong(out, value);
   }
-
 }

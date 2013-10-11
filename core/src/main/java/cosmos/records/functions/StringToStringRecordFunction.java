@@ -22,21 +22,20 @@ import org.apache.accumulo.core.security.ColumnVisibility;
 
 import com.google.common.collect.Maps;
 
-import cosmos.options.Defaults;
 import cosmos.records.RecordFunction;
 import cosmos.records.RecordValue;
 import cosmos.results.Column;
 
 /**
- * Converts an {@link Entry<String,String>} to {@link Entry<Column,RecordValue>} using an empty {@link ColumnVisibility} 
+ * Converts an {@link Entry<String,String>} to {@link Entry<Column,RecordValue>} using an empty {@link ColumnVisibility}
  */
 public class StringToStringRecordFunction implements RecordFunction<String,String> {
 
   @Override
-  public Entry<Column,RecordValue> apply(Entry<String,String> input) {
+  public Entry<Column,RecordValue<?>> apply(Entry<String,String> input) {
     // Slightly duplicative, but making an inner instance of StringToStringWithVisibility is just as bad
     // in terms of duplicate code and the inheritance of that constructor would just be weird.
-    return Maps.immutableEntry(Column.create(input.getKey()), RecordValue.create(input.getValue(), Defaults.EMPTY_VIS));
+    return Maps.<Column,RecordValue<?>> immutableEntry(Column.create(input.getKey()), RecordValue.create(input.getValue()));
   }
 
 }

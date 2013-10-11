@@ -229,17 +229,17 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
       for (int i = 0; i < fields.size(); i++) {
         String field = fields.get(i);
         Column col = new Column(field);
-        Collection<RecordValue> values = document.get(col);
+        Collection<RecordValue<?>> values = document.get(col);
         if (values != null) {
 
-          List<Entry<Column,RecordValue>> columns = Lists.newArrayList();
-          for (RecordValue value : values) {
-            columns.add(Maps.immutableEntry(col, value));
+          List<Entry<Column,RecordValue<?>>> columns = Lists.newArrayList();
+          for (RecordValue<?> value : values) {
+            columns.add(Maps.<Column,RecordValue<?>> immutableEntry(col, value));
           }
           results[i] = columns;// values.iterator().next().value();
 
         } else {
-          results[i] = new ArrayList<RecordValue>();
+          results[i] = new ArrayList<RecordValue<?>>();
         }
       }
       return results;
@@ -248,11 +248,11 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
 
   }
 
-  class GroupByResultFuckit implements Function<Entry<RecordValue,Long>,Object[]> {
+  class GroupByResultFuckit implements Function<Entry<RecordValue<?>,Long>,Object[]> {
 
     public GroupByResultFuckit() {}
 
-    public Object[] apply(Entry<RecordValue,Long> result) {
+    public Object[] apply(Entry<RecordValue<?>,Long> result) {
 
       Object[] results = new Object[2];
       results[0] = result.getKey();

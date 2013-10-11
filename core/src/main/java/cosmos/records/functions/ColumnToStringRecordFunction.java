@@ -20,7 +20,6 @@ import java.util.Map.Entry;
 
 import com.google.common.collect.Maps;
 
-import cosmos.options.Defaults;
 import cosmos.records.RecordFunction;
 import cosmos.records.RecordValue;
 import cosmos.results.Column;
@@ -31,8 +30,7 @@ import cosmos.results.Column;
 public class ColumnToStringRecordFunction implements RecordFunction<Column,String> {
 
   @Override
-  public Entry<Column,RecordValue> apply(Entry<Column,String> input) {
-    return Maps.immutableEntry(input.getKey(), RecordValue.create(input.getValue(), Defaults.EMPTY_VIS));
+  public Entry<Column,RecordValue<?>> apply(Entry<Column,String> input) {
+    return Maps.<Column,RecordValue<?>> immutableEntry(input.getKey(), RecordValue.create(input.getValue()));
   }
-
 }

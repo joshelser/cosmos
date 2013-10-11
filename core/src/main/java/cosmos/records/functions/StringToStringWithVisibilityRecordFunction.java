@@ -32,14 +32,14 @@ import cosmos.results.Column;
 public class StringToStringWithVisibilityRecordFunction implements RecordFunction<String,String> {
 
   protected final ColumnVisibility recordVisibility;
-  
+
   public StringToStringWithVisibilityRecordFunction(ColumnVisibility recordVisibility) {
     this.recordVisibility = recordVisibility;
   }
 
   @Override
-  public Entry<Column,RecordValue> apply(Entry<String,String> input) {
-    return Maps.immutableEntry(Column.create(input.getKey()), RecordValue.create(input.getValue(), recordVisibility));
+  public Entry<Column,RecordValue<?>> apply(Entry<String,String> input) {
+    return Maps.<Column,RecordValue<?>> immutableEntry(Column.create(input.getKey()), RecordValue.create(input.getValue(), recordVisibility));
   }
 
 }

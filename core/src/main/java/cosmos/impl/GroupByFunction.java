@@ -38,19 +38,19 @@ import cosmos.records.RecordValue;
 /**
  * 
  */
-public class GroupByFunction implements Function<Entry<Key,Value>,Entry<RecordValue,Long>> {
+public class GroupByFunction implements Function<Entry<Key,Value>,Entry<RecordValue<?>,Long>> {
 
   private final Text _holder = new Text();
   
   @Override
-  public Entry<RecordValue,Long> apply(Entry<Key,Value> entry) {
+  public Entry<RecordValue<?>,Long> apply(Entry<Key,Value> entry) {
     String value = getValueFromKey(entry.getKey());
     
     //TODO Add Cache for CV
-    RecordValue sval = RecordValue.create(value, entry.getKey().getColumnVisibilityParsed());
+    RecordValue<?> val = RecordValue.create(value, entry.getKey().getColumnVisibilityParsed());
     VLongWritable writable = GroupByRowSuffixIterator.getWritable(entry.getValue());
     
-    return Maps.immutableEntry(sval, writable.get());
+    return Maps.<RecordValue<?>,Long> immutableEntry(val, writable.get());
   }
   
   private String getValueFromKey(Key k) {

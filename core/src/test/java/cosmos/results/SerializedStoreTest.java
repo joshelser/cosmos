@@ -32,7 +32,7 @@ public class SerializedStoreTest extends AbstractSortableTest {
     // Save off our Store that we've defined
     PersistedStores.store(id);
     
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("NAME"), RecordValue.create("George", VIZ));
     data.put(Column.create("AGE"), RecordValue.create("25", VIZ));
@@ -74,7 +74,7 @@ public class SerializedStoreTest extends AbstractSortableTest {
     // Save off our Store that we've defined
     PersistedStores.store(id);
     
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("NAME"), RecordValue.create("George", VIZ));
     data.put(Column.create("AGE"), RecordValue.create("25", VIZ));

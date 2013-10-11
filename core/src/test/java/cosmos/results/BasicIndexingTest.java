@@ -62,11 +62,11 @@ import cosmos.util.IdentitySet;
 @RunWith(JUnit4.class)
 public class BasicIndexingTest extends AbstractSortableTest {
   
-  protected List<Multimap<Column,RecordValue>> data;
+  protected List<Multimap<Column,RecordValue<?>>> data;
   
   @Test
   public void test() throws Exception {
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
     data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
@@ -119,7 +119,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void totalDeletion() throws Exception {
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
     data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
@@ -155,7 +155,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void postIndex() throws Exception {
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
     data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
@@ -189,7 +189,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void addResultsWithIndexOverSparseData() throws Exception {
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
     data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
@@ -228,7 +228,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void indexEverything() throws Exception {
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
     data.put(Column.create("SIZE"), RecordValue.create("2", VIZ));
@@ -327,7 +327,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void postIndexSparseData() throws Exception {
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
     data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
@@ -362,7 +362,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void pagedResults() throws Exception {
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
     data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
@@ -423,7 +423,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     Store id = Store.create(c, AUTHS,
         Sets.newHashSet(Index.define("NAME"), Index.define("AGE"), Index.define("HEIGHT"), Index.define("WEIGHT")));
     
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("NAME"), RecordValue.create("George", VIZ));
     data.put(Column.create("AGE"), RecordValue.create("25", VIZ));
@@ -479,7 +479,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
     
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(name, RecordValue.create("George", VIZ));
     data.put(Column.create("AGE"), RecordValue.create("25", VIZ));
@@ -543,7 +543,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
     
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(name, RecordValue.create("George", VIZ));
     data.put(Column.create("AGE"), RecordValue.create("25", VIZ));
@@ -567,10 +567,10 @@ public class BasicIndexingTest extends AbstractSortableTest {
     s.addResults(id, Collections.<Record<?>> singleton(new MultimapRecord(data, "3", VIZ)));
     
     // Plain groupBy over three records with unique values in said column
-    CloseableIterable<Entry<RecordValue,Long>> groups = s.groupResults(id, name);
-    Map<RecordValue,Long> expectedGroups = ImmutableMap.<RecordValue,Long>of(RecordValue.create("George", VIZ), 1l, RecordValue.create("Steve", VIZ), 1l, RecordValue.create("Frank", VIZ), 1l);
+    CloseableIterable<Entry<RecordValue<?>,Long>> groups = s.groupResults(id, name);
+    Map<RecordValue<?>,Long> expectedGroups = ImmutableMap.<RecordValue<?>,Long>of(RecordValue.create("George", VIZ), 1l, RecordValue.create("Steve", VIZ), 1l, RecordValue.create("Frank", VIZ), 1l);
     int count = 0;
-    for (Entry<RecordValue,Long> group : groups) {
+    for (Entry<RecordValue<?>,Long> group : groups) {
       Assert.assertTrue(expectedGroups.containsKey(group.getKey()));
       Assert.assertEquals(expectedGroups.get(group.getKey()), group.getValue());
       count++;
@@ -580,9 +580,9 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     // Group by weight which only has one value
     groups = s.groupResults(id, weight);
-    expectedGroups = ImmutableMap.<RecordValue,Long>of(RecordValue.create("100", VIZ), 1l);
+    expectedGroups = ImmutableMap.<RecordValue<?>,Long>of(RecordValue.create("100", VIZ), 1l);
     count = 0;
-    for (Entry<RecordValue,Long> group : groups) {
+    for (Entry<RecordValue<?>,Long> group : groups) {
       Assert.assertTrue(expectedGroups.containsKey(group.getKey()));
       Assert.assertEquals(expectedGroups.get(group.getKey()), group.getValue());
       count++;
@@ -592,9 +592,9 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     // Group by height which is the same for everyone
     groups = s.groupResults(id, height);
-    expectedGroups = ImmutableMap.<RecordValue,Long>of(RecordValue.create("70", VIZ), 3l);
+    expectedGroups = ImmutableMap.<RecordValue<?>,Long>of(RecordValue.create("70", VIZ), 3l);
     count = 0;
-    for (Entry<RecordValue,Long> group : groups) {
+    for (Entry<RecordValue<?>,Long> group : groups) {
       Assert.assertTrue(expectedGroups.containsKey(group.getKey()));
       Assert.assertEquals(expectedGroups.get(group.getKey()), group.getValue());
       count++;
@@ -613,7 +613,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
     
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(name, RecordValue.create("George", VIZ));
     data.put(Column.create("AGE"), RecordValue.create("25", VIZ));
@@ -639,13 +639,13 @@ public class BasicIndexingTest extends AbstractSortableTest {
     int pageSize = 1;
     
     // Plain groupBy over three records with unique values in said column
-    PagedResults<Entry<RecordValue,Long>> groups = s.groupResults(id, name, Paging.create(pageSize, Integer.MAX_VALUE));
-    Map<RecordValue,Long> expectedGroups = ImmutableMap.<RecordValue,Long>of(RecordValue.create("George", VIZ), 1l, RecordValue.create("Steve", VIZ), 1l, RecordValue.create("Frank", VIZ), 1l);
+    PagedResults<Entry<RecordValue<?>,Long>> groups = s.groupResults(id, name, Paging.create(pageSize, Integer.MAX_VALUE));
+    Map<RecordValue<?>,Long> expectedGroups = ImmutableMap.<RecordValue<?>,Long>of(RecordValue.create("George", VIZ), 1l, RecordValue.create("Steve", VIZ), 1l, RecordValue.create("Frank", VIZ), 1l);
     int count = 0;
-    for (List<Entry<RecordValue,Long>> groupPage : groups) {
+    for (List<Entry<RecordValue<?>,Long>> groupPage : groups) {
       Assert.assertEquals(pageSize, groupPage.size());
       
-      for (Entry<RecordValue,Long> group : groupPage) {
+      for (Entry<RecordValue<?>,Long> group : groupPage) {
         Assert.assertTrue(expectedGroups.containsKey(group.getKey()));
         Assert.assertEquals(expectedGroups.get(group.getKey()), group.getValue());
         count++;
@@ -661,7 +661,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
   
   @Test
   public void reverseSorting() throws Exception {
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("TEXT"), RecordValue.create("aaa", VIZ));
     
@@ -725,7 +725,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
 
   @Test
   public void addHighColumnCardinalityResults() throws Exception {
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     for (int i = 0; i < 100; i++) { 
       data.put(Column.create("TEXT" + i), RecordValue.create("foo", VIZ));
@@ -766,7 +766,7 @@ public class BasicIndexingTest extends AbstractSortableTest {
     
     Store id = Store.create(c, AUTHS, Sets.newHashSet(Index.define(name), Index.define(age), Index.define(height), Index.define(weight)));
     
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(name, RecordValue.create("George", VIZ));
     data.put(Column.create("AGE"), RecordValue.create("25", VIZ));

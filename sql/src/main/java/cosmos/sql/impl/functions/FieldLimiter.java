@@ -41,7 +41,7 @@ import cosmos.sql.call.Field;
 
 public class FieldLimiter implements Function<MultimapRecord,MultimapRecord> {
   
-  Predicate<Entry<Column,RecordValue>> limitingPredicate;
+  Predicate<Entry<Column,RecordValue<?>>> limitingPredicate;
   
   public FieldLimiter(List<Field> fields) {
     limitingPredicate = new FieldLimitPredicate(Lists.newArrayList(Iterables.transform(fields, new Function<Field,String>() {
@@ -59,7 +59,7 @@ public class FieldLimiter implements Function<MultimapRecord,MultimapRecord> {
   }
   
   private class FieldLimitingQueryResult extends MultimapRecord {
-    public FieldLimitingQueryResult(MultimapRecord other, String newDocId, Predicate<Entry<Column,RecordValue>> limitingPredicate) {
+    public FieldLimitingQueryResult(MultimapRecord other, String newDocId, Predicate<Entry<Column,RecordValue<?>>> limitingPredicate) {
       super(other, newDocId);
       document = Multimaps.filterEntries(document, limitingPredicate);
       
@@ -72,7 +72,7 @@ public class FieldLimiter implements Function<MultimapRecord,MultimapRecord> {
    * @author phrocker
    * 
    */
-  private class FieldLimitPredicate implements Predicate<Entry<Column,RecordValue>> {
+  private class FieldLimitPredicate implements Predicate<Entry<Column,RecordValue<?>>> {
     
     private List<String> fields;
     
@@ -81,7 +81,7 @@ public class FieldLimiter implements Function<MultimapRecord,MultimapRecord> {
     }
     
     @Override
-    public boolean apply(Entry<Column,RecordValue> entry) {
+    public boolean apply(Entry<Column,RecordValue<?>> entry) {
       return fields.contains(entry.getKey().name());
     }
   }

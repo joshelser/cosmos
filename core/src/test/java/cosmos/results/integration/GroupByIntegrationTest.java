@@ -118,7 +118,7 @@ public class GroupByIntegrationTest {
     
     final ColumnVisibility cv = new ColumnVisibility("");
     
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     data.put(Column.create("NAME"), RecordValue.create("Josh", cv));
     data.put(Column.create("AGE"), RecordValue.create("24", cv));
     data.put(Column.create("STATE"), RecordValue.create("MD", cv));
@@ -146,15 +146,15 @@ public class GroupByIntegrationTest {
     sorts.addResults(id, Lists.<Record<?>> newArrayList(mqr3, mqr2, mqr1));
     
     // Testing NAME
-    Map<RecordValue,Long> expects = ImmutableMap.<RecordValue,Long> of(
+    Map<RecordValue<?>,Long> expects = ImmutableMap.<RecordValue<?>,Long> of(
         RecordValue.create("Josh", cv), 1l, 
         RecordValue.create("Wilhelm", cv), 1l, 
         RecordValue.create("Marky", cv), 1l);
     
-    CloseableIterable<Entry<RecordValue,Long>> countedResults = sorts.groupResults(id, Column.create("NAME"));
+    CloseableIterable<Entry<RecordValue<?>,Long>> countedResults = sorts.groupResults(id, Column.create("NAME"));
     
     int resultCount = 0;
-    for (Entry<RecordValue,Long> entry : countedResults) {
+    for (Entry<RecordValue<?>,Long> entry : countedResults) {
       resultCount++;
       
       Assert.assertTrue(expects.containsKey(entry.getKey()));
@@ -165,7 +165,7 @@ public class GroupByIntegrationTest {
     Assert.assertEquals(expects.size(), resultCount);
   
     // TEesting AGE
-    expects = ImmutableMap.<RecordValue,Long> of(
+    expects = ImmutableMap.<RecordValue<?>,Long> of(
         RecordValue.create("24", cv), 1l, 
         RecordValue.create("25", cv), 1l, 
         RecordValue.create("29", cv), 1l);
@@ -173,7 +173,7 @@ public class GroupByIntegrationTest {
     countedResults = sorts.groupResults(id, Column.create("AGE"));
     
     resultCount = 0;
-    for (Entry<RecordValue,Long> entry : countedResults) {
+    for (Entry<RecordValue<?>,Long> entry : countedResults) {
       resultCount++;
       
       Assert.assertTrue(expects.containsKey(entry.getKey()));
@@ -185,12 +185,12 @@ public class GroupByIntegrationTest {
     Assert.assertEquals(expects.size(), resultCount);
   
     // Testing STATE
-    expects = ImmutableMap.<RecordValue,Long> of(RecordValue.create("MD", cv), 3l);
+    expects = ImmutableMap.<RecordValue<?>,Long> of(RecordValue.create("MD", cv), 3l);
     
     countedResults = sorts.groupResults(id, Column.create("STATE"));
     
     resultCount = 0;
-    for (Entry<RecordValue,Long> entry : countedResults) {
+    for (Entry<RecordValue<?>,Long> entry : countedResults) {
       resultCount++;
       
       Assert.assertTrue(expects.containsKey(entry.getKey()));
@@ -202,14 +202,14 @@ public class GroupByIntegrationTest {
     Assert.assertEquals(expects.size(), resultCount);
   
     // Testing COLOR
-    expects = ImmutableMap.<RecordValue,Long> of(
+    expects = ImmutableMap.<RecordValue<?>,Long> of(
         RecordValue.create("Blue", cv), 2l, 
         RecordValue.create("Pink", cv), 1l);
     
     countedResults = sorts.groupResults(id, Column.create("COLOR"));
     
     resultCount = 0;
-    for (Entry<RecordValue,Long> entry : countedResults) {
+    for (Entry<RecordValue<?>,Long> entry : countedResults) {
       resultCount++;
       
       Assert.assertTrue(expects.containsKey(entry.getKey()));

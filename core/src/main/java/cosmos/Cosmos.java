@@ -163,7 +163,7 @@ public interface Cosmos {
    * @param order
    * @return
    */
-  public CloseableIterable<Entry<RecordValue,Long>> groupResults(Store id, Column column) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public CloseableIterable<Entry<RecordValue<?>,Long>> groupResults(Store id, Column column) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Return counts for unique values in the given column, paging through results
@@ -173,7 +173,7 @@ public interface Cosmos {
    * @param order
    * @return
    */
-  public PagedResults<Entry<RecordValue,Long>> groupResults(Store id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
+  public PagedResults<Entry<RecordValue<?>,Long>> groupResults(Store id, Column column, Paging limits) throws TableNotFoundException, UnexpectedStateException, UnindexedColumnException;
   
   /**
    * Given a docId contained in the {@link Store}, fetch the record  

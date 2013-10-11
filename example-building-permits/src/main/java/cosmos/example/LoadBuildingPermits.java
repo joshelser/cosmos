@@ -105,7 +105,7 @@ public class LoadBuildingPermits implements Runnable {
         }
         
         // Make the Multimap of column to svalue
-        HashMultimap<Column,RecordValue> metadata = HashMultimap.create();
+        HashMultimap<Column,RecordValue<?>> metadata = HashMultimap.create();
         for (int i = 0; i < schema.size(); i++) {
           String name = schema.get(i);
           String value = StringUtils.trim(data[i]);
@@ -120,10 +120,10 @@ public class LoadBuildingPermits implements Runnable {
           log.error("Expected to find one {} column in record: {}", ID, metadata.toString());
         }
         
-        RecordValue docId = metadata.get(ID).iterator().next();
+        RecordValue<?> docId = metadata.get(ID).iterator().next();
         
         // Add the record to our buffer
-        cachedResults.add(new MultimapRecord(metadata, docId.value(), Defaults.EMPTY_VIS));
+        cachedResults.add(new MultimapRecord(metadata, docId.value().toString(), Defaults.EMPTY_VIS));
         
         // Flush the buffer when it gets big enough
         if (itemsToBuffer < cachedResults.size()) {

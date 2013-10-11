@@ -100,7 +100,7 @@ public class MediawikiQueries {
   }
   
   public static MultimapRecord pagesToQueryResult(Page p) {
-    HashMultimap<Column,RecordValue> data = HashMultimap.create();
+    HashMultimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     String pageId = Long.toString(p.getId());
     
@@ -265,7 +265,7 @@ public class MediawikiQueries {
   }
   
   public void loadCountsForRecord(Map<Column,Long> counts, MultimapRecord r) {
-	  for (Entry<Column,RecordValue> entry : r.columnValues()) {
+	  for (Entry<Column,RecordValue<?>> entry : r.columnValues()) {
 		  Column c = entry.getKey();
 		  if (counts.containsKey(c)) {
 			  counts.put(c, counts.get(c)+1);
@@ -328,17 +328,17 @@ public class MediawikiQueries {
       sw.stop();
       resultCount++;
       
-      Collection<RecordValue> values = r.get(colToFetch);
+      Collection<RecordValue<?>> values = r.get(colToFetch);
       
-      TreeSet<RecordValue> sortedValues = Sets.newTreeSet(values);
+      TreeSet<RecordValue<?>> sortedValues = Sets.newTreeSet(values);
       
       if (null == prev) {
-        prev = sortedValues.first().value();
+        prev = sortedValues.first().value().toString();
       } else {
         boolean plausible = false;
-        Iterator<RecordValue> iter = sortedValues.iterator();
+        Iterator<RecordValue<?>> iter = sortedValues.iterator();
         for (; !plausible && iter.hasNext();) {
-          String val = iter.next().value();
+          String val = iter.next().value().toString();
           if (prev.compareTo(val) <= 0) {
             plausible = true;
           }
@@ -378,10 +378,10 @@ public class MediawikiQueries {
     Stopwatch sw = new Stopwatch();
     
     sw.start();
-    final CloseableIterable<Entry<RecordValue,Long>> results = this.sorts.groupResults(id, colToFetch);
-    TreeMap<RecordValue,Long> counts = Maps.newTreeMap();
+    final CloseableIterable<Entry<RecordValue<?>,Long>> results = this.sorts.groupResults(id, colToFetch);
+    TreeMap<RecordValue<?>,Long> counts = Maps.newTreeMap();
     
-    for (Entry<RecordValue,Long> entry : results) {
+    for (Entry<RecordValue<?>,Long> entry : results) {
       counts.put(entry.getKey(), entry.getValue());
     }
     
@@ -394,10 +394,10 @@ public class MediawikiQueries {
 //    System.out.println(counts);
     
     final CloseableIterable<MultimapRecord> verifyResults = this.sorts.fetch(id, Index.define(colToFetch));
-    TreeMap<RecordValue,Long> records = Maps.newTreeMap();
+    TreeMap<RecordValue<?>,Long> records = Maps.newTreeMap();
     for (MultimapRecord r : verifyResults) {
       if (r.containsKey(colToFetch)) {
-        for (RecordValue val : r.get(colToFetch)) {
+        for (RecordValue<?> val : r.get(colToFetch)) {
           if (records.containsKey(val)) {
             records.put(val, records.get(val) + 1);
           } else {
@@ -414,8 +414,8 @@ public class MediawikiQueries {
       System.exit(1);
     }
     
-    Set<RecordValue> countKeys= counts.keySet(), recordKeys = records.keySet();
-    for (RecordValue k : countKeys) {
+    Set<RecordValue<?>> countKeys= counts.keySet(), recordKeys = records.keySet();
+    for (RecordValue<?> k : countKeys) {
       if (!recordKeys.contains(k)) {
         System.out.println(Thread.currentThread().getName() + ": " + colToFetch + " - Expected to have count for " + k); 
         System.exit(1); 

@@ -45,7 +45,7 @@ import cosmos.results.Column;
 public class MultimapRecord implements Record<MultimapRecord> {
 
   protected String docId;
-  protected Multimap<Column,RecordValue> document;
+  protected Multimap<Column,RecordValue<?>> document;
   protected ColumnVisibility docVisibility;
 
   protected MultimapRecord() {}
@@ -61,12 +61,12 @@ public class MultimapRecord implements Record<MultimapRecord> {
     this.document = HashMultimap.create();
 
     for (Entry<T1,T2> untypedEntry : untypedDoc.entries()) {
-      Entry<Column,RecordValue> entry = function.apply(untypedEntry);
+      Entry<Column,RecordValue<?>> entry = function.apply(untypedEntry);
       this.document.put(entry.getKey(), entry.getValue());
     }
   }
 
-  public MultimapRecord(Multimap<Column,RecordValue> document, String docId, ColumnVisibility docVisibility) {
+  public MultimapRecord(Multimap<Column,RecordValue<?>> document, String docId, ColumnVisibility docVisibility) {
     checkNotNull(document);
     checkNotNull(docId);
     checkNotNull(docVisibility);
@@ -101,7 +101,7 @@ public class MultimapRecord implements Record<MultimapRecord> {
     return this.docVisibility;
   }
 
-  public Iterable<Entry<Column,RecordValue>> columnValues() {
+  public Collection<Entry<Column,RecordValue<?>>> columnValues() {
     return this.document.entries();
   }
 
@@ -113,11 +113,11 @@ public class MultimapRecord implements Record<MultimapRecord> {
     return this.document.containsKey(key);
   }
 
-  public boolean containEntry(Column column, RecordValue svalue) {
-    return this.document.containsEntry(column, svalue);
+  public boolean containEntry(Column column, RecordValue<?> value) {
+    return this.document.containsEntry(column, value);
   }
 
-  public Collection<RecordValue> get(Column column) {
+  public Collection<RecordValue<?>> get(Column column) {
     return this.document.get(column);
   }
 
@@ -155,7 +155,7 @@ public class MultimapRecord implements Record<MultimapRecord> {
     out.write(cvBytes);
 
     WritableUtils.writeVInt(out, this.document.size());
-    for (Entry<Column,RecordValue> entry : this.document.entries()) {
+    for (Entry<Column,RecordValue<?>> entry : this.document.entries()) {
       entry.getKey().write(out);
       entry.getValue().write(out);
     }

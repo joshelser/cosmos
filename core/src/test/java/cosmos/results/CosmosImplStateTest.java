@@ -42,7 +42,7 @@ public class CosmosImplStateTest extends AbstractSortableTest {
     Store id = Store.create(c, AUTHS, IdentitySet.<Index> create());
     Cosmos cosmos = new CosmosImpl(zkConnectString());
     
-    MultimapRecord mqr = new MultimapRecord(HashMultimap.<Column,RecordValue> create(), "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(HashMultimap.<Column,RecordValue<?>> create(), "1", VIZ);
     
     cosmos.addResult(id, mqr);
   }
@@ -52,7 +52,7 @@ public class CosmosImplStateTest extends AbstractSortableTest {
     Store id = Store.create(c, AUTHS, IdentitySet.<Index> create());
     Cosmos cosmos = new CosmosImpl(zkConnectString());
     
-    MultimapRecord mqr = new MultimapRecord(HashMultimap.<Column,RecordValue> create(), "1", VIZ);
+    MultimapRecord mqr = new MultimapRecord(HashMultimap.<Column,RecordValue<?>> create(), "1", VIZ);
     
     cosmos.addResults(id, Collections.singleton(mqr));
   }

@@ -38,7 +38,7 @@ public class MultimapQueryResultTest extends AbstractSortableTest {
   
   @Test
   public void identityWritableEquality() throws Exception {
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
     data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));
@@ -60,7 +60,7 @@ public class MultimapQueryResultTest extends AbstractSortableTest {
   
   @Test
   public void nonEqual() throws Exception {
-    Multimap<Column,RecordValue> data = HashMultimap.create();
+    Multimap<Column,RecordValue<?>> data = HashMultimap.create();
     
     data.put(Column.create("TEXT"), RecordValue.create("foo", VIZ));
     data.put(Column.create("TEXT"), RecordValue.create("bar", VIZ));

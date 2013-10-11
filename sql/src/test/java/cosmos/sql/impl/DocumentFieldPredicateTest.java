@@ -21,7 +21,7 @@ public class DocumentFieldPredicateTest {
 	@Test
 	public void testEmptyDocument()
 	{
-		Multimap<Column, RecordValue> values = ArrayListMultimap.create();
+		Multimap<Column, RecordValue<?>> values = ArrayListMultimap.create();
 		MultimapRecord doc = new MultimapRecord(values,"abc",new ColumnVisibility("viz1"));
 		DocumentFieldPredicate filter = new DocumentFieldPredicate(new Field("field1"),new Literal("Value1"));
 		assertFalse( filter.apply(doc) );
@@ -30,8 +30,8 @@ public class DocumentFieldPredicateTest {
 	@Test
 	public void testFieldButNoValue()
 	{
-		Multimap<Column, RecordValue> values = ArrayListMultimap.create();
-		values.put(new Column("field1"), new RecordValue("Value2", new ColumnVisibility("viz1")));
+		Multimap<Column, RecordValue<?>> values = ArrayListMultimap.create();
+		values.put(new Column("field1"), RecordValue.create("Value2", new ColumnVisibility("viz1")));
 		MultimapRecord doc = new MultimapRecord(values,"abc",new ColumnVisibility("viz1"));
 		DocumentFieldPredicate filter = new DocumentFieldPredicate(new Field("field1"),new Literal("Value1"));
 		assertFalse( filter.apply(doc) );
@@ -40,8 +40,8 @@ public class DocumentFieldPredicateTest {
 	@Test
 	public void testFieldWithValue()
 	{
-		Multimap<Column, RecordValue> values = ArrayListMultimap.create();
-		values.put(new Column("field1"), new RecordValue("Value1", new ColumnVisibility("viz1")));
+		Multimap<Column, RecordValue<?>> values = ArrayListMultimap.create();
+		values.put(new Column("field1"), RecordValue.create("Value1", new ColumnVisibility("viz1")));
 		MultimapRecord doc = new MultimapRecord(values,"abc",new ColumnVisibility("viz1"));
 		DocumentFieldPredicate filter = new DocumentFieldPredicate(new Field("field1"),new Literal("Value1"));
 		assertTrue( filter.apply(doc) );

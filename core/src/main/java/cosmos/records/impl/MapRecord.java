@@ -26,6 +26,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.ColumnVisibility;
@@ -44,7 +45,7 @@ import cosmos.results.Column;
 public class MapRecord implements Record<MapRecord> {
   
   protected String docId;
-  protected Map<Column,RecordValue> document;
+  protected Map<Column,RecordValue<?>> document;
   protected ColumnVisibility docVisibility;
   
   protected MapRecord() { }
@@ -60,12 +61,12 @@ public class MapRecord implements Record<MapRecord> {
     this.docVisibility = docVisibility;
     
     for (Entry<T1,T2> untypedEntry : untypedDoc.entrySet()) {
-      Entry<Column,RecordValue> entry = function.apply(untypedEntry);
+      Entry<Column,RecordValue<?>> entry = function.apply(untypedEntry);
       this.document.put(entry.getKey(), entry.getValue());
     }
   }
   
-  public MapRecord(Map<Column,RecordValue> document, String docId, ColumnVisibility docVisibility) {
+  public MapRecord(Map<Column,RecordValue<?>> document, String docId, ColumnVisibility docVisibility) {
     checkNotNull(document);
     checkNotNull(docId);
     checkNotNull(docVisibility);
@@ -91,7 +92,7 @@ public class MapRecord implements Record<MapRecord> {
     return this.docVisibility;
   }
   
-  public Iterable<Entry<Column,RecordValue>> columnValues() {
+  public Set<Entry<Column,RecordValue<?>>> columnValues() {
     return this.document.entrySet();
   }
   
@@ -129,7 +130,7 @@ public class MapRecord implements Record<MapRecord> {
     out.write(cvBytes);
     
     WritableUtils.writeVInt(out, this.document.size());
-    for (Entry<Column,RecordValue> entry : this.document.entrySet()) {
+    for (Entry<Column,RecordValue<?>> entry : this.document.entrySet()) {
       entry.getKey().write(out);
       entry.getValue().write(out);
     }

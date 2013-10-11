@@ -41,8 +41,8 @@ public class DocumentFieldPredicate implements Predicate<MultimapRecord> {
 
   @Override
   public boolean apply(MultimapRecord input) {
-    Collection<RecordValue> values = input.get(column);
-    for (RecordValue value : values) {
+    Collection<RecordValue<?>> values = input.get(column);
+    for (RecordValue<?> value : values) {
       if (value.value().equals(predicateValue.toString()))
         return true;
     }

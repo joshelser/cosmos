@@ -175,16 +175,16 @@ public class BuildingPermitsExample {
       sw.start();
       
       // Get the number of times we've seen each value in a given column
-      CloseableIterable<Entry<RecordValue,Long>> groupingsInColumn = cosmos.groupResults(id, c);
+      CloseableIterable<Entry<RecordValue<?>,Long>> groupingsInColumn = cosmos.groupResults(id, c);
       
       log.info(c.name() + ":");
       
       // Iterate over the counts, collecting the top N values in each column
-      TreeMap<Long,RecordValue> topValues = Maps.newTreeMap();
+      TreeMap<Long,RecordValue<?>> topValues = Maps.newTreeMap();
       
-      for (Entry<RecordValue,Long> entry : groupingsInColumn) {
+      for (Entry<RecordValue<?>,Long> entry : groupingsInColumn) {
         if (topValues.size() == numTopValues) {
-          Entry<Long,RecordValue> least = topValues.pollFirstEntry();
+          Entry<Long,RecordValue<?>> least = topValues.pollFirstEntry();
           
           if (least.getKey() < entry.getValue()) {
             topValues.put(entry.getValue(), entry.getKey());
