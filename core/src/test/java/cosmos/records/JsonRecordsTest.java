@@ -62,4 +62,14 @@ public class JsonRecordsTest {
     JsonRecords.fromJson(json);
   }
 
+  @Test
+  public void emptyJson() {
+    String json = "[]";
+    
+    Assert.assertEquals(0, JsonRecords.fromJson(json).size());
+    
+    json = "";
+    
+    Assert.assertEquals(0, JsonRecords.fromJson(json).size());
+  }
 }

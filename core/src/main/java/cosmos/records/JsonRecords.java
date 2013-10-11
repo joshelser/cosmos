@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -102,10 +103,14 @@ public class JsonRecords {
     final Gson gson = new Gson();
     List<Map<String,String>> maps = null;
     try {
-      maps= gson.fromJson(json, listOfMapsType);
+      maps = gson.fromJson(json, listOfMapsType);
     } catch (JsonSyntaxException e) {
       log.error("Expected JSON to be a List of Maps");
       throw e;
+    }
+    
+    if (null == maps) {
+      return Collections.emptyList();
     }
     
     List<MapRecord> records = Lists.newArrayListWithExpectedSize(maps.size());
