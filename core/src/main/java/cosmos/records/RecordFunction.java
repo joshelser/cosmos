@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 
 import com.google.common.base.Function;
 
+import cosmos.records.values.RecordValue;
 import cosmos.results.Column;
 
 /**

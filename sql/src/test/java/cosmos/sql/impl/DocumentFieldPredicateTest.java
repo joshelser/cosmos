@@ -9,8 +9,8 @@ import org.junit.Test;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
-import cosmos.records.RecordValue;
 import cosmos.records.impl.MultimapRecord;
+import cosmos.records.values.RecordValue;
 import cosmos.results.Column;
 import cosmos.sql.call.Field;
 import cosmos.sql.call.Literal;

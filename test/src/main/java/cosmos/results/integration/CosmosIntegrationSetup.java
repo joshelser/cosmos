@@ -48,8 +48,8 @@ import com.google.common.collect.Multimap;
 import cosmos.IntegrationTests;
 import cosmos.options.Index;
 import cosmos.records.Record;
-import cosmos.records.RecordValue;
 import cosmos.records.impl.MultimapRecord;
+import cosmos.records.values.RecordValue;
 import cosmos.results.Column;
 
 /**

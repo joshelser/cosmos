@@ -26,6 +26,7 @@ import com.google.gson.JsonParseException;
 
 import cosmos.options.Defaults;
 import cosmos.records.impl.MapRecord;
+import cosmos.records.values.RecordValue;
 import cosmos.results.Column;
 
 /**

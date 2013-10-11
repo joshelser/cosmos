@@ -45,7 +45,7 @@ import com.google.common.io.Files;
 import cosmos.Cosmos;
 import cosmos.impl.CosmosImpl;
 import cosmos.options.Index;
-import cosmos.records.RecordValue;
+import cosmos.records.values.RecordValue;
 import cosmos.results.CloseableIterable;
 import cosmos.results.Column;
 import cosmos.store.Store;

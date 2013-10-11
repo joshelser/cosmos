@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cosmos.records;
+package cosmos.records.values;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -26,22 +26,22 @@ import org.apache.hadoop.io.WritableUtils;
 /**
  * 
  */
-public class StringRecordValue extends RecordValue<String> {
-  
-  public StringRecordValue(String value, ColumnVisibility cv) {
+public class IntegerRecordValue extends RecordValue<Integer> {
+
+  public IntegerRecordValue(Integer value, ColumnVisibility cv) {
     super(value, cv);
   }
   
   @Override
   public void readFields(DataInput in) throws IOException {
     readVisibility(in);
-    this.value = WritableUtils.readString(in);
+    this.value = WritableUtils.readVInt(in);
   }
-  
+
   @Override
   public void write(DataOutput out) throws IOException {
     writeVisibility(out);
-    WritableUtils.writeString(out, value);
+    WritableUtils.writeVInt(out, value);
   }
 
 }

@@ -33,7 +33,7 @@ import com.google.common.collect.Maps;
 
 import cosmos.accumulo.GroupByRowSuffixIterator;
 import cosmos.options.Defaults;
-import cosmos.records.RecordValue;
+import cosmos.records.values.RecordValue;
 
 /**
  * 

@@ -17,7 +17,7 @@
  *  Copyright 2013 Josh Elser
  *
  */
-package cosmos.records;
+package cosmos.records.values;
 
 import java.io.DataInput;
 import java.io.DataOutput;

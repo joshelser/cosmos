@@ -23,7 +23,7 @@ import org.apache.accumulo.core.security.ColumnVisibility;
 import com.google.common.collect.Maps;
 
 import cosmos.records.RecordFunction;
-import cosmos.records.RecordValue;
+import cosmos.records.values.RecordValue;
 import cosmos.results.Column;
 
 /**

@@ -21,8 +21,8 @@ import com.google.common.collect.Lists;
 
 import cosmos.Cosmos;
 import cosmos.options.Defaults;
-import cosmos.records.RecordValue;
 import cosmos.records.impl.MultimapRecord;
+import cosmos.records.values.RecordValue;
 import cosmos.results.Column;
 import cosmos.store.Store;
 

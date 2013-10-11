@@ -39,7 +39,7 @@ import com.google.common.collect.Maps;
 
 import cosmos.records.Record;
 import cosmos.records.RecordFunction;
-import cosmos.records.RecordValue;
+import cosmos.records.values.RecordValue;
 import cosmos.results.Column;
 
 public class MapRecord implements Record<MapRecord> {

@@ -26,6 +26,7 @@ import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.hadoop.io.Writable;
 
+import cosmos.records.values.RecordValue;
 import cosmos.results.Column;
 
 public interface Record<T> extends Writable {
