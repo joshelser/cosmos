@@ -97,6 +97,14 @@ public class MapRecord implements Record<MapRecord> {
     this.document = map;
   }
   
+  public boolean containsKey(Column c) {
+    return this.document.containsKey(c);
+  }
+  
+  public RecordValue<?> get(Column c) {
+    return this.document.get(c);
+  }
+  
   public ColumnVisibility documentVisibility() {
     return this.docVisibility;
   }
@@ -179,7 +187,7 @@ public class MapRecord implements Record<MapRecord> {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder(16);
-    sb.append("ID:").append(docId()).append(" ").append(documentVisibility()).append(" ").append(document());
+    sb.append(docId()).append(" ").append(documentVisibility()).append(" - ").append(document());
     return sb.toString();
   }
   

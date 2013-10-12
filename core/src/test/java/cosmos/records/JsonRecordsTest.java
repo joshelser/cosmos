@@ -88,17 +88,16 @@ public class JsonRecordsTest {
     Assert.assertEquals(1, records.size());
     
     MapRecord record = records.get(0);
-    Map<Column,RecordValue<?>> map = record.getMap();
     
     Column c = Column.create("foo1");
-    Assert.assertTrue("Map does not contain key: " + map, map.containsKey(c));
-    Assert.assertEquals(StringRecordValue.class, map.get(c).getClass());
-    Assert.assertEquals("bar1", map.get(c).value());
+    Assert.assertTrue("Map does not contain key: " + record, record.containsKey(c));
+    Assert.assertEquals(StringRecordValue.class, record.get(c).getClass());
+    Assert.assertEquals("bar1", record.get(c).value());
 
     c = Column.create("foo2");
-    Assert.assertTrue("Map does not contain key: " + map, map.containsKey(c));
-    Assert.assertEquals(IntegerRecordValue.class, map.get(c).getClass());
-    Assert.assertEquals(2, map.get(c).value());
+    Assert.assertTrue("Map does not contain key: " + record, record.containsKey(c));
+    Assert.assertEquals(IntegerRecordValue.class, record.get(c).getClass());
+    Assert.assertEquals(2, record.get(c).value());
   }
 
   @Test
@@ -109,11 +108,10 @@ public class JsonRecordsTest {
     Assert.assertEquals(1, records.size());
     
     MapRecord record = records.get(0);
-    Map<Column,RecordValue<?>> map = record.getMap();
     
     Column c = Column.create("foo2");
-    Assert.assertTrue("Map does not contain key: " + map, map.containsKey(c));
-    Assert.assertEquals(LongRecordValue.class, map.get(c).getClass());
-    Assert.assertEquals(Long.MAX_VALUE, map.get(c).value());
+    Assert.assertTrue("Map does not contain key: " + record, record.containsKey(c));
+    Assert.assertEquals(LongRecordValue.class, record.get(c).getClass());
+    Assert.assertEquals(Long.MAX_VALUE, record.get(c).value());
   }
 }
