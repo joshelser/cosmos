@@ -16,17 +16,21 @@
  */
 package cosmos.records;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.gson.JsonParseException;
 
 import cosmos.options.Defaults;
 import cosmos.records.impl.MapRecord;
+import cosmos.records.impl.MultimapRecord;
 import cosmos.records.values.IntegerRecordValue;
 import cosmos.records.values.LongRecordValue;
 import cosmos.records.values.RecordValue;
@@ -42,7 +46,7 @@ public class JsonRecordsTest {
   public void simpleJsonTest() {
     String json = "[{'foo1':'bar1', 'foo2':'bar2'}, {'foo3':'bar3', 'foo4':'bar4'}]";
 
-    List<MapRecord> records = JsonRecords.fromJson(json);
+    List<MapRecord> records = JsonRecords.fromJsonAsMap(json);
 
     Assert.assertEquals(2, records.size());
 
@@ -56,35 +60,51 @@ public class JsonRecordsTest {
   }
 
   @Test(expected = JsonParseException.class)
-  public void invalidJson() {
+  public void invalidJsonMap() {
     String json = "[{'foo1";
 
-    JsonRecords.fromJson(json);
+    JsonRecords.fromJsonAsMap(json);
   }
 
   @Test(expected = JsonParseException.class)
-  public void nonSupportedJson() {
+  public void invalidJsonMultimap() {
+    String json = "[{'foo1";
+
+    JsonRecords.fromJsonAsMultimap(json);
+  }
+
+  @Test(expected = JsonParseException.class)
+  public void nonSupportedJsonMap() {
     String json = "{'foo1':'bar1'}";
 
-    JsonRecords.fromJson(json);
+    JsonRecords.fromJsonAsMap(json);
+  }
+
+  @Test(expected = JsonParseException.class)
+  public void nonSupportedJsonMultimap() {
+    String json = "{'foo1':'bar1'}";
+
+    JsonRecords.fromJsonAsMultimap(json);
   }
 
   @Test
   public void emptyJson() {
     String json = "[]";
 
-    Assert.assertEquals(0, JsonRecords.fromJson(json).size());
+    Assert.assertEquals(0, JsonRecords.fromJsonAsMap(json).size());
+    Assert.assertEquals(0, JsonRecords.fromJsonAsMultimap(json).size());
 
     json = "";
 
-    Assert.assertEquals(0, JsonRecords.fromJson(json).size());
+    Assert.assertEquals(0, JsonRecords.fromJsonAsMap(json).size());
+    Assert.assertEquals(0, JsonRecords.fromJsonAsMultimap(json).size());
   }
 
   @Test
   public void mixedNumericJson() {
     String json = "[ {'foo1':'bar1', 'foo2':2} ]";
 
-    List<MapRecord> records = JsonRecords.fromJson(json);
+    List<MapRecord> records = JsonRecords.fromJsonAsMap(json);
     Assert.assertEquals(1, records.size());
     
     MapRecord record = records.get(0);
@@ -104,7 +124,7 @@ public class JsonRecordsTest {
   public void longJson() {
     String json = "[ {'foo2':" + Long.MAX_VALUE + "} ]";
 
-    List<MapRecord> records = JsonRecords.fromJson(json);
+    List<MapRecord> records = JsonRecords.fromJsonAsMap(json);
     Assert.assertEquals(1, records.size());
     
     MapRecord record = records.get(0);
@@ -113,5 +133,54 @@ public class JsonRecordsTest {
     Assert.assertTrue("Map does not contain key: " + record, record.containsKey(c));
     Assert.assertEquals(LongRecordValue.class, record.get(c).getClass());
     Assert.assertEquals(Long.MAX_VALUE, record.get(c).value());
+  }
+  
+  @Test
+  public void duplicateKeysInMap() {
+    String json = "[ {'foo':1, 'foo':2} ]";
+    
+    MapRecord record = JsonRecords.fromJsonAsMap(json).get(0);
+    
+    Assert.assertEquals(2, record.get(Column.create("foo")).value());
+  }
+  
+  @Test
+  public void duplicateKeysInMultimap() {
+    String json = "[ {'foo':1, 'foo':2} ]";
+    
+    MultimapRecord record = JsonRecords.fromJsonAsMultimap(json).get(0);
+    
+    Collection<RecordValue<?>> values = record.get(Column.create("foo"));
+    Assert.assertEquals(1, values.size());
+    Assert.assertEquals(2, values.iterator().next().value());
+  }
+  
+  @Test
+  public void arrayValueInMultimap() {
+    String json = "[ {'foo':[1, 2]} ]";
+    
+    MultimapRecord record = JsonRecords.fromJsonAsMultimap(json).get(0);
+    
+    Collection<RecordValue<?>> values = record.get(Column.create("foo"));
+    Set<Integer> ints = Sets.newHashSet();
+    for (RecordValue<?> value : values) {
+      ints.add(((IntegerRecordValue) value).value());
+    }
+    
+    Assert.assertEquals(ImmutableSet.of(1, 2), ints);
+  }
+  
+  @Test(expected = RuntimeException.class)
+  public void nestedArrayInValue() {
+    String json = "[ {'foo':[1, [2]]} ]";
+    
+    JsonRecords.fromJsonAsMultimap(json);
+  }
+  
+  @Test(expected = RuntimeException.class)
+  public void objectInArrayInValue() {
+    String json = "[ {'foo':[1, {'foo':2} ]} ]";
+    
+    JsonRecords.fromJsonAsMultimap(json);
   }
 }
