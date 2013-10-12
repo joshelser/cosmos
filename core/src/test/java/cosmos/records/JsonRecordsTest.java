@@ -17,6 +17,7 @@
 package cosmos.records;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,7 +27,10 @@ import com.google.gson.JsonParseException;
 
 import cosmos.options.Defaults;
 import cosmos.records.impl.MapRecord;
+import cosmos.records.values.IntegerRecordValue;
+import cosmos.records.values.LongRecordValue;
 import cosmos.records.values.RecordValue;
+import cosmos.records.values.StringRecordValue;
 import cosmos.results.Column;
 
 /**
@@ -77,9 +81,39 @@ public class JsonRecordsTest {
   }
 
   @Test
-  public void numericJson() {
+  public void mixedNumericJson() {
     String json = "[ {'foo1':'bar1', 'foo2':2} ]";
 
     List<MapRecord> records = JsonRecords.fromJson(json);
+    Assert.assertEquals(1, records.size());
+    
+    MapRecord record = records.get(0);
+    Map<Column,RecordValue<?>> map = record.getMap();
+    
+    Column c = Column.create("foo1");
+    Assert.assertTrue("Map does not contain key: " + map, map.containsKey(c));
+    Assert.assertEquals(StringRecordValue.class, map.get(c).getClass());
+    Assert.assertEquals("bar1", map.get(c).value());
+
+    c = Column.create("foo2");
+    Assert.assertTrue("Map does not contain key: " + map, map.containsKey(c));
+    Assert.assertEquals(IntegerRecordValue.class, map.get(c).getClass());
+    Assert.assertEquals(2, map.get(c).value());
+  }
+
+  @Test
+  public void longJson() {
+    String json = "[ {'foo2':" + Long.MAX_VALUE + "} ]";
+
+    List<MapRecord> records = JsonRecords.fromJson(json);
+    Assert.assertEquals(1, records.size());
+    
+    MapRecord record = records.get(0);
+    Map<Column,RecordValue<?>> map = record.getMap();
+    
+    Column c = Column.create("foo2");
+    Assert.assertTrue("Map does not contain key: " + map, map.containsKey(c));
+    Assert.assertEquals(LongRecordValue.class, map.get(c).getClass());
+    Assert.assertEquals(Long.MAX_VALUE, map.get(c).value());
   }
 }

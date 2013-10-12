@@ -24,6 +24,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -86,6 +87,14 @@ public class MapRecord implements Record<MapRecord> {
   
   public MapRecord typedDocument() {
     return this;
+  }
+  
+  public Map<Column,RecordValue<?>> getMap() {
+    return document;
+  }
+  
+  public void setMap(Map<Column,RecordValue<?>> map) {
+    this.document = map;
   }
   
   public ColumnVisibility documentVisibility() {
