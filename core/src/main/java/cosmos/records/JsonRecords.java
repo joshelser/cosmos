@@ -76,8 +76,8 @@ public class JsonRecords {
    * @throws IOException
    * @throws JsonSyntaxException
    */
-  public static List<MapRecord> fromJsonAsMap(File jsonFile) throws FileNotFoundException, IOException, JsonSyntaxException {
-    return fromJsonAsMap(jsonFile, new CountingDocIdGenerator());
+  public static List<MapRecord> parseAsMap(File jsonFile) throws FileNotFoundException, IOException, JsonSyntaxException {
+    return parseAsMap(jsonFile, new CountingDocIdGenerator());
   }
 
   /**
@@ -89,8 +89,8 @@ public class JsonRecords {
    * @throws IOException
    * @throws JsonSyntaxException
    */
-  public static List<MultimapRecord> fromJsonAsMultiMap(File jsonFile) throws FileNotFoundException, IOException, JsonSyntaxException {
-    return fromJsonAsMultimap(jsonFile, new CountingDocIdGenerator());
+  public static List<MultimapRecord> parseAsMultimap(File jsonFile) throws FileNotFoundException, IOException, JsonSyntaxException {
+    return parseAsMultimap(jsonFile, new CountingDocIdGenerator());
   }
   
   /**
@@ -103,7 +103,7 @@ public class JsonRecords {
    * @throws IOException
    * @throws JsonSyntaxException
    */
-  public static List<MapRecord> fromJsonAsMap(File jsonFile, DocIdGenerator generator) throws FileNotFoundException, IOException, JsonSyntaxException {
+  public static List<MapRecord> parseAsMap(File jsonFile, DocIdGenerator generator) throws FileNotFoundException, IOException, JsonSyntaxException {
     Preconditions.checkNotNull(jsonFile);
     Preconditions.checkArgument(jsonFile.exists() && jsonFile.isFile() && jsonFile.canRead(), jsonFile + " is not a readable file");
     Preconditions.checkNotNull(generator);
@@ -120,9 +120,9 @@ public class JsonRecords {
     
     String json = sb.toString();
     
-    return fromJsonAsMap(json, generator);
+    return parseAsMap(json, generator);
   }
-  public static List<MultimapRecord> fromJsonAsMultimap(File jsonFile, DocIdGenerator generator) throws FileNotFoundException, IOException, JsonSyntaxException {
+  public static List<MultimapRecord> parseAsMultimap(File jsonFile, DocIdGenerator generator) throws FileNotFoundException, IOException, JsonSyntaxException {
     Preconditions.checkNotNull(jsonFile);
     Preconditions.checkArgument(jsonFile.exists() && jsonFile.isFile() && jsonFile.canRead(), jsonFile + " is not a readable file");
     Preconditions.checkNotNull(generator);
@@ -139,18 +139,18 @@ public class JsonRecords {
     
     String json = sb.toString();
     
-    return fromJsonAsMultimap(json, generator);
+    return parseAsMultimap(json, generator);
   }
   
-  public static List<MapRecord> fromJsonAsMap(String json) throws JsonSyntaxException {
-    return fromJsonAsMap(json, new CountingDocIdGenerator());
+  public static List<MapRecord> parseAsMap(String json) throws JsonSyntaxException {
+    return parseAsMap(json, new CountingDocIdGenerator());
   }
   
-  public static List<MultimapRecord> fromJsonAsMultimap(String json) throws JsonSyntaxException {
-    return fromJsonAsMultimap(json, new CountingDocIdGenerator());
+  public static List<MultimapRecord> parseAsMultimap(String json) throws JsonSyntaxException {
+    return parseAsMultimap(json, new CountingDocIdGenerator());
   }
   
-  public static List<MapRecord> fromJsonAsMap(String json, DocIdGenerator generator) throws JsonSyntaxException {
+  public static List<MapRecord> parseAsMap(String json, DocIdGenerator generator) throws JsonSyntaxException {
     Preconditions.checkNotNull(json);
     Preconditions.checkNotNull(generator);
     
@@ -182,7 +182,7 @@ public class JsonRecords {
     return records;
   }
   
-  public static List<MultimapRecord> fromJsonAsMultimap(String json, DocIdGenerator generator) throws JsonSyntaxException {
+  public static List<MultimapRecord> parseAsMultimap(String json, DocIdGenerator generator) throws JsonSyntaxException {
     Preconditions.checkNotNull(json);
     Preconditions.checkNotNull(generator);
     

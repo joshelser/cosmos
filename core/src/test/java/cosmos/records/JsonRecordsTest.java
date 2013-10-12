@@ -46,7 +46,7 @@ public class JsonRecordsTest {
   public void simpleJsonTest() {
     String json = "[{'foo1':'bar1', 'foo2':'bar2'}, {'foo3':'bar3', 'foo4':'bar4'}]";
 
-    List<MapRecord> records = JsonRecords.fromJsonAsMap(json);
+    List<MapRecord> records = JsonRecords.parseAsMap(json);
 
     Assert.assertEquals(2, records.size());
 
@@ -63,48 +63,48 @@ public class JsonRecordsTest {
   public void invalidJsonMap() {
     String json = "[{'foo1";
 
-    JsonRecords.fromJsonAsMap(json);
+    JsonRecords.parseAsMap(json);
   }
 
   @Test(expected = JsonParseException.class)
   public void invalidJsonMultimap() {
     String json = "[{'foo1";
 
-    JsonRecords.fromJsonAsMultimap(json);
+    JsonRecords.parseAsMultimap(json);
   }
 
   @Test(expected = JsonParseException.class)
   public void nonSupportedJsonMap() {
     String json = "{'foo1':'bar1'}";
 
-    JsonRecords.fromJsonAsMap(json);
+    JsonRecords.parseAsMap(json);
   }
 
   @Test(expected = JsonParseException.class)
   public void nonSupportedJsonMultimap() {
     String json = "{'foo1':'bar1'}";
 
-    JsonRecords.fromJsonAsMultimap(json);
+    JsonRecords.parseAsMultimap(json);
   }
 
   @Test
   public void emptyJson() {
     String json = "[]";
 
-    Assert.assertEquals(0, JsonRecords.fromJsonAsMap(json).size());
-    Assert.assertEquals(0, JsonRecords.fromJsonAsMultimap(json).size());
+    Assert.assertEquals(0, JsonRecords.parseAsMap(json).size());
+    Assert.assertEquals(0, JsonRecords.parseAsMultimap(json).size());
 
     json = "";
 
-    Assert.assertEquals(0, JsonRecords.fromJsonAsMap(json).size());
-    Assert.assertEquals(0, JsonRecords.fromJsonAsMultimap(json).size());
+    Assert.assertEquals(0, JsonRecords.parseAsMap(json).size());
+    Assert.assertEquals(0, JsonRecords.parseAsMultimap(json).size());
   }
 
   @Test
   public void mixedNumericJson() {
     String json = "[ {'foo1':'bar1', 'foo2':2} ]";
 
-    List<MapRecord> records = JsonRecords.fromJsonAsMap(json);
+    List<MapRecord> records = JsonRecords.parseAsMap(json);
     Assert.assertEquals(1, records.size());
     
     MapRecord record = records.get(0);
@@ -124,7 +124,7 @@ public class JsonRecordsTest {
   public void longJson() {
     String json = "[ {'foo2':" + Long.MAX_VALUE + "} ]";
 
-    List<MapRecord> records = JsonRecords.fromJsonAsMap(json);
+    List<MapRecord> records = JsonRecords.parseAsMap(json);
     Assert.assertEquals(1, records.size());
     
     MapRecord record = records.get(0);
@@ -139,7 +139,7 @@ public class JsonRecordsTest {
   public void duplicateKeysInMap() {
     String json = "[ {'foo':1, 'foo':2} ]";
     
-    MapRecord record = JsonRecords.fromJsonAsMap(json).get(0);
+    MapRecord record = JsonRecords.parseAsMap(json).get(0);
     
     Assert.assertEquals(2, record.get(Column.create("foo")).value());
   }
@@ -148,7 +148,7 @@ public class JsonRecordsTest {
   public void duplicateKeysInMultimap() {
     String json = "[ {'foo':1, 'foo':2} ]";
     
-    MultimapRecord record = JsonRecords.fromJsonAsMultimap(json).get(0);
+    MultimapRecord record = JsonRecords.parseAsMultimap(json).get(0);
     
     Collection<RecordValue<?>> values = record.get(Column.create("foo"));
     Assert.assertEquals(1, values.size());
@@ -159,7 +159,7 @@ public class JsonRecordsTest {
   public void arrayValueInMultimap() {
     String json = "[ {'foo':[1, 2]} ]";
     
-    MultimapRecord record = JsonRecords.fromJsonAsMultimap(json).get(0);
+    MultimapRecord record = JsonRecords.parseAsMultimap(json).get(0);
     
     Collection<RecordValue<?>> values = record.get(Column.create("foo"));
     Set<Integer> ints = Sets.newHashSet();
@@ -174,13 +174,13 @@ public class JsonRecordsTest {
   public void nestedArrayInValue() {
     String json = "[ {'foo':[1, [2]]} ]";
     
-    JsonRecords.fromJsonAsMultimap(json);
+    JsonRecords.parseAsMultimap(json);
   }
   
   @Test(expected = RuntimeException.class)
   public void objectInArrayInValue() {
     String json = "[ {'foo':[1, {'foo':2} ]} ]";
     
-    JsonRecords.fromJsonAsMultimap(json);
+    JsonRecords.parseAsMultimap(json);
   }
 }
