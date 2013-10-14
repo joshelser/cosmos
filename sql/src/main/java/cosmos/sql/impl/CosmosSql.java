@@ -190,6 +190,9 @@ public class CosmosSql implements SchemaDefiner<Object[]>, TableDefiner {
         }
 
       }
+      
+      // Persist the traces of the cosmos calls
+      res.sendTraces();
 
     } catch (UnexpectedStateException e1) {
       log.error("Could not group results", e1);

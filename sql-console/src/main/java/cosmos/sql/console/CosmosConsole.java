@@ -278,6 +278,8 @@ public class CosmosConsole {
         
         log.info("Loaded wiki data with an id of {}", id.uuid());
         
+        id.sendTraces();
+        
         // Serialize this Store so we can reconstitute it again later
         PersistedStores.store(id);
       }
