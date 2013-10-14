@@ -30,6 +30,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,7 @@ import com.google.common.collect.Lists;
 
 import cosmos.trace.Tracer;
 import cosmos.trace.TracerClient;
+import cosmos.web.CosmosWebConfiguration;
 import cosmos.web.reponse.TracerResponse;
 
 /**
@@ -46,18 +48,22 @@ import cosmos.web.reponse.TracerResponse;
 @Produces({MediaType.APPLICATION_JSON})
 public class MostRecent {
   private static final Logger log = LoggerFactory.getLogger(MostRecent.class);
-  
+
   protected final TracerClient tc;
   protected final SimpleDateFormat yyyymmddFormat = new SimpleDateFormat("yyyyMMdd");
-  
+
   public MostRecent() {
+    Configuration conf = CosmosWebConfiguration.get();
+
     try {
-      tc = new TracerClient("accumulo1.5", "localhost", "root", "secret");
+      tc = new TracerClient(conf.get(CosmosWebConfiguration.ACCUMULO_INSTANCE), conf.get(CosmosWebConfiguration.ZOOKEEPERS),
+          conf.get(CosmosWebConfiguration.ACCUMULO_USER), conf.get(CosmosWebConfiguration.ACCUMULO_PASSWORD));
     } catch (Exception e) {
+      log.error("Could not create tracer client", e);
       throw new RuntimeException(e);
     }
   }
-  
+
   protected synchronized Date parseDate(String input) {
     try {
       return yyyymmddFormat.parse(input);
@@ -65,45 +71,45 @@ public class MostRecent {
       throw new RuntimeException("Input '" + input + "' must be a date in the form: yyyyMMdd", e);
     }
   }
-  
+
   protected TracerResponse transform(Tracer t) {
     return new TracerResponse(t);
   }
-  
+
   protected List<TracerResponse> transform(List<Tracer> tracers) {
     List<TracerResponse> tracerResponses = Lists.newArrayListWithExpectedSize(tracers.size());
-    
+
     for (Tracer tracer : tracers) {
       tracerResponses.add(transform(tracer));
     }
-    
+
     return tracerResponses;
   }
-  
+
   @Path("/recent")
   @GET
   public List<TracerResponse> recent(@QueryParam("num") @DefaultValue("10") Integer numRecent) {
     List<Tracer> timings = tc.mostRecentTimings(numRecent);
-    
+
     return transform(timings);
   }
-  
+
   @Path("/since")
   @GET
   public List<TracerResponse> between(@QueryParam("start") String start) {
     List<Tracer> timings = Lists.newArrayList(tc.since(parseDate(start)));
-    
+
     return transform(timings);
   }
-  
+
   @Path("/between")
   @GET
   public List<TracerResponse> between(@QueryParam("start") String start, @QueryParam("end") String end) {
     List<Tracer> timings = Lists.newArrayList(tc.between(parseDate(start), parseDate(end)));
-    
+
     return transform(timings);
   }
-  
+
   @Path("/timing")
   @GET
   public TracerResponse timing(@QueryParam("uuid") String uuid) {
@@ -113,7 +119,7 @@ public class MostRecent {
     } catch (NoSuchElementException e) {
       throw new WebApplicationException(404);
     }
-    
+
     return transform(timing);
   }
 }

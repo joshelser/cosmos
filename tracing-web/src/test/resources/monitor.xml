@@ -8,7 +8,7 @@
     </property>
     <property>
         <name>cosmos.accumulo.instance</name>
-        <value>accumulo1.5</value>
+        <value>accumulo</value>
     </property>
     <property>
         <name>cosmos.accumulo.username</name>
