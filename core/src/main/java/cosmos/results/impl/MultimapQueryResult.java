@@ -41,6 +41,7 @@ import com.google.common.collect.Multimap;
 import cosmos.results.Column;
 import cosmos.results.QueryResult;
 import cosmos.results.SValue;
+import cosmos.statistics.ColumnStatistics;
 
 public class MultimapQueryResult implements QueryResult<MultimapQueryResult> {
   

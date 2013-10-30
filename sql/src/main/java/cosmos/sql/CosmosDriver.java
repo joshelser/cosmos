@@ -39,7 +39,6 @@ import org.apache.accumulo.core.security.Authorizations;
 
 import cosmos.sql.impl.CosmosSql;
 import cosmos.sql.impl.CosmosTable;
-import cosmos.sql.impl.MetadataTable;
 
 /**
  * JDBC Driver.

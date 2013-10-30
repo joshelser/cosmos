@@ -1,10 +1,12 @@
 package cosmos.statistics.store;
 
+import com.google.common.base.Preconditions;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 
 /**
- * This can be treated as a counter
+ * This can be treated as a counter -- rough implementation
+ * of hyper log log
  */
 public class Cardinality extends Statistic<Cardinality> {
 
@@ -46,6 +48,7 @@ public class Cardinality extends Statistic<Cardinality> {
   }
 
   public Cardinality(long cardinality) {
+	this(Integer.valueOf(4));
     value += cardinality;
   }
 
@@ -54,6 +57,7 @@ public class Cardinality extends Statistic<Cardinality> {
   }
 
   public void update(String term) {
+	  Preconditions.checkNotNull("Incoming term should not be null", term);
     final int x = hf.hashBytes(term.getBytes()).asInt();
     int j = x >>> (Integer.SIZE - p);
     int leftMost = (x << p) | (1 << (p - 1)) + 1;
@@ -62,6 +66,7 @@ public class Cardinality extends Statistic<Cardinality> {
     else {
       leftMost = 1 + Integer.numberOfLeadingZeros(leftMost);
     }
+
     registers[j] = Math.max(registers[j], leftMost);
   }
 

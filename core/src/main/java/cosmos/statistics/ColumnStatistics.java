@@ -27,37 +27,53 @@ import cosmos.store.Store;
 
 public class ColumnStatistics implements IndexSelectivity {
 
-  Count count;
+	Count count;
 
-  Cardinality card;
+	Cardinality card;
 
-  ColumnStatistics(Store store, Column column) {
+	/**
+	 * Store references to the column and store.
+	 */
+	protected Store store;
 
-    count = new Count(Long.MAX_VALUE);
+	protected Column column;
 
-    card = new Cardinality(Long.MAX_VALUE);
+	ColumnStatistics(Store store, Column column) {
 
-  }
+		this.store = store;
+		
+		this.column = column;
+		
+		count = new Count(Long.MAX_VALUE);
 
-  @Override
-  public boolean isDelayed() {
-    return true;
-  }
+		card = new Cardinality(Long.MAX_VALUE);
 
-  @Override
-  public double selectivity() {
-    // remember your rules of math ... / then * ;)
-    return Math.ceil(cardinality().get() / countEstimate().get() * 100);
-  }
+	}
 
-  @Override
-  public Cardinality cardinality() {
-    return card;
-  }
+	@Override
+	public boolean isDelayed() {
+		return true;
+	}
 
-  @Override
-  public Count countEstimate() {
-    return count;
-  }
+	@Override
+	public double selectivity() {
+		// remember your rules of math ... / then * ;)
+		return Math.ceil(cardinality().get() / countEstimate().get() * 100);
+	}
+
+	@Override
+	public Cardinality cardinality() {
+		return card;
+	}
+
+	@Override
+	public Count countEstimate() {
+		return count;
+	}
+	
+	public Column getColumn()
+	{
+		return column;
+	}
 
 }

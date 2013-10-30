@@ -20,6 +20,8 @@ public class IndexStatistics extends ColumnStatistics {
    */
   IndexStatistics(Store store, Index index) {
     super(store, index.column());
+    count = new Count(0);
+    cardinality = new Cardinality(Integer.valueOf(4));
   }
 
   @Override

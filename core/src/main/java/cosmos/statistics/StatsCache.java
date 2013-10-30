@@ -18,6 +18,7 @@ public class StatsCache {
   public static Cache<Entry<Store,String>,StatisticsIfc> cache;
 
   static {
+	durationUnits = TimeUnit.HOURS;
     initialize();
   }
 
